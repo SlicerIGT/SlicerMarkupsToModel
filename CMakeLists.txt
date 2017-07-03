@@ -4,7 +4,7 @@ project(MarkupsToModel)
 
 #-----------------------------------------------------------------------------
 # Extension meta-information
-set(EXTENSION_HOMEPAGE "http://slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/MarkupsToModel")
+set(EXTENSION_HOMEPAGE "https://github.com/SlicerIGT/MarkupsToModel")
 set(EXTENSION_CATEGORY "Informatics")
 set(EXTENSION_CONTRIBUTORS "Thomas Vaughan (PerkLab, Queen's University),\
   Andras Lasso (PerkLab, Queen's University), Adam Rankin (Robarts Research Center, Western University),\
