@@ -317,32 +317,11 @@ vtkMRMLModelNode * vtkMRMLMarkupsToModelNode::GetModelNode()
 
 void vtkMRMLMarkupsToModelNode::SetAndObserveMarkupsNodeID( const char* markupsId )
 {
-  const char* currentNodeId=this->GetNodeReferenceID(INPUT_MARKUPS_ROLE);
-  if (markupsId!=NULL && currentNodeId!=NULL)
-  {
-    if (strcmp(markupsId,currentNodeId)==0)
-    {
-      // not changed
-      return;
-    }
-  }
-  vtkNew<vtkIntArray> events;
-  events->InsertNextValue( vtkCommand::ModifiedEvent );
-  events->InsertNextValue( vtkMRMLMarkupsNode::PointModifiedEvent ); // PointEndInteractionEvent 
-  this->SetAndObserveNodeReferenceID( INPUT_MARKUPS_ROLE, markupsId, events.GetPointer() );
+  this->SetAndObserveNodeReferenceID( INPUT_MARKUPS_ROLE, markupsId);
 }
 
 void vtkMRMLMarkupsToModelNode::SetAndObserveModelNodeID( const char* modelId )
 {
-  const char* currentNodeId = this->GetNodeReferenceID( OUTPUT_MODEL_ROLE );
-  if ( modelId != NULL && currentNodeId != NULL )
-  {
-    if ( strcmp( modelId, currentNodeId ) == 0 )
-    {
-      // not changed
-      return;
-    }
-  }
   this->SetAndObserveNodeReferenceID( OUTPUT_MODEL_ROLE, modelId );
 }
 

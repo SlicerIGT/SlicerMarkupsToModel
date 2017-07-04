@@ -36,6 +36,7 @@ limitations under the License.
 #include <vtkPolyData.h>
 
 // MRML includes
+#include "vtkMRMLMarkupsToModelNode.h"
 
 // STD includes
 #include <cstdlib>
@@ -44,6 +45,7 @@ limitations under the License.
 
 class vtkMRMLMarkupsFiducialNode;
 class vtkMRMLMarkupsToModelNode;
+class vtkMRMLModelNode;
 class vtkPolyData;
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
@@ -67,10 +69,14 @@ public:
 
   void ProcessMRMLNodesEvents( vtkObject* caller, unsigned long event, void* callData );
 
-  static std::string GetMarkupsNodeName(vtkMRMLMarkupsToModelNode* );
-  static std::string GetModelNodeName(vtkMRMLMarkupsToModelNode* );
-  static std::string GetMarkupsDisplayNodeName(vtkMRMLMarkupsToModelNode* );
-  static std::string GetModelDisplayNodeName(vtkMRMLMarkupsToModelNode* );
+  // Low-level interface for generating closed surface model without creating a parameter node
+  bool UpdateClosedSurfaceModel(vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode, bool smoothing = true, bool forceConvex = false, double delaunayAlpha = 0.0, bool cleanMarkups = true);
+
+  // Low-level interface for generating curve model without creating a parameter node
+  bool UpdateOutputCurveModel(vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
+    int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
+    bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
+    bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices);
 
 protected:
   vtkSlicerMarkupsToModelLogic();
@@ -87,11 +93,8 @@ protected:
   virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
 
 private:
-
   vtkSlicerMarkupsToModelLogic(const vtkSlicerMarkupsToModelLogic&); // Not implemented
-  void operator=(const vtkSlicerMarkupsToModelLogic&); // Not implemented
-
-  
+  void operator=(const vtkSlicerMarkupsToModelLogic&); // Not implemented  
 };
 
 #endif

@@ -47,41 +47,24 @@ namespace CreateClosedSurfaceUtil
   // Implementation
 
   //------------------------------------------------------------------------------
-  void UpdateOutputCloseSurfaceModel(vtkMRMLMarkupsToModelNode* markupsToModelModuleNode, vtkPolyData* output)
+  bool UpdateOutputCloseSurfaceModel(vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
+    bool cleanMarkups, double delaunayAlpha, bool smoothing, bool forceConvex)
   {
-    if (markupsToModelModuleNode == NULL)
+    if (modelNode == NULL)
     {
-      vtkGenericWarningMacro("No markupsToModelModuleNode provided to UpdateOutputCloseSurfaceModel. No operation performed.");
-      return;
+      vtkGenericWarningMacro("No output model is provided to UpdateOutputCloseSurfaceModel. No operation performed.");
+      return false;
     }
-    if (output == NULL)
+    if (markupsNode == NULL || markupsNode->GetNumberOfFiducials() == 0)
     {
-      vtkGenericWarningMacro("No output poly data provided to UpdateOutputCloseSurfaceModel. No operation performed.");
-      return;
+      // No markup points, set the output to empty
+      vtkNew<vtkPolyData> outputPolyData;
+      modelNode->SetAndObservePolyData(outputPolyData.GetPointer());
+      return true;
     }
-    vtkMRMLMarkupsFiducialNode* markups = markupsToModelModuleNode->GetMarkupsNode();
-    if (markups == NULL)
-    {
-      return; // The output will remain empty
-    }
-
-
-    int numberOfMarkups = markups->GetNumberOfFiducials();
-
-    if (numberOfMarkups == 0)
-    {
-      return; // The output will remain empty
-    }
-
-    bool outputContainsData = output->GetNumberOfPoints();
-    if (outputContainsData)
-    {
-      vtkGenericWarningMacro("Output poly data provided to UpdateOutputCloseSurfaceModel already contains data. Existing data will be overwritten.");
-    }
-
-    output->Reset(); // empty the poly data of all existing data
 
     vtkSmartPointer< vtkPoints > inputPoints = vtkSmartPointer< vtkPoints >::New();
+    int numberOfMarkups = markupsNode->GetNumberOfFiducials();
     inputPoints->SetNumberOfPoints(numberOfMarkups);
 
     vtkSmartPointer< vtkCellArray > inputCellArray = vtkSmartPointer< vtkCellArray >::New();
@@ -90,7 +73,7 @@ namespace CreateClosedSurfaceUtil
     double markupPoint[3] = { 0.0, 0.0, 0.0 };
     for (int i = 0; i < numberOfMarkups; i++)
     {
-      markups->GetNthFiducialPosition(i, markupPoint);
+      markupsNode->GetNthFiducialPosition(i, markupPoint);
       inputCellArray->InsertCellPoint(i);
       inputPoints->SetPoint(i, markupPoint);
     }
@@ -102,7 +85,7 @@ namespace CreateClosedSurfaceUtil
     vtkSmartPointer< vtkCleanPolyData > cleanPointPolyData = vtkSmartPointer< vtkCleanPolyData >::New();
     cleanPointPolyData->SetInputData(inputPolyData);
     cleanPointPolyData->SetTolerance(CLEAN_POLYDATA_TOLERANCE_MM);
-    if (markupsToModelModuleNode->GetCleanMarkups())
+    if (cleanMarkups)
     {
       cleanPointPolyData->SetPointMerging(1);
     }
@@ -117,7 +100,7 @@ namespace CreateClosedSurfaceUtil
     vtkPoints* cleanedPoints = cleanedPolyData->GetPoints();
 
     vtkSmartPointer< vtkDelaunay3D > delaunay = vtkSmartPointer< vtkDelaunay3D >::New();
-    delaunay->SetAlpha(markupsToModelModuleNode->GetDelaunayAlpha());
+    delaunay->SetAlpha(delaunayAlpha);
     delaunay->AlphaTrisOff();
     delaunay->AlphaLinesOff();
     delaunay->AlphaVertsOff();
@@ -208,7 +191,7 @@ namespace CreateClosedSurfaceUtil
     default: // unsupported or invalid
     {
       vtkGenericWarningMacro("Unsupported pointArrangementType detected: " << pointArrangement << ". Aborting closed surface generation.");
-      return;
+      return false;
     }
     }
 
@@ -219,14 +202,13 @@ namespace CreateClosedSurfaceUtil
     vtkSmartPointer<vtkPolyDataNormals> normals = vtkSmartPointer<vtkPolyDataNormals>::New();
     normals->SetFeatureAngle(100); // TODO: This needs some justification
 
-    if (markupsToModelModuleNode->GetButterflySubdivision() &&
-      pointArrangement == POINT_ARRANGEMENT_NONPLANAR)
+    if (smoothing && pointArrangement == POINT_ARRANGEMENT_NONPLANAR)
     {
       vtkSmartPointer< vtkButterflySubdivisionFilter > subdivisionFilter = vtkSmartPointer< vtkButterflySubdivisionFilter >::New();
       subdivisionFilter->SetInputConnection(surfaceFilter->GetOutputPort());
       subdivisionFilter->SetNumberOfSubdivisions(3);
       subdivisionFilter->Update();
-      if (markupsToModelModuleNode->GetConvexHull())
+      if (forceConvex)
       {
         vtkSmartPointer< vtkDelaunay3D > convexHull = vtkSmartPointer< vtkDelaunay3D >::New();
         convexHull->SetInputConnection(subdivisionFilter->GetOutputPort());
@@ -248,7 +230,44 @@ namespace CreateClosedSurfaceUtil
       normals->SetInputConnection(linearSubdivision->GetOutputPort());
     }
     normals->Update();
-    output->DeepCopy(normals->GetOutput());
+    modelNode->SetAndObservePolyData(normals->GetOutput());
+    return true;
+  }
+
+  //------------------------------------------------------------------------------
+  bool UpdateOutputCloseSurfaceModel(vtkMRMLMarkupsToModelNode* markupsToModelModuleNode)
+  {
+    if (markupsToModelModuleNode == NULL)
+    {
+      vtkGenericWarningMacro("No markupsToModelModuleNode provided to UpdateOutputCloseSurfaceModel. No operation performed.");
+      return false;
+    }
+    vtkMRMLMarkupsFiducialNode* markupsNode = markupsToModelModuleNode->GetMarkupsNode();
+    if (markupsNode == NULL)
+    {
+      vtkGenericWarningMacro("No markups node is defined in markupsToModelModuleNode.");
+      return false;
+    }
+    vtkMRMLModelNode* modelNode = markupsToModelModuleNode->GetModelNode();
+    if (modelNode == NULL)
+    {
+      if (markupsToModelModuleNode->GetScene() == NULL)
+      {
+        vtkGenericWarningMacro("Output model node is not specified and markupsToModelModuleNode is not associated with any scene.");
+        return false;
+      }
+      modelNode = vtkMRMLModelNode::SafeDownCast(markupsToModelModuleNode->GetScene()->AddNewNodeByClass("vtkMRMLModelNode"));
+      if (markupsToModelModuleNode->GetName())
+      {
+        std::string modelNodeName = std::string(markupsToModelModuleNode->GetName()).append("Model");
+        modelNode->SetName(modelNodeName.c_str());
+      }
+      markupsToModelModuleNode->SetAndObserveModelNodeID(modelNode->GetID());
+    }
+
+    return UpdateOutputCloseSurfaceModel(markupsNode, modelNode, markupsToModelModuleNode->GetCleanMarkups(),
+      markupsToModelModuleNode->GetDelaunayAlpha(), markupsToModelModuleNode->GetButterflySubdivision(),
+      markupsToModelModuleNode->GetConvexHull());
   }
 
   //------------------------------------------------------------------------------

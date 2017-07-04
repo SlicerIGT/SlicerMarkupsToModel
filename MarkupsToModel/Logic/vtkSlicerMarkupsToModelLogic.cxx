@@ -119,24 +119,9 @@ void vtkSlicerMarkupsToModelLogic::OnMRMLSceneEndImport()
     vtkMRMLMarkupsToModelNode* markupsToModelNode = vtkMRMLMarkupsToModelNode::SafeDownCast(markupsToModelNodeIt->GetCurrentObject());
     if (markupsToModelNode != NULL)
     {
-      vtkWarningMacro("OnMRMLSceneEndImport: Module node added. Set the model pointer ");
-
-      if (!GetModelNodeName(markupsToModelNode).empty() &&
-          markupsToModelNode->GetModelNode() != NULL)
-      {
-        vtkMRMLNode* modelNodeFromScene = this->GetMRMLScene()->GetNodeByID(markupsToModelNode->GetModelNode()->GetID());
-        if (modelNodeFromScene != NULL)
-        {
-          markupsToModelNode->SetAndObserveModelNodeID(modelNodeFromScene->GetID());
-        }
-        else
-        {
-          vtkWarningMacro("Did not find the saved Model node.");
-        }
-      }
+      this->UpdateOutputModel(markupsToModelNode);
     }
   }
-  this->Modified();
 }
 
 //---------------------------------------------------------------------------
@@ -262,33 +247,24 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
     return;
   }
 
-  // store the output poly data in this pointer
-  vtkSmartPointer<vtkPolyData> outputPolyData = vtkSmartPointer<vtkPolyData>::New();
-
   switch (markupsToModelModuleNode->GetModelType())
   {
-  case vtkMRMLMarkupsToModelNode::ClosedSurface: CreateClosedSurfaceUtil::UpdateOutputCloseSurfaceModel(markupsToModelModuleNode, outputPolyData); break;
-  case vtkMRMLMarkupsToModelNode::Curve: CreateCurveUtil::UpdateOutputCurveModel(markupsToModelModuleNode, outputPolyData); break;
+  case vtkMRMLMarkupsToModelNode::ClosedSurface: CreateClosedSurfaceUtil::UpdateOutputCloseSurfaceModel(markupsToModelModuleNode); break;
+  case vtkMRMLMarkupsToModelNode::Curve: CreateCurveUtil::UpdateOutputCurveModel(markupsToModelModuleNode); break;
   }
 
-  // assign the poly data to the model node
   vtkMRMLModelNode* modelNode = markupsToModelModuleNode->GetModelNode();
-  if (modelNode == NULL)
+  if (modelNode)
   {
-    modelNode = vtkMRMLModelNode::SafeDownCast(this->GetMRMLScene()->AddNewNodeByClass("vtkMRMLModelNode"));
-    modelNode->SetName(GetModelNodeName(markupsToModelModuleNode).c_str());
+    vtkMRMLModelDisplayNode* displayNode = vtkMRMLModelDisplayNode::SafeDownCast(modelNode->GetDisplayNode());
+    if (displayNode == NULL)
+    {
+      modelNode->CreateDefaultDisplayNodes();
+      displayNode = vtkMRMLModelDisplayNode::SafeDownCast(modelNode->GetDisplayNode());
+      std::string name = std::string(modelNode->GetName()).append("ModelDisplay");
+      displayNode->SetName(name.c_str());
+    }
   }
-  modelNode->SetAndObservePolyData(outputPolyData);
-
-  vtkMRMLModelDisplayNode* displayNode = vtkMRMLModelDisplayNode::SafeDownCast(modelNode->GetDisplayNode());
-  if (displayNode == NULL)
-  {
-    modelNode->CreateDefaultDisplayNodes();
-    displayNode = vtkMRMLModelDisplayNode::SafeDownCast(modelNode->GetDisplayNode());
-    displayNode->SetName(GetModelDisplayNodeName(markupsToModelModuleNode).c_str());
-  }
-
-  markupsToModelModuleNode->SetAndObserveModelNodeID(modelNode->GetID());
 }
 
 //------------------------------------------------------------------------------
@@ -322,61 +298,28 @@ void vtkSlicerMarkupsToModelLogic::ProcessMRMLNodesEvents(vtkObject* caller, uns
 }
 
 //------------------------------------------------------------------------------
-std::string vtkSlicerMarkupsToModelLogic::GetMarkupsNodeName(vtkMRMLMarkupsToModelNode* mrmlNode)
+bool vtkSlicerMarkupsToModelLogic::UpdateClosedSurfaceModel(
+  vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
+  bool smoothing, bool forceConvex, double delaunayAlpha, bool cleanMarkups)
 {
-  vtkMRMLMarkupsNode* markupsNode = mrmlNode->GetMarkupsNode();
-  if (markupsNode == NULL)
-  {
-    return std::string(mrmlNode->GetID()).append("Markups");
-  }
-
-  return std::string(markupsNode->GetName());
+  return CreateClosedSurfaceUtil::UpdateOutputCloseSurfaceModel(markupsNode, modelNode,
+    cleanMarkups, delaunayAlpha, smoothing, forceConvex);
 }
 
 //------------------------------------------------------------------------------
-std::string vtkSlicerMarkupsToModelLogic::GetModelNodeName(vtkMRMLMarkupsToModelNode* mrmlNode)
+bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel(vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
+  int interpolationType, bool tubeLoop, double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints,
+  bool cleanMarkups, int polynomialOrder, int pointParameterType)
 {
-  vtkMRMLModelNode* modelNode = mrmlNode->GetModelNode();
-  if (modelNode == NULL)
-  {
-    return std::string(mrmlNode->GetID()).append("Model");
-  }
+  // Changing default Kochanek spline node parameters is not useful
+  // (it would only be useful to change per control point)
+  const double kochanekBias = 0.0;
+  const double kochanekContinuity = 0.0;
+  const double kochanekTension = 0.0;
+  bool kochanekEndsCopyNearestDerivatives = false;
 
-  return std::string(modelNode->GetName());
-}
-
-//------------------------------------------------------------------------------
-std::string vtkSlicerMarkupsToModelLogic::GetMarkupsDisplayNodeName(vtkMRMLMarkupsToModelNode* mrmlNode)
-{
-  vtkMRMLMarkupsNode* markupsNode = mrmlNode->GetMarkupsNode();
-  if (markupsNode == NULL)
-  {
-    return std::string(mrmlNode->GetID()).append("MarkupsDisplay");
-  }
-
-  vtkMRMLModelDisplayNode* markupsDisplayNode = vtkMRMLModelDisplayNode::SafeDownCast(markupsNode->GetDisplayNode());
-  if (markupsDisplayNode == NULL)
-  {
-    return std::string(mrmlNode->GetID()).append("MarkupsDisplay");
-  }
-
-  return std::string(markupsDisplayNode->GetName());
-}
-
-//------------------------------------------------------------------------------
-std::string vtkSlicerMarkupsToModelLogic::GetModelDisplayNodeName(vtkMRMLMarkupsToModelNode* mrmlNode)
-{
-  vtkMRMLModelNode* modelNode = mrmlNode->GetModelNode();
-  if (modelNode == NULL)
-  {
-    return std::string(mrmlNode->GetID()).append("ModelDisplay");
-  }
-
-  vtkMRMLModelDisplayNode* modelDisplayNode = vtkMRMLModelDisplayNode::SafeDownCast(modelNode->GetDisplayNode());
-  if (modelDisplayNode == NULL)
-  {
-    return std::string(mrmlNode->GetID()).append("ModelDisplay");
-  }
-
-  return std::string(modelDisplayNode->GetName());
+  return CreateCurveUtil::UpdateOutputCurveModel(markupsNode, modelNode,
+    interpolationType, pointParameterType, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides,
+    cleanMarkups, polynomialOrder,
+    kochanekBias, kochanekContinuity, kochanekTension, kochanekEndsCopyNearestDerivatives);
 }
