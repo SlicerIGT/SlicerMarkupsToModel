@@ -403,7 +403,7 @@ namespace CreateCurveUtil
     SetCardinalSplineParameters(controlPoints, splineX, splineY, splineZ, tubeLoop);
 
     vtkSmartPointer< vtkPoints > curvePoints = vtkSmartPointer< vtkPoints >::New();
-    AllocateCurvePoints(controlPoints, curvePoints, tubeRadius, tubeNumberOfSides);
+    AllocateCurvePoints(controlPoints, curvePoints, tubeSegmentsBetweenControlPoints, tubeLoop);
 
     // Iterate over the segments to interpolate, add all the "in-between" points
     int numberSegmentsToInterpolate;
