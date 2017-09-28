@@ -42,10 +42,11 @@ namespace CreateCurveUtil
       return false;
     }
     vtkNew<vtkPolyData> outputPolyData;
-    modelNode->SetAndObservePolyData(outputPolyData.GetPointer());
+
     if (markupsNode == NULL || markupsNode->GetNumberOfFiducials() < NUMBER_OF_LINE_POINTS_MIN)
     {
       // No markup points, set the output to empty
+      modelNode->SetAndObservePolyData(outputPolyData.GetPointer());
       return true;
     }
 
@@ -101,6 +102,8 @@ namespace CreateCurveUtil
         break;
       }
     }
+
+    modelNode->SetAndObservePolyData(outputPolyData.GetPointer());
     return true;
   }
 
