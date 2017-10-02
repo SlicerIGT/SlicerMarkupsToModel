@@ -15,18 +15,19 @@
 #ifndef __vtkMRMLMarkupsToModelNode_h
 #define __vtkMRMLMarkupsToModelNode_h
 
-//#include <ctime>
+// std includes
 #include <iostream>
-//#include <utility>
 #include <list>
 
-#include "vtkCommand.h"
+// vtk includes
+#include <vtkCommand.h>
+#include <vtkObject.h>
+#include <vtkObjectBase.h>
+#include <vtkObjectFactory.h>
+
+// Slicer includes
 #include "vtkMRMLNode.h"
 #include "vtkMRMLScene.h"
-#include "vtkObject.h"
-#include "vtkObjectBase.h"
-#include "vtkObjectFactory.h"
-
 
 // MarkupsToModel includes
 #include "vtkSlicerMarkupsToModelModuleMRMLExport.h"
@@ -76,8 +77,7 @@ public:
     Curve,
     ModelType_Last // insert valid types above this line
   };
-
-
+  
   enum InterpolationType
   {
     Linear = 0,
@@ -93,7 +93,7 @@ public:
     MinimumSpanningTree,
     PointParameterType_Last // insert valid types above this line
   };
-  
+
   vtkTypeMacro( vtkMRMLMarkupsToModelNode, vtkMRMLNode );
   
   // Standard MRML node methods  
