@@ -26,8 +26,7 @@
 #include "ui_qSlicerMarkupsToModelModuleWidget.h"
 #include "qSlicerSimpleMarkupsWidget.h"
 
-// Slicer MRML includes
-#include "vtkMRMLMarkupsToModelNode.h"
+// Slicer includes
 #include "vtkMRMLModelDisplayNode.h"
 #include "vtkMRMLMarkupsDisplayNode.h"
 #include "vtkMRMLDisplayNode.h"
@@ -35,9 +34,10 @@
 #include "vtkMRMLMarkupsFiducialNode.h"
 #include "vtkMRMLInteractionNode.h"
 
-// logic
+// module includes
+#include "vtkMRMLMarkupsToModelNode.h"
 #include "vtkSlicerMarkupsToModelLogic.h"
-
+#include "vtkCreateCurveUtil.h"
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
