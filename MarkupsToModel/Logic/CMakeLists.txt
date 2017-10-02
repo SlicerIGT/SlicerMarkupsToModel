@@ -14,6 +14,10 @@ set(${KIT}_INCLUDE_DIRECTORIES
 set(${KIT}_SRCS
   vtkSlicer${MODULE_NAME}Logic.cxx
   vtkSlicer${MODULE_NAME}Logic.h
+  CreateClosedSurfaceUtil.cxx
+  CreateClosedSurfaceUtil.h
+  CreateCurveUtil.cxx
+  CreateCurveUtil.h
   )
 
 set(${KIT}_TARGET_LIBRARIES
