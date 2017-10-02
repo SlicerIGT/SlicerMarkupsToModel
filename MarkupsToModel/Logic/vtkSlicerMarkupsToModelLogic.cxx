@@ -268,7 +268,7 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
 }
 
 //------------------------------------------------------------------------------
-void vtkSlicerMarkupsToModelLogic::ProcessMRMLNodesEvents(vtkObject* caller, unsigned long event, void* callData)
+void vtkSlicerMarkupsToModelLogic::ProcessMRMLNodesEvents(vtkObject* caller, unsigned long event, void* /*callData*/ )
 {
   vtkMRMLNode* callerNode = vtkMRMLNode::SafeDownCast(caller);
   if (callerNode == NULL)
