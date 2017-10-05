@@ -105,6 +105,8 @@ void qSlicerMarkupsToModelModuleWidget::setup()
   markupDefaultColor.setRgbF(1, 0.5, 0.5);
   d->MarkupsSelector->setDefaultNodeColor(markupDefaultColor);
 
+  this->setMRMLScene( d->logic()->GetMRMLScene() );
+
   connect(d->ParameterNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(onMarkupsToModelNodeSelectionChanged()));
   connect(d->ModelNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(onModelNodeSelectionChanged()));
   connect(d->ModelNodeSelector, SIGNAL(nodeAddedByUser(vtkMRMLNode*)), this, SLOT(onModelNodeAdded(vtkMRMLNode*)));
