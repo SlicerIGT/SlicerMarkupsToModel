@@ -26,8 +26,7 @@
 #include "ui_qSlicerMarkupsToModelModuleWidget.h"
 #include "qSlicerSimpleMarkupsWidget.h"
 
-// Slicer MRML includes
-#include "vtkMRMLMarkupsToModelNode.h"
+// Slicer includes
 #include "vtkMRMLModelDisplayNode.h"
 #include "vtkMRMLMarkupsDisplayNode.h"
 #include "vtkMRMLDisplayNode.h"
@@ -35,9 +34,10 @@
 #include "vtkMRMLMarkupsFiducialNode.h"
 #include "vtkMRMLInteractionNode.h"
 
-// logic
+// module includes
+#include "vtkMRMLMarkupsToModelNode.h"
 #include "vtkSlicerMarkupsToModelLogic.h"
-
+#include "vtkCreateCurveUtil.h"
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
@@ -104,6 +104,8 @@ void qSlicerMarkupsToModelModuleWidget::setup()
   QColor markupDefaultColor;
   markupDefaultColor.setRgbF(1, 0.5, 0.5);
   d->MarkupsSelector->setDefaultNodeColor(markupDefaultColor);
+
+  this->setMRMLScene( d->logic()->GetMRMLScene() );
 
   connect(d->ParameterNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(onMarkupsToModelNodeSelectionChanged()));
   connect(d->ModelNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(onModelNodeSelectionChanged()));

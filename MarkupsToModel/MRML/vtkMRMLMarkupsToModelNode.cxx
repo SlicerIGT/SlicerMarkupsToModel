@@ -1,5 +1,7 @@
-// MarkupsToModel MRML includes
+// MarkupsToModel includes
 #include "vtkMRMLMarkupsToModelNode.h"
+
+// slicer includes
 #include "vtkMRMLModelDisplayNode.h"
 #include "vtkMRMLMarkupsDisplayNode.h"
 #include "vtkMRMLDisplayNode.h"
@@ -18,6 +20,7 @@
 static const char* INPUT_MARKUPS_ROLE = "InputMarkups";
 static const char* OUTPUT_MODEL_ROLE = "OutputModel";
 
+//-----------------------------------------------------------------
 vtkMRMLMarkupsToModelNode* vtkMRMLMarkupsToModelNode::New()
 {
   // First try to create the object from the vtkObjectFactory
@@ -30,6 +33,7 @@ vtkMRMLMarkupsToModelNode* vtkMRMLMarkupsToModelNode::New()
   return new vtkMRMLMarkupsToModelNode;
 }
 
+//-----------------------------------------------------------------
 vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
 {
   this->HideFromEditorsOff();
@@ -67,10 +71,12 @@ vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
   this->PolynomialOrder = 3;
 }
 
+//-----------------------------------------------------------------
 vtkMRMLMarkupsToModelNode::~vtkMRMLMarkupsToModelNode()
 {
 }
 
+//-----------------------------------------------------------------
 vtkMRMLNode* vtkMRMLMarkupsToModelNode::CreateNodeInstance()
 {
   // First try to create the object from the vtkObjectFactory
@@ -83,6 +89,7 @@ vtkMRMLNode* vtkMRMLMarkupsToModelNode::CreateNodeInstance()
   return new vtkMRMLMarkupsToModelNode;
 }
 
+//-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::WriteXML( ostream& of, int nIndent )
 {
   Superclass::WriteXML(of, nIndent); // This will take care of referenced nodes
@@ -107,6 +114,7 @@ void vtkMRMLMarkupsToModelNode::WriteXML( ostream& of, int nIndent )
   of << indent << " PolynomialOrder=\"" << this->PolynomialOrder << "\"";
 }
 
+//-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::ReadXMLAttributes( const char** atts )
 {
   int disabledModify = this->StartModify();
@@ -168,7 +176,7 @@ void vtkMRMLMarkupsToModelNode::ReadXMLAttributes( const char** atts )
       else
       {
         vtkWarningMacro("Unrecognized interpolation type read from MRML node: " << attValue << ". Setting to Linear.");
-        this->InterpolationType = this->Linear;
+        this->InterpolationType = Linear;
       }
     }
     else if ( ! strcmp( attName, "PointParameterType" ) )
@@ -181,7 +189,7 @@ void vtkMRMLMarkupsToModelNode::ReadXMLAttributes( const char** atts )
       else
       {
         vtkWarningMacro("Unrecognized point parameter type read from MRML node: " << attValue << ". Setting to RawIndices.");
-        this->PointParameterType = this->RawIndices;
+        this->PointParameterType = RawIndices;
       }
     }
     else if ( ! strcmp( attName, "TubeRadius" ) )
@@ -290,42 +298,48 @@ void vtkMRMLMarkupsToModelNode::ReadXMLAttributes( const char** atts )
   this->EndModify(disabledModify);
 }
 
+//-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::Copy( vtkMRMLNode *anode )
 {  
   Superclass::Copy( anode ); // This will take care of referenced nodes
-  vtkMRMLMarkupsToModelNode *node = ( vtkMRMLMarkupsToModelNode* ) anode;
   this->Modified();
 }
 
+//-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::PrintSelf( ostream& os, vtkIndent indent )
 {
   vtkMRMLNode::PrintSelf(os,indent); // This will take care of referenced nodes
   os << indent << "ModelID: ";
 }
 
+//-----------------------------------------------------------------
 vtkMRMLMarkupsFiducialNode * vtkMRMLMarkupsToModelNode::GetMarkupsNode()
 {
   vtkMRMLMarkupsFiducialNode* markupsNode = vtkMRMLMarkupsFiducialNode::SafeDownCast( this->GetNodeReference( INPUT_MARKUPS_ROLE ) );
   return markupsNode;
 }
 
+//-----------------------------------------------------------------
 vtkMRMLModelNode * vtkMRMLMarkupsToModelNode::GetModelNode()
 {
   vtkMRMLModelNode* modelNode = vtkMRMLModelNode::SafeDownCast( this->GetNodeReference( OUTPUT_MODEL_ROLE ) );
   return modelNode;
 }
 
+//-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::SetAndObserveMarkupsNodeID( const char* markupsId )
 {
   this->SetAndObserveNodeReferenceID( INPUT_MARKUPS_ROLE, markupsId);
 }
 
+//-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::SetAndObserveModelNodeID( const char* modelId )
 {
   this->SetAndObserveNodeReferenceID( OUTPUT_MODEL_ROLE, modelId );
 }
 
-void vtkMRMLMarkupsToModelNode::ProcessMRMLEvents( vtkObject *caller, unsigned long event, void *callData )
+//-----------------------------------------------------------------
+void vtkMRMLMarkupsToModelNode::ProcessMRMLEvents( vtkObject *caller, unsigned long /*event*/, void* /*callData*/ )
 {
   vtkMRMLNode* callerNode = vtkMRMLNode::SafeDownCast( caller );
   if ( callerNode == NULL ) return;
@@ -349,6 +363,7 @@ const char* vtkMRMLMarkupsToModelNode::GetModelTypeAsString( int id )
   }
 }
 
+//------------------------------------------------------------------------------
 const char* vtkMRMLMarkupsToModelNode::GetInterpolationTypeAsString( int id )
 {
   switch ( id )
@@ -363,6 +378,7 @@ const char* vtkMRMLMarkupsToModelNode::GetInterpolationTypeAsString( int id )
   }
 }
 
+//------------------------------------------------------------------------------
 const char* vtkMRMLMarkupsToModelNode::GetPointParameterTypeAsString( int id )
 {
   switch ( id )
@@ -375,6 +391,7 @@ const char* vtkMRMLMarkupsToModelNode::GetPointParameterTypeAsString( int id )
   }
 }
 
+//------------------------------------------------------------------------------
 int vtkMRMLMarkupsToModelNode::GetModelTypeFromString( const char* name )
 {
   if ( name == NULL )
@@ -394,6 +411,7 @@ int vtkMRMLMarkupsToModelNode::GetModelTypeFromString( const char* name )
   return -1;
 }
 
+//------------------------------------------------------------------------------
 int vtkMRMLMarkupsToModelNode::GetInterpolationTypeFromString( const char* name )
 {
   if ( name == NULL )
@@ -413,6 +431,7 @@ int vtkMRMLMarkupsToModelNode::GetInterpolationTypeFromString( const char* name 
   return -1;
 }
 
+//------------------------------------------------------------------------------
 int vtkMRMLMarkupsToModelNode::GetPointParameterTypeFromString( const char* name )
 {
   if ( name == NULL )
@@ -431,4 +450,3 @@ int vtkMRMLMarkupsToModelNode::GetPointParameterTypeFromString( const char* name
   // unknown name
   return -1;
 }
-

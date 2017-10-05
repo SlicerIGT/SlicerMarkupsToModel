@@ -53,7 +53,6 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkSlicerMarkupsToModelLogic
   public vtkSlicerModuleLogic
 {
 public:
-
   static vtkSlicerMarkupsToModelLogic *New();
   vtkTypeMacro(vtkSlicerMarkupsToModelLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
@@ -68,15 +67,6 @@ public:
   void UpdateOutputModel( vtkMRMLMarkupsToModelNode* moduleNode );
 
   void ProcessMRMLNodesEvents( vtkObject* caller, unsigned long event, void* callData );
-
-  // Low-level interface for generating closed surface model without creating a parameter node
-  bool UpdateClosedSurfaceModel(vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode, bool smoothing = true, bool forceConvex = false, double delaunayAlpha = 0.0, bool cleanMarkups = true);
-
-  // Low-level interface for generating curve model without creating a parameter node
-  bool UpdateOutputCurveModel(vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
-    int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
-    bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
-    bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices);
 
 protected:
   vtkSlicerMarkupsToModelLogic();
@@ -95,6 +85,9 @@ protected:
 private:
   vtkSlicerMarkupsToModelLogic(const vtkSlicerMarkupsToModelLogic&); // Not implemented
   void operator=(const vtkSlicerMarkupsToModelLogic&); // Not implemented  
+    
+  bool UpdateCurveModel(vtkMRMLMarkupsToModelNode* markupsToModelModuleNode);
+  bool UpdateClosedSurfaceModel(vtkMRMLMarkupsToModelNode* markupsToModelModuleNode);
 };
 
 #endif
