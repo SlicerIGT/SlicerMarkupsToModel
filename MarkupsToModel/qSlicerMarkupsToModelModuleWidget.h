@@ -52,10 +52,11 @@ protected slots:
   void onUpdateButtonClicked();
   void onUpdateButtonCheckboxToggled(bool);
   void onMarkupsToModelNodeSelectionChanged();
-  void onModelNodeSelectionChanged();
-  void onModelNodeAdded(vtkMRMLNode*);
-  void onMarkupsNodeSelectionChanged();
-  void onMarkupsNodeAdded(vtkMRMLNode*);
+  void onOutputModelComboBoxSelectionChanged(vtkMRMLNode*);
+  void onOutputModelComboBoxNodeAdded(vtkMRMLNode*);
+  void onInputNodeComboBoxSelectionChanged(vtkMRMLNode*);
+  void onInputNodeComboBoxNodeAdded(vtkMRMLNode*);
+  void onInputChangeNodeTypeButtonClicked();
 
   void onSceneImportedEvent();
 
@@ -77,14 +78,14 @@ protected:
   virtual void exit();
 
   // functions for manipulating other MRML nodes
-  vtkMRMLModelNode* GetModelNode( );
-  vtkMRMLMarkupsFiducialNode* GetMarkupsNode( );
+  vtkMRMLModelNode* GetOutputModelNode();
+  vtkMRMLNode* GetInputNode();
 
-  bool GetOutputIntersectionVisibility( );
-  bool GetOutputVisibility( );
-  double GetOutputOpacity( );
-  void GetOutputColor( double outputColor[3] );
-  double GetMarkupsTextScale( );
+  bool GetOutputIntersectionVisibility();
+  bool GetOutputVisibility();
+  double GetOutputOpacity();
+  void GetOutputColor( double outputColor[ 3 ] );
+  double GetMarkupsTextScale();
 
 
 private:

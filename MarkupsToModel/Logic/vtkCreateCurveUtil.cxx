@@ -803,29 +803,3 @@ void vtkCreateCurveUtil::ComputePointParametersMinimumSpanningTree(vtkPoints * c
     controlPointParameters->InsertNextTuple1(pathParameters[indexAlongPath]);
   }
 }
-
-//------------------------------------------------------------------------------
-void vtkCreateCurveUtil::MarkupsToPoints(vtkMRMLMarkupsFiducialNode* markupsNode, vtkPoints* outputPoints, bool cleanMarkups)
-{
-  int  numberOfMarkups = markupsNode->GetNumberOfFiducials();
-  outputPoints->SetNumberOfPoints(numberOfMarkups);
-  double markupPoint[3] = { 0.0, 0.0, 0.0 };
-  for (int i = 0; i < numberOfMarkups; i++)
-  {
-    markupsNode->GetNthFiducialPosition(i, markupPoint);
-    outputPoints->SetPoint(i, markupPoint);
-  }
-
-  if (cleanMarkups)
-  {
-    vtkSmartPointer< vtkPolyData > polyData = vtkSmartPointer< vtkPolyData >::New();
-    polyData->Initialize();
-    polyData->SetPoints(outputPoints);
-
-    vtkSmartPointer< vtkCleanPolyData > cleanPointPolyData = vtkSmartPointer< vtkCleanPolyData >::New();
-    cleanPointPolyData->SetInputData(polyData);
-    cleanPointPolyData->SetTolerance(CLEAN_POLYDATA_TOLERANCE_MM);
-    cleanPointPolyData->Update();
-  }
-}
-

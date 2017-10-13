@@ -18,6 +18,8 @@ set(${KIT}_SRCS
   vtkCreateClosedSurfaceUtil.h
   vtkCreateCurveUtil.cxx
   vtkCreateCurveUtil.h
+  vtkCreateModelUtil.cxx
+  vtkCreateModelUtil.h
   )
 
 set(${KIT}_TARGET_LIBRARIES
