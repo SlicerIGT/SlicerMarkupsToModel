@@ -57,8 +57,8 @@ public:
   vtkTypeMacro(vtkSlicerMarkupsToModelLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  // Sets the markups node to be transformed
-  void SetMarkupsNode( vtkMRMLMarkupsFiducialNode* newMarkups, vtkMRMLMarkupsToModelNode* moduleNode );
+  // Sets the input node to be processed
+  void SetInputNode( vtkMRMLMarkupsToModelNode* moduleNode, vtkMRMLNode* newInputNode );
 
   vtkSlicerMarkupsLogic* MarkupsLogic;
   // Updates the mouse selection type to create markups or to navigate the scene.
@@ -85,9 +85,10 @@ protected:
 private:
   vtkSlicerMarkupsToModelLogic(const vtkSlicerMarkupsToModelLogic&); // Not implemented
   void operator=(const vtkSlicerMarkupsToModelLogic&); // Not implemented  
-    
-  bool UpdateCurveModel(vtkMRMLMarkupsToModelNode* markupsToModelModuleNode);
-  bool UpdateClosedSurfaceModel(vtkMRMLMarkupsToModelNode* markupsToModelModuleNode);
+
+  // Create an output model based on the control points, and parameters in the markupsToModelModuleNode
+  void GenerateCurvePolyData( vtkMRMLMarkupsToModelNode* markupsToModelModuleNode, vtkPoints* controlPoints, vtkPolyData* outputPolyData );
+  void GenerateClosedSurfacePolyData( vtkMRMLMarkupsToModelNode* markupsToModelModuleNode, vtkPoints* controlPoints, vtkPolyData* outputPolyData );
 };
 
 #endif

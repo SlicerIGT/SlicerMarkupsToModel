@@ -159,12 +159,12 @@ public:
   // to the last time stamp saved.
 
   // 
-  void SetAndObserveMarkupsNodeID( const char* markupsId );
-  void SetAndObserveModelNodeID( const char* modelId );
+  void SetAndObserveInputNodeID( const char* markupsId );
+  void SetAndObserveOutputModelNodeID( const char* modelId );
   void ProcessMRMLEvents( vtkObject *caller, unsigned long event, void *callData );
 
-  vtkMRMLMarkupsFiducialNode * GetMarkupsNode( );
-  vtkMRMLModelNode* GetModelNode( );
+  vtkMRMLNode * GetInputNode( );
+  vtkMRMLModelNode* GetOutputModelNode( );
 
   // Convert between model and interpolation types IDs and names.
   static const char* GetModelTypeAsString( int id );

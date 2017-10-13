@@ -51,16 +51,12 @@ class vtkCreateCurveUtil : public vtkObject
     // Assign parameter values to points based on their position in a minimum spanning tree between the two farthest points (good for unordered point sets)
     static void ComputePointParametersMinimumSpanningTree(vtkPoints* controlPoints, vtkDoubleArray* outputPointParameters);
 
-    // Convert the MRML Markups node to a vtkPoints object, with option to remove duplicates
-    static void MarkupsToPoints(vtkMRMLMarkupsFiducialNode* markupsNode, vtkPoints* outputPoints, bool removeDuplicates);
-
   private:
     // Prevent declarations of this class
     vtkCreateCurveUtil() {};
     ~vtkCreateCurveUtil() {};
     
     static const int NUMBER_OF_LINE_POINTS_MIN = 2;
-    static const double CLEAN_POLYDATA_TOLERANCE_MM = 0.01;
 
     static void AllocateCurvePoints(vtkPoints* controlPoints, vtkPoints* outputPoints, int tubeSegmentsBetweenControlPoints, bool tubeLoop);
     static void CloseLoop(vtkPoints* outputPoints);

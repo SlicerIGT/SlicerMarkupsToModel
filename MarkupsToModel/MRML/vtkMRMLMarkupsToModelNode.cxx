@@ -17,7 +17,7 @@
 // Other includes
 #include <sstream>
 
-static const char* INPUT_MARKUPS_ROLE = "InputMarkups";
+static const char* INPUT_ROLE = "InputMarkups";
 static const char* OUTPUT_MODEL_ROLE = "OutputModel";
 
 //-----------------------------------------------------------------
@@ -43,7 +43,7 @@ vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
   events->InsertNextValue( vtkCommand::ModifiedEvent );
   events->InsertNextValue( vtkMRMLMarkupsNode::PointModifiedEvent );//PointEndInteractionEvent
 
-  this->AddNodeReferenceRole( INPUT_MARKUPS_ROLE, NULL, events.GetPointer() );
+  this->AddNodeReferenceRole( INPUT_ROLE, NULL, events.GetPointer() );
   this->AddNodeReferenceRole( OUTPUT_MODEL_ROLE );
 
   this->AutoUpdateOutput = true;
@@ -313,27 +313,27 @@ void vtkMRMLMarkupsToModelNode::PrintSelf( ostream& os, vtkIndent indent )
 }
 
 //-----------------------------------------------------------------
-vtkMRMLMarkupsFiducialNode * vtkMRMLMarkupsToModelNode::GetMarkupsNode()
+vtkMRMLNode* vtkMRMLMarkupsToModelNode::GetInputNode()
 {
-  vtkMRMLMarkupsFiducialNode* markupsNode = vtkMRMLMarkupsFiducialNode::SafeDownCast( this->GetNodeReference( INPUT_MARKUPS_ROLE ) );
-  return markupsNode;
+  vtkMRMLNode* inputNode = this->GetNodeReference( INPUT_ROLE );
+  return inputNode;
 }
 
 //-----------------------------------------------------------------
-vtkMRMLModelNode * vtkMRMLMarkupsToModelNode::GetModelNode()
+vtkMRMLModelNode* vtkMRMLMarkupsToModelNode::GetOutputModelNode()
 {
   vtkMRMLModelNode* modelNode = vtkMRMLModelNode::SafeDownCast( this->GetNodeReference( OUTPUT_MODEL_ROLE ) );
   return modelNode;
 }
 
 //-----------------------------------------------------------------
-void vtkMRMLMarkupsToModelNode::SetAndObserveMarkupsNodeID( const char* markupsId )
+void vtkMRMLMarkupsToModelNode::SetAndObserveInputNodeID( const char* inputId )
 {
-  this->SetAndObserveNodeReferenceID( INPUT_MARKUPS_ROLE, markupsId);
+  this->SetAndObserveNodeReferenceID( INPUT_ROLE, inputId);
 }
 
 //-----------------------------------------------------------------
-void vtkMRMLMarkupsToModelNode::SetAndObserveModelNodeID( const char* modelId )
+void vtkMRMLMarkupsToModelNode::SetAndObserveOutputModelNodeID( const char* modelId )
 {
   this->SetAndObserveNodeReferenceID( OUTPUT_MODEL_ROLE, modelId );
 }
@@ -344,7 +344,7 @@ void vtkMRMLMarkupsToModelNode::ProcessMRMLEvents( vtkObject *caller, unsigned l
   vtkMRMLNode* callerNode = vtkMRMLNode::SafeDownCast( caller );
   if ( callerNode == NULL ) return;
 
-  if ( this->GetMarkupsNode() && this->GetMarkupsNode()==caller )
+  if ( this->GetInputNode() && this->GetInputNode()==caller )
   {
     this->InvokeCustomModifiedEvent(MarkupsPositionModifiedEvent);
   }
