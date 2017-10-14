@@ -42,6 +42,7 @@ vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
   vtkNew<vtkIntArray> events;
   events->InsertNextValue( vtkCommand::ModifiedEvent );
   events->InsertNextValue( vtkMRMLMarkupsNode::PointModifiedEvent );//PointEndInteractionEvent
+  events->InsertNextValue( vtkMRMLModelNode::MeshModifiedEvent );
 
   this->AddNodeReferenceRole( INPUT_ROLE, NULL, events.GetPointer() );
   this->AddNodeReferenceRole( OUTPUT_MODEL_ROLE );
@@ -329,13 +330,29 @@ vtkMRMLModelNode* vtkMRMLMarkupsToModelNode::GetOutputModelNode()
 //-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::SetAndObserveInputNodeID( const char* inputId )
 {
-  this->SetAndObserveNodeReferenceID( INPUT_ROLE, inputId);
+  // error check
+  const char* outputId = this->GetNodeReferenceID( OUTPUT_MODEL_ROLE );
+  if ( inputId != NULL && outputId != NULL && strcmp( inputId, outputId ) == 0 )
+  {
+    vtkErrorMacro( "Input node and output node cannot be the same." );
+    return;
+  }
+
+  this->SetAndObserveNodeReferenceID( INPUT_ROLE, inputId );
 }
 
 //-----------------------------------------------------------------
-void vtkMRMLMarkupsToModelNode::SetAndObserveOutputModelNodeID( const char* modelId )
+void vtkMRMLMarkupsToModelNode::SetAndObserveOutputModelNodeID( const char* outputId )
 {
-  this->SetAndObserveNodeReferenceID( OUTPUT_MODEL_ROLE, modelId );
+  // error check
+  const char* inputId = this->GetNodeReferenceID( INPUT_ROLE );
+  if ( inputId != NULL && outputId != NULL && strcmp( inputId, outputId ) == 0 )
+  {
+    vtkErrorMacro( "Input node and output node cannot be the same." );
+    return;
+  }
+
+  this->SetAndObserveNodeReferenceID( OUTPUT_MODEL_ROLE, outputId );
 }
 
 //-----------------------------------------------------------------

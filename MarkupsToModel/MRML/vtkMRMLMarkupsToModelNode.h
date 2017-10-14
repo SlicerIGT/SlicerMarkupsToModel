@@ -159,8 +159,8 @@ public:
   // to the last time stamp saved.
 
   // 
-  void SetAndObserveInputNodeID( const char* markupsId );
-  void SetAndObserveOutputModelNodeID( const char* modelId );
+  void SetAndObserveInputNodeID( const char* inputNodeId );
+  void SetAndObserveOutputModelNodeID( const char* outputModelNodeId );
   void ProcessMRMLEvents( vtkObject *caller, unsigned long event, void *callData );
 
   vtkMRMLNode * GetInputNode( );
