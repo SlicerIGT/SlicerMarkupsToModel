@@ -34,14 +34,14 @@ void vtkCreateModelUtil::vtkMRMLNodeToVtkPoints( vtkMRMLNode* inputNode, vtkPoin
     return;
   }
 
-  if ( vtkMRMLModelNode::SafeDownCast( inputNode ) )
+  vtkMRMLMarkupsFiducialNode* inputMarkupsNode = vtkMRMLMarkupsFiducialNode::SafeDownCast( inputNode );
+  vtkMRMLModelNode* inputModelNode = vtkMRMLModelNode::SafeDownCast( inputNode );
+  if ( inputModelNode != NULL)
   {
-    vtkMRMLModelNode* inputModelNode = vtkMRMLModelNode::SafeDownCast( inputNode );
     vtkCreateModelUtil::vtkMRMLNodeToVtkPoints( inputModelNode, outputPoints );
   }
-  else if ( vtkMRMLMarkupsFiducialNode::SafeDownCast( inputNode ) )
+  else if ( inputMarkupsNode != NULL )
   {
-    vtkMRMLMarkupsFiducialNode* inputMarkupsNode = vtkMRMLMarkupsFiducialNode::SafeDownCast( inputNode );
     vtkCreateModelUtil::vtkMRMLNodeToVtkPoints( inputMarkupsNode, outputPoints );
   }
   else

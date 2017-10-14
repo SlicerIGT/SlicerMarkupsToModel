@@ -115,36 +115,30 @@
      </item>
      <item row="2" column="1">
       <layout class="QGridLayout" name="inputNodeSelectionLayout">
-       <item row="0" column="0">
-        <widget class="qSlicerSimpleMarkupsWidget" name="InputMarkupsNodeWidget">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+       <item row="2" column="1">
+        <widget class="qSlicerMarkupsPlaceWidget" name="InputMarkupsPlaceWidget">
+         <property name="placeMultipleMarkups">
+          <enum>qSlicerMarkupsPlaceWidget::ForcePlaceMultipleMarkups</enum>
          </property>
-         <property name="toolTip">
-          <string extracomment="Select the input markups that will define the model">Select the input markups that will define the model</string>
-         </property>
-         <property name="enterPlaceModeOnNodeChange">
-          <bool>false</bool>
+         <property name="defaultNodeColor">
+          <color>
+           <red>255</red>
+           <green>128</green>
+           <blue>128</blue>
+          </color>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QPushButton" name="InputChangeNodeTypeButton">
-         <property name="text">
-          <string>Change node type</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
         <widget class="qMRMLNodeComboBox" name="InputNodeSelector">
          <property name="nodeTypes">
           <stringlist>
            <string>vtkMRMLMarkupsFiducialNode</string>
            <string>vtkMRMLModelNode</string>
           </stringlist>
+         </property>
+         <property name="baseName">
+          <string>Points</string>
          </property>
          <property name="noneEnabled">
           <bool>true</bool>
@@ -752,9 +746,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>qSlicerSimpleMarkupsWidget</class>
+   <class>qSlicerMarkupsPlaceWidget</class>
    <extends>qSlicerWidget</extends>
-   <header>qSlicerSimpleMarkupsWidget.h</header>
+   <header>qSlicerMarkupsPlaceWidget.h</header>
   </customwidget>
   <customwidget>
    <class>ctkCheckablePushButton</class>
@@ -825,22 +819,6 @@
   <connection>
    <sender>qSlicerMarkupsToModelModuleWidget</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
-   <receiver>InputMarkupsNodeWidget</receiver>
-   <slot>setMRMLScene(vtkMRMLScene*)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>94</x>
-     <y>66</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>101</x>
-     <y>79</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>qSlicerMarkupsToModelModuleWidget</sender>
-   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>InputNodeSelector</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
    <hints>
@@ -851,6 +829,22 @@
     <hint type="destinationlabel">
      <x>454</x>
      <y>304</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>qSlicerMarkupsToModelModuleWidget</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>InputMarkupsPlaceWidget</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>400</x>
+     <y>261</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>723</x>
+     <y>85</y>
     </hint>
    </hints>
   </connection>

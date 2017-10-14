@@ -56,7 +56,6 @@ protected slots:
   void onOutputModelComboBoxNodeAdded(vtkMRMLNode*);
   void onInputNodeComboBoxSelectionChanged(vtkMRMLNode*);
   void onInputNodeComboBoxNodeAdded(vtkMRMLNode*);
-  void onInputChangeNodeTypeButtonClicked();
 
   void onSceneImportedEvent();
 
