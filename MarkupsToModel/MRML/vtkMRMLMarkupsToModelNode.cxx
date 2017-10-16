@@ -177,7 +177,7 @@ void vtkMRMLMarkupsToModelNode::ReadXMLAttributes( const char** atts )
       else
       {
         vtkWarningMacro("Unrecognized interpolation type read from MRML node: " << attValue << ". Setting to Linear.");
-        this->InterpolationType = Linear;
+        this->InterpolationType = this->Linear;
       }
     }
     else if ( ! strcmp( attName, "PointParameterType" ) )
@@ -190,7 +190,7 @@ void vtkMRMLMarkupsToModelNode::ReadXMLAttributes( const char** atts )
       else
       {
         vtkWarningMacro("Unrecognized point parameter type read from MRML node: " << attValue << ". Setting to RawIndices.");
-        this->PointParameterType = RawIndices;
+        this->PointParameterType = this->RawIndices;
       }
     }
     else if ( ! strcmp( attName, "TubeRadius" ) )
@@ -466,4 +466,32 @@ int vtkMRMLMarkupsToModelNode::GetPointParameterTypeFromString( const char* name
   }
   // unknown name
   return -1;
+}
+
+//------------------------------------------------------------------------------
+vtkMRMLMarkupsFiducialNode* vtkMRMLMarkupsToModelNode::GetMarkupsNode()
+{
+  vtkWarningMacro( "vtkMRMLMarkupsToModelNode::GetMarkupsNode() is deprecated. Use vtkMRMLMarkupsToModelNode::GetInputNode() instead." );
+  return vtkMRMLMarkupsFiducialNode::SafeDownCast( this->GetInputNode() );
+}
+
+//------------------------------------------------------------------------------
+vtkMRMLModelNode* vtkMRMLMarkupsToModelNode::GetModelNode()
+{
+  vtkWarningMacro( "vtkMRMLMarkupsToModelNode::GetModelNode() is deprecated. Use vtkMRMLMarkupsToModelNode::GetOutputModelNode() instead." );
+  return this->GetOutputModelNode();
+}
+
+//------------------------------------------------------------------------------
+void vtkMRMLMarkupsToModelNode::SetAndObserveMarkupsNodeID( const char* id )
+{
+  vtkWarningMacro( "vtkMRMLMarkupsToModelNode::SetAndObserveMarkupsNodeID() is deprecated. Use vtkMRMLMarkupsToModelNode::SetAndObserveInputNodeID() instead." );
+  this->SetAndObserveInputNodeID( id );
+}
+
+//------------------------------------------------------------------------------
+void vtkMRMLMarkupsToModelNode::SetAndObserveModelNodeID( const char* id )
+{
+  vtkWarningMacro( "vtkMRMLMarkupsToModelNode::SetAndObserveModelNodeID() is deprecated. Use vtkMRMLMarkupsToModelNode::SetAndObserveOutputModelNodeID() instead." );
+  this->SetAndObserveOutputModelNodeID( id );
 }

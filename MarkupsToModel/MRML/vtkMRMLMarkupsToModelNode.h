@@ -154,11 +154,6 @@ protected:
   
 public:
 
-  // Tool is interpreted as displayable node. The tool's time stamp is checked with a frequency determined
-  // by the QTimer in the toolBarManagerWidget class. The tool's status is set to 1 if the time stamp has changed compared
-  // to the last time stamp saved.
-
-  // 
   void SetAndObserveInputNodeID( const char* inputNodeId );
   void SetAndObserveOutputModelNodeID( const char* outputModelNodeId );
   void ProcessMRMLEvents( vtkObject *caller, unsigned long event, void *callData );
@@ -173,6 +168,18 @@ public:
   static int GetModelTypeFromString( const char* name );
   static int GetInterpolationTypeFromString( const char* name );
   static int GetPointParameterTypeFromString( const char* name );
+
+  // DEPRECATED - Get the input node
+  vtkMRMLMarkupsFiducialNode* GetMarkupsNode( );
+
+  // DEPRECATED - Get the output node
+  vtkMRMLModelNode* GetModelNode( );
+
+  // DEPRECATED - Set the input node
+  void SetAndObserveMarkupsNodeID( const char* id );
+
+  // DEPRECATED - Set the output node
+  void SetAndObserveModelNodeID( const char* id );
 
 private:
   int    ModelType;

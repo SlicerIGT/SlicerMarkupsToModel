@@ -57,16 +57,28 @@ public:
   vtkTypeMacro(vtkSlicerMarkupsToModelLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  // Sets the input node to be processed
-  void SetInputNode( vtkMRMLMarkupsToModelNode* moduleNode, vtkMRMLNode* newInputNode );
-
   vtkSlicerMarkupsLogic* MarkupsLogic;
+
   // Updates the mouse selection type to create markups or to navigate the scene.
   void UpdateSelectionNode( vtkMRMLMarkupsToModelNode* markupsToModelModuleNode );
+
   // Updates closed surface or curve output model from markups
   void UpdateOutputModel( vtkMRMLMarkupsToModelNode* moduleNode );
 
   void ProcessMRMLNodesEvents( vtkObject* caller, unsigned long event, void* callData );
+
+  // DEPRECATED - Sets the input node to be processed
+  void SetMarkupsNode( vtkMRMLMarkupsFiducialNode* newMarkups, vtkMRMLMarkupsToModelNode* moduleNode );
+
+  // DEPRECATED
+  bool UpdateClosedSurfaceModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
+      bool smoothing = true, bool forceConvex = false, double delaunayAlpha = 0.0, bool cleanMarkups = true);
+
+  // DEPRECATED
+  bool UpdateOutputCurveModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
+      int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
+      bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
+      bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices );
 
 protected:
   vtkSlicerMarkupsToModelLogic();

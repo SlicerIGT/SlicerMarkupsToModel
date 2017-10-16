@@ -20,18 +20,18 @@
 #include <vtkUnstructuredGrid.h>
 
 //------------------------------------------------------------------------------
-bool vtkCreateClosedSurfaceUtil::GenerateCloseSurfaceModel(vtkPoints* inputPoints, vtkPolyData* outputPolyData,
+bool vtkCreateClosedSurfaceUtil::GenerateClosedSurfaceModel(vtkPoints* inputPoints, vtkPolyData* outputPolyData,
   double delaunayAlpha, bool smoothing, bool forceConvex)
 {
   if (outputPolyData == NULL)
   {
-    vtkGenericWarningMacro("No output poly data is provided to UpdateOutputCloseSurfaceModel. No operation performed.");
+    vtkGenericWarningMacro("No output poly data is provided to UpdateOutputClosedSurfaceModel. No operation performed.");
     return false;
   }
 
   if (inputPoints == NULL)
   {
-    vtkGenericWarningMacro("No input points provided to UpdateOutputCloseSurfaceModel. No operation performed.");
+    vtkGenericWarningMacro("No input points provided to UpdateOutputClosedSurfaceModel. No operation performed.");
     return false;
   }
 
