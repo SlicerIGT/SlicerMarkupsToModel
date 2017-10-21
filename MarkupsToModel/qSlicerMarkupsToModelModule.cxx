@@ -83,11 +83,11 @@ QString qSlicerMarkupsToModelModule::acknowledgementText() const
 QStringList qSlicerMarkupsToModelModule::contributors() const
 {
   QStringList moduleContributors;
-  moduleContributors << QString("Jaime Garcia Guevara (Queen's University)");
+  moduleContributors << QString("Thomas Vaughan (Queen's University)");
   moduleContributors << QString("Andras Lasso (Queen's University)");
   moduleContributors << QString("Adam Rankin (Robarts Research Center, Western University");
-  moduleContributors << QString("Thomas Vaughan (Queen's University)");
   moduleContributors << QString("Aniqah Mair (Queen's University)");
+  moduleContributors << QString("Jaime Garcia Guevara (Queen's University)");
   return moduleContributors;
 }
 
