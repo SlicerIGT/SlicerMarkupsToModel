@@ -22,16 +22,16 @@
 //------------------------------------------------------------------------------
 bool vtkCreateClosedSurfaceUtil::GenerateClosedSurfaceModel(vtkPoints* inputPoints, vtkPolyData* outputPolyData,
   double delaunayAlpha, bool smoothing, bool forceConvex)
-{
-  if (outputPolyData == NULL)
-  {
-    vtkGenericWarningMacro("No output poly data is provided to UpdateOutputClosedSurfaceModel. No operation performed.");
-    return false;
-  }
-
+{  
   if (inputPoints == NULL)
   {
-    vtkGenericWarningMacro("No input points provided to UpdateOutputClosedSurfaceModel. No operation performed.");
+    vtkGenericWarningMacro("Input points are null. No model generated.");
+    return false;
+  }
+  
+  if (outputPolyData == NULL)
+  {
+    vtkGenericWarningMacro("Output poly data is null. No model generated.");
     return false;
   }
 

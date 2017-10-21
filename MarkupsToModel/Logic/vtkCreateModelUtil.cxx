@@ -24,13 +24,13 @@ void vtkCreateModelUtil::vtkMRMLNodeToVtkPoints( vtkMRMLNode* inputNode, vtkPoin
 {
   if ( inputNode == NULL )
   {
-    vtkGenericWarningMacro( "Input node is null." );
+    vtkGenericWarningMacro( "Input node is null. No points will be obtained." );
     return;
   }
   
   if ( outputPoints == NULL )
   {
-    vtkGenericWarningMacro( "Output vtkPoints is null." );
+    vtkGenericWarningMacro( "Output vtkPoints is null. No points will be obtained." );
     return;
   }
 
@@ -46,7 +46,7 @@ void vtkCreateModelUtil::vtkMRMLNodeToVtkPoints( vtkMRMLNode* inputNode, vtkPoin
   }
   else
   {
-    vtkGenericWarningMacro( "Unsupported input node type." );
+    vtkGenericWarningMacro( "Unsupported input node type. No points will be obtained." );
   }
 }
 
@@ -55,13 +55,13 @@ void vtkCreateModelUtil::vtkMRMLNodeToVtkPoints( vtkMRMLModelNode* inputModelNod
 {
   if ( inputModelNode == NULL )
   {
-    vtkGenericWarningMacro( "Input node is null." );
+    vtkGenericWarningMacro( "Input node is null. No points will be obtained." );
     return;
   }
 
   if ( outputPoints == NULL )
   {
-    vtkGenericWarningMacro( "Output vtkPoints is null." );
+    vtkGenericWarningMacro( "Output vtkPoints is null. No points will be obtained." );
     return;
   }
 
@@ -83,13 +83,13 @@ void vtkCreateModelUtil::vtkMRMLNodeToVtkPoints( vtkMRMLMarkupsFiducialNode* inp
 {
   if ( inputMarkupsNode == NULL )
   {
-    vtkGenericWarningMacro( "Input node is null." );
+    vtkGenericWarningMacro( "Input node is null. No points will be obtained." );
     return;
   }
 
   if ( outputPoints == NULL )
   {
-    vtkGenericWarningMacro( "Output vtkPoints is null." );
+    vtkGenericWarningMacro( "Output vtkPoints is null. No points will be obtained." );
     return;
   }
 

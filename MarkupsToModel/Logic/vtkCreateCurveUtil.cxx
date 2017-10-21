@@ -21,7 +21,7 @@ void vtkCreateCurveUtil::AllocateCurvePoints(vtkPoints* controlPoints, vtkPoints
   if (tubeLoop)
   {
     outputPoints->SetNumberOfPoints(numberControlPoints * tubeSegmentsBetweenControlPoints + 2);
-    // two extra points are required to "close off" the loop, and ensure that the tube appears fully continuous
+    // two extra points are required to "close off" the loop, and ensure that the tube normals appear fully continuous
   }
   else
   {
@@ -143,6 +143,18 @@ void vtkCreateCurveUtil::SetKochanekSplineParameters(vtkPoints* controlPoints, v
 //------------------------------------------------------------------------------
 void vtkCreateCurveUtil::GetTubePolyDataFromPoints(vtkPoints* pointsToConnect, vtkPolyData* outputTube, double tubeRadius, int tubeNumberOfSides)
 {
+  if ( pointsToConnect == NULL )
+  {
+    vtkGenericWarningMacro("Points to connect is null. No model generated.");
+    return;
+  }
+
+  if ( outputTube == NULL )
+  {
+    vtkGenericWarningMacro("Output tube poly data is null. No model generated.");
+    return;
+  }
+
   int numPoints = pointsToConnect->GetNumberOfPoints();
 
   vtkSmartPointer< vtkCellArray > lineCellArray = vtkSmartPointer< vtkCellArray >::New();
@@ -174,7 +186,13 @@ void vtkCreateCurveUtil::GenerateLinearCurveModel(vtkPoints* controlPoints, vtkP
 {
   if (controlPoints == NULL)
   {
-    vtkGenericWarningMacro("Control points data structure is null. No model generated.");
+    vtkGenericWarningMacro("Control points are null. No model generated.");
+    return;
+  }
+
+  if (outputTubePolyData == NULL)
+  {
+    vtkGenericWarningMacro("Output tube poly data is null. No model generated.");
     return;
   }
 
@@ -249,7 +267,13 @@ void vtkCreateCurveUtil::GenerateCardinalCurveModel(vtkPoints* controlPoints, vt
 {
   if (controlPoints == NULL)
   {
-    vtkGenericWarningMacro("Control points data structure is null. No model generated.");
+    vtkGenericWarningMacro("Control points are null. No model generated.");
+    return;
+  }
+
+  if (outputTubePolyData == NULL)
+  {
+    vtkGenericWarningMacro("Output tube poly data is null. No model generated.");
     return;
   }
 
@@ -329,7 +353,13 @@ void vtkCreateCurveUtil::GenerateKochanekCurveModel(vtkPoints* controlPoints, vt
 {
   if (controlPoints == NULL)
   {
-    vtkGenericWarningMacro("Control points data structure is null. No model generated.");
+    vtkGenericWarningMacro("Control points are null. No model generated.");
+    return;
+  }
+
+  if (outputTubePolyData == NULL)
+  {
+    vtkGenericWarningMacro("Output tube poly data is null. No model generated.");
     return;
   }
 
@@ -404,13 +434,19 @@ void vtkCreateCurveUtil::GenerateKochanekCurveModel(vtkPoints* controlPoints, vt
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::GeneratePolynomialCurveModel(vtkPoints* controlPoints, vtkPolyData* outputPolyData,
+void vtkCreateCurveUtil::GeneratePolynomialCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
   double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints, bool tubeLoop,
   int polynomialOrder, vtkDoubleArray* inputPointParameters)
 {
   if (controlPoints == NULL)
   {
     vtkGenericWarningMacro("Control points are null. No model generated.");
+    return;
+  }
+
+  if (outputTubePolyData == NULL)
+  {
+    vtkGenericWarningMacro("Output tube poly data is null. No model generated.");
     return;
   }
 
@@ -426,7 +462,7 @@ void vtkCreateCurveUtil::GeneratePolynomialCurveModel(vtkPoints* controlPoints, 
   if (numPoints == NUMBER_OF_LINE_POINTS_MIN)
   {
     vtkGenericWarningMacro("Only " << NUMBER_OF_LINE_POINTS_MIN << " provided. Fitting line.");
-    GenerateLinearCurveModel(controlPoints, outputPolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
+    GenerateLinearCurveModel(controlPoints, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
     return;
   }
 
@@ -569,7 +605,7 @@ void vtkCreateCurveUtil::GeneratePolynomialCurveModel(vtkPoints* controlPoints, 
   tubeFilter->CappingOn();
   tubeFilter->Update();
 
-  outputPolyData->DeepCopy(tubeFilter->GetOutput());
+  outputTubePolyData->DeepCopy(tubeFilter->GetOutput());
 }
 
 //------------------------------------------------------------------------------
