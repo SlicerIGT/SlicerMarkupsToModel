@@ -7,7 +7,9 @@
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
 
-class vtkCreateModelUtil : public vtkObject
+#include "vtkSlicerMarkupsToModelModuleLogicExport.h"
+
+class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCreateModelUtil : public vtkObject
 {
 public:
   // standard vtk object methods
