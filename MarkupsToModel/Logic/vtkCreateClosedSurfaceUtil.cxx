@@ -20,6 +20,23 @@
 #include <vtkUnstructuredGrid.h>
 
 //------------------------------------------------------------------------------
+// constants within this file
+static const double COMPARE_TO_ZERO_TOLERANCE = 0.0001;
+
+//------------------------------------------------------------------------------
+vtkStandardNewMacro( vtkCreateClosedSurfaceUtil );
+
+//------------------------------------------------------------------------------
+vtkCreateClosedSurfaceUtil::vtkCreateClosedSurfaceUtil()
+{
+}
+
+//------------------------------------------------------------------------------
+vtkCreateClosedSurfaceUtil::~vtkCreateClosedSurfaceUtil()
+{
+}
+
+//------------------------------------------------------------------------------
 bool vtkCreateClosedSurfaceUtil::GenerateClosedSurfaceModel(vtkPoints* inputPoints, vtkPolyData* outputPolyData,
   double delaunayAlpha, bool smoothing, bool forceConvex)
 {  
@@ -438,4 +455,10 @@ void vtkCreateClosedSurfaceUtil::GetNthColumnInMatrix(vtkMatrix4x4* matrix, int 
   outputAxis[0] = matrix->GetElement(0, n);
   outputAxis[1] = matrix->GetElement(1, n);
   outputAxis[2] = matrix->GetElement(2, n);
+}
+
+//------------------------------------------------------------------------------
+void vtkCreateClosedSurfaceUtil::PrintSelf( ostream &os, vtkIndent indent )
+{
+  Superclass::PrintSelf( os, indent );
 }

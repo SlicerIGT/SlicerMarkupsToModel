@@ -14,6 +14,35 @@
 #include <vtkTubeFilter.h>
 
 //------------------------------------------------------------------------------
+// constant within this file
+static const int NUMBER_OF_LINE_POINTS_MIN = 2;
+
+//------------------------------------------------------------------------------
+// constant default values defined here due to VS2013 compile issue C2864
+const bool vtkCreateCurveUtil::TUBE_LOOP_DEFAULT = false;
+const double vtkCreateCurveUtil::TUBE_RADIUS_DEFAULT = 1.0;
+const int vtkCreateCurveUtil::TUBE_NUMBER_OF_SIDES_DEFAULT = 8;
+const int vtkCreateCurveUtil::TUBE_SEGMENTS_BETWEEN_CONTROL_POINTS_DEFAULT = 5;
+const int vtkCreateCurveUtil::POLYNOMIAL_ORDER_DEFAULT = 3;
+const double vtkCreateCurveUtil::KOCHANEK_BIAS_DEFAULT = 0.0;
+const double vtkCreateCurveUtil::KOCHANEK_CONTINUITY_DEFAULT = 0.0;
+const double vtkCreateCurveUtil::KOCHANEK_TENSION_DEFAULT = 0.0;
+const double vtkCreateCurveUtil::KOCHANEK_ENDS_COPY_NEAREST_DERIVATIVE_DEFAULT = 0.0;
+
+//------------------------------------------------------------------------------
+vtkStandardNewMacro( vtkCreateCurveUtil );
+
+//------------------------------------------------------------------------------
+vtkCreateCurveUtil::vtkCreateCurveUtil()
+{
+}
+
+//------------------------------------------------------------------------------
+vtkCreateCurveUtil::~vtkCreateCurveUtil()
+{
+}
+
+//------------------------------------------------------------------------------
 void vtkCreateCurveUtil::AllocateCurvePoints(vtkPoints* controlPoints, vtkPoints* outputPoints, int tubeSegmentsBetweenControlPoints, bool tubeLoop)
 {
   // Number of points is different depending on whether the curve is a loop
@@ -838,4 +867,10 @@ void vtkCreateCurveUtil::ComputePointParametersMinimumSpanningTree(vtkPoints * c
     }
     controlPointParameters->InsertNextTuple1(pathParameters[indexAlongPath]);
   }
+}
+
+//------------------------------------------------------------------------------
+void vtkCreateCurveUtil::PrintSelf( ostream &os, vtkIndent indent )
+{
+  Superclass::PrintSelf( os, indent );
 }
