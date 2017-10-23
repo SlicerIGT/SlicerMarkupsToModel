@@ -11,6 +11,11 @@
 class vtkCreateClosedSurfaceUtil : public vtkObject
 {
   public:
+    // standard vtk object methods
+    vtkTypeMacro( vtkCreateClosedSurfaceUtil, vtkObject );
+    void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
+    static vtkCreateClosedSurfaceUtil *New();
+
     enum PointArrangement
     {
       POINT_ARRANGEMENT_SINGULAR = 0,
@@ -23,13 +28,11 @@ class vtkCreateClosedSurfaceUtil : public vtkObject
     // Generates the closed surface from the points using vtkDelaunay3D.
     static bool GenerateClosedSurfaceModel( vtkPoints* points, vtkPolyData* outputPolyData, double delaunayAlpha, bool smoothing, bool forceConvex );
 
+  protected:
+    vtkCreateClosedSurfaceUtil();
+    ~vtkCreateClosedSurfaceUtil();
+
   private:
-    // Prevent declarations of this class
-    vtkCreateClosedSurfaceUtil() {};
-    ~vtkCreateClosedSurfaceUtil() {};
-
-    static const double COMPARE_TO_ZERO_TOLERANCE = 0.0001;
-
     // Compute the best fit plane through the points, as well as the major and minor axes which describe variation in points.
     static void ComputeTransformMatrixFromBoundingAxes( vtkPoints* points, vtkMatrix4x4* transformFromBoundingAxes );
 
@@ -47,6 +50,10 @@ class vtkCreateClosedSurfaceUtil : public vtkObject
     // helper utility functions
     static void SetNthColumnInMatrix( vtkMatrix4x4* matrix, int n, const double axis[ 3 ] );
     static void GetNthColumnInMatrix( vtkMatrix4x4* matrix, int n, double outputAxis[ 3 ] );
+
+    // not used
+    vtkCreateClosedSurfaceUtil ( const vtkCreateClosedSurfaceUtil& ) VTK_DELETE_FUNCTION;
+    void operator= ( const vtkCreateClosedSurfaceUtil& ) VTK_DELETE_FUNCTION;
 };
 
 #endif

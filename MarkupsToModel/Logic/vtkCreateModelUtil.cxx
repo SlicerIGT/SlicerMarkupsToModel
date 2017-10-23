@@ -12,6 +12,19 @@
 #include <vtkSmartPointer.h>
 
 //------------------------------------------------------------------------------
+vtkStandardNewMacro( vtkCreateModelUtil );
+
+//------------------------------------------------------------------------------
+vtkCreateModelUtil::vtkCreateModelUtil()
+{
+}
+
+//------------------------------------------------------------------------------
+vtkCreateModelUtil::~vtkCreateModelUtil()
+{
+}
+
+//------------------------------------------------------------------------------
 bool vtkCreateModelUtil::vtkMRMLNodeToVtkPointsSupported( vtkMRMLNode* inputNode )
 {
   bool inputIsModelNode = vtkMRMLModelNode::SafeDownCast( inputNode ) != NULL;
@@ -117,3 +130,8 @@ void vtkCreateModelUtil::RemoveDuplicatePoints( vtkPoints* points )
   cleanPointPolyData->Update();
 }
 
+//------------------------------------------------------------------------------
+void vtkCreateModelUtil::PrintSelf( ostream &os, vtkIndent indent )
+{
+  Superclass::PrintSelf( os, indent );
+}
