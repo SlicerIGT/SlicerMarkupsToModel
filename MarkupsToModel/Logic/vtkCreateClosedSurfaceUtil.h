@@ -8,7 +8,9 @@
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
 
-class vtkCreateClosedSurfaceUtil : public vtkObject
+#include "vtkSlicerMarkupsToModelModuleLogicExport.h"
+
+class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCreateClosedSurfaceUtil : public vtkObject
 {
   public:
     // standard vtk object methods
