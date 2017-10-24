@@ -1,4 +1,4 @@
-#include "vtkCreateClosedSurfaceUtil.h"
+#include "vtkSlicerMarkupsToModelClosedSurfaceGeneration.h"
 
 #include "vtkMRMLModelNode.h"
 #include "vtkMRMLMarkupsFiducialNode.h"
@@ -24,20 +24,20 @@
 static const double COMPARE_TO_ZERO_TOLERANCE = 0.0001;
 
 //------------------------------------------------------------------------------
-vtkStandardNewMacro( vtkCreateClosedSurfaceUtil );
+vtkStandardNewMacro( vtkSlicerMarkupsToModelClosedSurfaceGeneration );
 
 //------------------------------------------------------------------------------
-vtkCreateClosedSurfaceUtil::vtkCreateClosedSurfaceUtil()
+vtkSlicerMarkupsToModelClosedSurfaceGeneration::vtkSlicerMarkupsToModelClosedSurfaceGeneration()
 {
 }
 
 //------------------------------------------------------------------------------
-vtkCreateClosedSurfaceUtil::~vtkCreateClosedSurfaceUtil()
+vtkSlicerMarkupsToModelClosedSurfaceGeneration::~vtkSlicerMarkupsToModelClosedSurfaceGeneration()
 {
 }
 
 //------------------------------------------------------------------------------
-bool vtkCreateClosedSurfaceUtil::GenerateClosedSurfaceModel(vtkPoints* inputPoints, vtkPolyData* outputPolyData,
+bool vtkSlicerMarkupsToModelClosedSurfaceGeneration::GenerateClosedSurfaceModel(vtkPoints* inputPoints, vtkPolyData* outputPolyData,
   double delaunayAlpha, bool smoothing, bool forceConvex)
 {  
   if (inputPoints == NULL)
@@ -217,7 +217,7 @@ bool vtkCreateClosedSurfaceUtil::GenerateClosedSurfaceModel(vtkPoints* inputPoin
 // Neither of these limitations will prevent the overall logic from functioning
 // correctly, but it is worth keeping in mind, and worth changing should a need 
 // arise
-void vtkCreateClosedSurfaceUtil::ComputeTransformMatrixFromBoundingAxes(vtkPoints* points, vtkMatrix4x4* boundingAxesToRasTransformMatrix)
+void vtkSlicerMarkupsToModelClosedSurfaceGeneration::ComputeTransformMatrixFromBoundingAxes(vtkPoints* points, vtkMatrix4x4* boundingAxesToRasTransformMatrix)
 {
   if (points == NULL)
   {
@@ -281,7 +281,7 @@ void vtkCreateClosedSurfaceUtil::ComputeTransformMatrixFromBoundingAxes(vtkPoint
 
 //------------------------------------------------------------------------------
 // It is assumed that sortedExtentRanges is pre-sorted in descending order (largest to smallest)
-vtkCreateClosedSurfaceUtil::PointArrangement vtkCreateClosedSurfaceUtil::ComputePointArrangement(const double sortedExtentRanges[3])
+vtkSlicerMarkupsToModelClosedSurfaceGeneration::PointArrangement vtkSlicerMarkupsToModelClosedSurfaceGeneration::ComputePointArrangement(const double sortedExtentRanges[3])
 {
   if (sortedExtentRanges == NULL)
   {
@@ -333,7 +333,7 @@ vtkCreateClosedSurfaceUtil::PointArrangement vtkCreateClosedSurfaceUtil::Compute
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateClosedSurfaceUtil::ComputeTransformedExtentRanges(vtkPoints* points, vtkMatrix4x4* transformMatrix, double outputExtentRanges[3])
+void vtkSlicerMarkupsToModelClosedSurfaceGeneration::ComputeTransformedExtentRanges(vtkPoints* points, vtkMatrix4x4* transformMatrix, double outputExtentRanges[3])
 {
   if (points == NULL)
   {
@@ -381,7 +381,7 @@ void vtkCreateClosedSurfaceUtil::ComputeTransformedExtentRanges(vtkPoints* point
 }
 
 //------------------------------------------------------------------------------
-double vtkCreateClosedSurfaceUtil::ComputeSurfaceExtrusionAmount(const double extents[3])
+double vtkSlicerMarkupsToModelClosedSurfaceGeneration::ComputeSurfaceExtrusionAmount(const double extents[3])
 {
   // MINIMUM_SURFACE_EXTRUSION_AMOUNT is the value returned by default, and the final result cannot be less than this.
   const double MINIMUM_SURFACE_EXTRUSION_AMOUNT = 0.01;
@@ -406,7 +406,7 @@ double vtkCreateClosedSurfaceUtil::ComputeSurfaceExtrusionAmount(const double ex
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateClosedSurfaceUtil::SetNthColumnInMatrix(vtkMatrix4x4* matrix, int n, const double axis[3])
+void vtkSlicerMarkupsToModelClosedSurfaceGeneration::SetNthColumnInMatrix(vtkMatrix4x4* matrix, int n, const double axis[3])
 {
   if (matrix == NULL)
   {
@@ -432,7 +432,7 @@ void vtkCreateClosedSurfaceUtil::SetNthColumnInMatrix(vtkMatrix4x4* matrix, int 
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateClosedSurfaceUtil::GetNthColumnInMatrix(vtkMatrix4x4* matrix, int n, double outputAxis[3])
+void vtkSlicerMarkupsToModelClosedSurfaceGeneration::GetNthColumnInMatrix(vtkMatrix4x4* matrix, int n, double outputAxis[3])
 {
   if (matrix == NULL)
   {
@@ -458,7 +458,7 @@ void vtkCreateClosedSurfaceUtil::GetNthColumnInMatrix(vtkMatrix4x4* matrix, int 
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateClosedSurfaceUtil::PrintSelf( ostream &os, vtkIndent indent )
+void vtkSlicerMarkupsToModelClosedSurfaceGeneration::PrintSelf( ostream &os, vtkIndent indent )
 {
   Superclass::PrintSelf( os, indent );
 }

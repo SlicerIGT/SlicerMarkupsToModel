@@ -1,4 +1,4 @@
-#include "vtkCreateCurveUtil.h"
+#include "vtkSlicerMarkupsToModelCurveGeneration.h"
 
 // slicer includes
 #include "vtkMRMLMarkupsFiducialNode.h"
@@ -19,31 +19,31 @@ static const int NUMBER_OF_LINE_POINTS_MIN = 2;
 
 //------------------------------------------------------------------------------
 // constant default values defined here due to VS2013 compile issue C2864
-const bool vtkCreateCurveUtil::TUBE_LOOP_DEFAULT = false;
-const double vtkCreateCurveUtil::TUBE_RADIUS_DEFAULT = 1.0;
-const int vtkCreateCurveUtil::TUBE_NUMBER_OF_SIDES_DEFAULT = 8;
-const int vtkCreateCurveUtil::TUBE_SEGMENTS_BETWEEN_CONTROL_POINTS_DEFAULT = 5;
-const int vtkCreateCurveUtil::POLYNOMIAL_ORDER_DEFAULT = 3;
-const double vtkCreateCurveUtil::KOCHANEK_BIAS_DEFAULT = 0.0;
-const double vtkCreateCurveUtil::KOCHANEK_CONTINUITY_DEFAULT = 0.0;
-const double vtkCreateCurveUtil::KOCHANEK_TENSION_DEFAULT = 0.0;
-const double vtkCreateCurveUtil::KOCHANEK_ENDS_COPY_NEAREST_DERIVATIVE_DEFAULT = 0.0;
+const bool vtkSlicerMarkupsToModelCurveGeneration::TUBE_LOOP_DEFAULT = false;
+const double vtkSlicerMarkupsToModelCurveGeneration::TUBE_RADIUS_DEFAULT = 1.0;
+const int vtkSlicerMarkupsToModelCurveGeneration::TUBE_NUMBER_OF_SIDES_DEFAULT = 8;
+const int vtkSlicerMarkupsToModelCurveGeneration::TUBE_SEGMENTS_BETWEEN_CONTROL_POINTS_DEFAULT = 5;
+const int vtkSlicerMarkupsToModelCurveGeneration::POLYNOMIAL_ORDER_DEFAULT = 3;
+const double vtkSlicerMarkupsToModelCurveGeneration::KOCHANEK_BIAS_DEFAULT = 0.0;
+const double vtkSlicerMarkupsToModelCurveGeneration::KOCHANEK_CONTINUITY_DEFAULT = 0.0;
+const double vtkSlicerMarkupsToModelCurveGeneration::KOCHANEK_TENSION_DEFAULT = 0.0;
+const double vtkSlicerMarkupsToModelCurveGeneration::KOCHANEK_ENDS_COPY_NEAREST_DERIVATIVE_DEFAULT = 0.0;
 
 //------------------------------------------------------------------------------
-vtkStandardNewMacro( vtkCreateCurveUtil );
+vtkStandardNewMacro( vtkSlicerMarkupsToModelCurveGeneration );
 
 //------------------------------------------------------------------------------
-vtkCreateCurveUtil::vtkCreateCurveUtil()
+vtkSlicerMarkupsToModelCurveGeneration::vtkSlicerMarkupsToModelCurveGeneration()
 {
 }
 
 //------------------------------------------------------------------------------
-vtkCreateCurveUtil::~vtkCreateCurveUtil()
+vtkSlicerMarkupsToModelCurveGeneration::~vtkSlicerMarkupsToModelCurveGeneration()
 {
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::AllocateCurvePoints(vtkPoints* controlPoints, vtkPoints* outputPoints, int tubeSegmentsBetweenControlPoints, bool tubeLoop)
+void vtkSlicerMarkupsToModelCurveGeneration::AllocateCurvePoints(vtkPoints* controlPoints, vtkPoints* outputPoints, int tubeSegmentsBetweenControlPoints, bool tubeLoop)
 {
   // Number of points is different depending on whether the curve is a loop
   int numberControlPoints = controlPoints->GetNumberOfPoints();
@@ -59,7 +59,7 @@ void vtkCreateCurveUtil::AllocateCurvePoints(vtkPoints* controlPoints, vtkPoints
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::CloseLoop(vtkPoints* outputPoints)
+void vtkSlicerMarkupsToModelCurveGeneration::CloseLoop(vtkPoints* outputPoints)
 {
   // If looped, move the first point and add an *extra* point. This is 
   // needed in order for the curve to be continuous, otherwise the tube ends won't 
@@ -78,7 +78,7 @@ void vtkCreateCurveUtil::CloseLoop(vtkPoints* outputPoints)
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::SetCardinalSplineParameters(vtkPoints* controlPoints, vtkCardinalSpline* splineX, vtkCardinalSpline* splineY, vtkCardinalSpline* splineZ, bool tubeLoop)
+void vtkSlicerMarkupsToModelCurveGeneration::SetCardinalSplineParameters(vtkPoints* controlPoints, vtkCardinalSpline* splineX, vtkCardinalSpline* splineY, vtkCardinalSpline* splineZ, bool tubeLoop)
 {
   if (tubeLoop)
   {
@@ -98,7 +98,7 @@ void vtkCreateCurveUtil::SetCardinalSplineParameters(vtkPoints* controlPoints, v
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::SetKochanekSplineParameters(vtkPoints* controlPoints, vtkKochanekSpline* splineX, vtkKochanekSpline* splineY, vtkKochanekSpline* splineZ, bool tubeLoop,
+void vtkSlicerMarkupsToModelCurveGeneration::SetKochanekSplineParameters(vtkPoints* controlPoints, vtkKochanekSpline* splineX, vtkKochanekSpline* splineY, vtkKochanekSpline* splineZ, bool tubeLoop,
   double kochanekBias, double kochanekContinuity, double kochanekTension, bool kochanekEndsCopyNearestDerivatives)
 {
   if (tubeLoop)
@@ -170,7 +170,7 @@ void vtkCreateCurveUtil::SetKochanekSplineParameters(vtkPoints* controlPoints, v
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::GetTubePolyDataFromPoints(vtkPoints* pointsToConnect, vtkPolyData* outputTube, double tubeRadius, int tubeNumberOfSides)
+void vtkSlicerMarkupsToModelCurveGeneration::GetTubePolyDataFromPoints(vtkPoints* pointsToConnect, vtkPolyData* outputTube, double tubeRadius, int tubeNumberOfSides)
 {
   if ( pointsToConnect == NULL )
   {
@@ -210,7 +210,7 @@ void vtkCreateCurveUtil::GetTubePolyDataFromPoints(vtkPoints* pointsToConnect, v
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::GenerateLinearCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
+void vtkSlicerMarkupsToModelCurveGeneration::GenerateLinearCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
   double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints, bool tubeLoop)
 {
   if (controlPoints == NULL)
@@ -234,7 +234,7 @@ void vtkCreateCurveUtil::GenerateLinearCurveModel(vtkPoints* controlPoints, vtkP
   }
 
   vtkSmartPointer< vtkPoints > curvePoints = vtkSmartPointer< vtkPoints >::New();
-  vtkCreateCurveUtil::AllocateCurvePoints(controlPoints, curvePoints, tubeSegmentsBetweenControlPoints, tubeLoop);
+  vtkSlicerMarkupsToModelCurveGeneration::AllocateCurvePoints(controlPoints, curvePoints, tubeSegmentsBetweenControlPoints, tubeLoop);
 
   // Iterate over the segments to interpolate, add all the "in-between" points
   int numberSegmentsToInterpolate;
@@ -284,14 +284,14 @@ void vtkCreateCurveUtil::GenerateLinearCurveModel(vtkPoints* controlPoints, vtkP
   // the last part of the curve depends on whether it is a loop or not
   if (tubeLoop)
   {
-    vtkCreateCurveUtil::CloseLoop(curvePoints);
+    vtkSlicerMarkupsToModelCurveGeneration::CloseLoop(curvePoints);
   }
 
-  vtkCreateCurveUtil::GetTubePolyDataFromPoints(curvePoints, outputTubePolyData, tubeRadius, tubeNumberOfSides);
+  vtkSlicerMarkupsToModelCurveGeneration::GetTubePolyDataFromPoints(curvePoints, outputTubePolyData, tubeRadius, tubeNumberOfSides);
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::GenerateCardinalCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
+void vtkSlicerMarkupsToModelCurveGeneration::GenerateCardinalCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
   double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints, bool tubeLoop)
 {
   if (controlPoints == NULL)
@@ -318,7 +318,7 @@ void vtkCreateCurveUtil::GenerateCardinalCurveModel(vtkPoints* controlPoints, vt
   if (numberControlPoints == NUMBER_OF_LINE_POINTS_MIN)
   {
     vtkGenericWarningMacro("Only " << NUMBER_OF_LINE_POINTS_MIN << " provided. Fitting line.");
-    vtkCreateCurveUtil::GenerateLinearCurveModel(controlPoints, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
+    vtkSlicerMarkupsToModelCurveGeneration::GenerateLinearCurveModel(controlPoints, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
     return;
   }
 
@@ -326,10 +326,10 @@ void vtkCreateCurveUtil::GenerateCardinalCurveModel(vtkPoints* controlPoints, vt
   vtkSmartPointer< vtkCardinalSpline > splineX = vtkSmartPointer< vtkCardinalSpline >::New();
   vtkSmartPointer< vtkCardinalSpline > splineY = vtkSmartPointer< vtkCardinalSpline >::New();
   vtkSmartPointer< vtkCardinalSpline > splineZ = vtkSmartPointer< vtkCardinalSpline >::New();
-  vtkCreateCurveUtil::SetCardinalSplineParameters(controlPoints, splineX, splineY, splineZ, tubeLoop);
+  vtkSlicerMarkupsToModelCurveGeneration::SetCardinalSplineParameters(controlPoints, splineX, splineY, splineZ, tubeLoop);
 
   vtkSmartPointer< vtkPoints > curvePoints = vtkSmartPointer< vtkPoints >::New();
-  vtkCreateCurveUtil::AllocateCurvePoints(controlPoints, curvePoints, tubeSegmentsBetweenControlPoints, tubeLoop);
+  vtkSlicerMarkupsToModelCurveGeneration::AllocateCurvePoints(controlPoints, curvePoints, tubeSegmentsBetweenControlPoints, tubeLoop);
 
   // Iterate over the segments to interpolate, add all the "in-between" points
   int numberSegmentsToInterpolate;
@@ -369,14 +369,14 @@ void vtkCreateCurveUtil::GenerateCardinalCurveModel(vtkPoints* controlPoints, vt
   // the last part of the curve depends on whether it is a loop or not
   if (tubeLoop)
   {
-    vtkCreateCurveUtil::CloseLoop(curvePoints);
+    vtkSlicerMarkupsToModelCurveGeneration::CloseLoop(curvePoints);
   }
 
-  vtkCreateCurveUtil::GetTubePolyDataFromPoints(curvePoints, outputTubePolyData, tubeRadius, tubeNumberOfSides);
+  vtkSlicerMarkupsToModelCurveGeneration::GetTubePolyDataFromPoints(curvePoints, outputTubePolyData, tubeRadius, tubeNumberOfSides);
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::GenerateKochanekCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
+void vtkSlicerMarkupsToModelCurveGeneration::GenerateKochanekCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
   double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints, bool tubeLoop,
   double kochanekBias, double kochanekContinuity, double kochanekTension, bool kochanekEndsCopyNearestDerivatives)
 {
@@ -412,11 +412,11 @@ void vtkCreateCurveUtil::GenerateKochanekCurveModel(vtkPoints* controlPoints, vt
   vtkSmartPointer< vtkKochanekSpline > splineX = vtkSmartPointer< vtkKochanekSpline >::New();
   vtkSmartPointer< vtkKochanekSpline > splineY = vtkSmartPointer< vtkKochanekSpline >::New();
   vtkSmartPointer< vtkKochanekSpline > splineZ = vtkSmartPointer< vtkKochanekSpline >::New();
-  vtkCreateCurveUtil::SetKochanekSplineParameters(controlPoints, splineX, splineY, splineZ, tubeLoop,
+  vtkSlicerMarkupsToModelCurveGeneration::SetKochanekSplineParameters(controlPoints, splineX, splineY, splineZ, tubeLoop,
     kochanekBias, kochanekContinuity, kochanekTension, kochanekEndsCopyNearestDerivatives);
 
   vtkSmartPointer< vtkPoints > curvePoints = vtkSmartPointer< vtkPoints >::New();
-  vtkCreateCurveUtil::AllocateCurvePoints(controlPoints, curvePoints, tubeSegmentsBetweenControlPoints, tubeLoop);
+  vtkSlicerMarkupsToModelCurveGeneration::AllocateCurvePoints(controlPoints, curvePoints, tubeSegmentsBetweenControlPoints, tubeLoop);
 
   // Iterate over the segments to interpolate, add all the "in-between" points
   int numberSegmentsToInterpolate;
@@ -456,14 +456,14 @@ void vtkCreateCurveUtil::GenerateKochanekCurveModel(vtkPoints* controlPoints, vt
   // the last part of the curve depends on whether it is a loop or not
   if (tubeLoop)
   {
-    vtkCreateCurveUtil::CloseLoop(curvePoints);
+    vtkSlicerMarkupsToModelCurveGeneration::CloseLoop(curvePoints);
   }
 
-  vtkCreateCurveUtil::GetTubePolyDataFromPoints(curvePoints, outputTubePolyData, tubeRadius, tubeNumberOfSides);
+  vtkSlicerMarkupsToModelCurveGeneration::GetTubePolyDataFromPoints(curvePoints, outputTubePolyData, tubeRadius, tubeNumberOfSides);
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::GeneratePolynomialCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
+void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
   double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints, bool tubeLoop,
   int polynomialOrder, vtkDoubleArray* inputPointParameters)
 {
@@ -499,7 +499,7 @@ void vtkCreateCurveUtil::GeneratePolynomialCurveModel(vtkPoints* controlPoints, 
   if (controlPointParameters == NULL) // if not defined, create an array based on the raw indices
   {
     controlPointParameters = vtkSmartPointer<vtkDoubleArray>::New();
-    vtkCreateCurveUtil::ComputePointParametersRawIndices(controlPoints, controlPointParameters);
+    vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersRawIndices(controlPoints, controlPointParameters);
   }
   else if (controlPointParameters->GetNumberOfTuples() != numPoints) // check size of point parameters array for consistency
   {
@@ -638,7 +638,7 @@ void vtkCreateCurveUtil::GeneratePolynomialCurveModel(vtkPoints* controlPoints, 
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::ComputePointParametersRawIndices(vtkPoints* controlPoints, vtkDoubleArray* controlPointParameters)
+void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersRawIndices(vtkPoints* controlPoints, vtkDoubleArray* controlPointParameters)
 {
   if (controlPoints == NULL)
   {
@@ -676,7 +676,7 @@ void vtkCreateCurveUtil::ComputePointParametersRawIndices(vtkPoints* controlPoin
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::ComputePointParametersMinimumSpanningTree(vtkPoints * controlPoints, vtkDoubleArray* controlPointParameters)
+void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersMinimumSpanningTree(vtkPoints * controlPoints, vtkDoubleArray* controlPointParameters)
 {
   if (controlPoints == NULL)
   {
@@ -870,7 +870,7 @@ void vtkCreateCurveUtil::ComputePointParametersMinimumSpanningTree(vtkPoints * c
 }
 
 //------------------------------------------------------------------------------
-void vtkCreateCurveUtil::PrintSelf( ostream &os, vtkIndent indent )
+void vtkSlicerMarkupsToModelCurveGeneration::PrintSelf( ostream &os, vtkIndent indent )
 {
   Superclass::PrintSelf( os, indent );
 }

@@ -56,29 +56,46 @@ public:
   static vtkSlicerMarkupsToModelLogic *New();
   vtkTypeMacro(vtkSlicerMarkupsToModelLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
-
-  vtkSlicerMarkupsLogic* MarkupsLogic;
+  vtkSlicerMarkupsLogic* MarkupsLogic;  
+  void ProcessMRMLNodesEvents( vtkObject* caller, unsigned long event, void* callData );
 
   // Updates the mouse selection type to create markups or to navigate the scene.
   void UpdateSelectionNode( vtkMRMLMarkupsToModelNode* markupsToModelModuleNode );
 
   // Updates closed surface or curve output model from markups
   void UpdateOutputModel( vtkMRMLMarkupsToModelNode* moduleNode );
+  
+  // lower-level access to functionality for making a closed surface model
+  static bool UpdateClosedSurfaceModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
+      bool smoothing = true, bool forceConvex = false, double delaunayAlpha = 0.0, bool cleanMarkups = true );
 
-  void ProcessMRMLNodesEvents( vtkObject* caller, unsigned long event, void* callData );
+  static bool UpdateClosedSurfaceModel( vtkPoints* controlPoints, vtkPolyData* polyData,
+    bool smoothing = true, bool forceConvex = false, double delaunayAlpha = 0.0, bool cleanMarkups = true );
 
-  // DEPRECATED - Sets the input node to be processed
-  void SetMarkupsNode( vtkMRMLMarkupsFiducialNode* newMarkups, vtkMRMLMarkupsToModelNode* moduleNode );
-
-  // DEPRECATED
-  bool UpdateClosedSurfaceModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
-      bool smoothing = true, bool forceConvex = false, double delaunayAlpha = 0.0, bool cleanMarkups = true);
-
-  // DEPRECATED
-  bool UpdateOutputCurveModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
+  // lower-level access to functionality for making a curve model
+  static bool UpdateOutputCurveModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
       int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
       bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
       bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices );
+  
+  static bool UpdateOutputCurveModel( vtkPoints* controlPoints, vtkPolyData* polyData,
+      int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
+      bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
+      bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices,
+      bool kochanekEndsCopyNearestDerivative = false, double kochanekBias = 0.0,
+      double kochanekContinuity = 0.0, double kochanekTension = 0.0 );
+
+  // Get the points store in a vtkMRMLMarkupsFiducialNode
+  static void MarkupsToPoints( vtkMRMLMarkupsFiducialNode* markupsNode, vtkPoints* outputPoints );
+  
+  // Get the points store in a vtkMRMLModelNode
+  static void ModelToPoints( vtkMRMLModelNode* modelNode, vtkPoints* outputPoints );
+
+  // Remove duplicate points from a vtkPoints object
+  static void RemoveDuplicatePoints( vtkPoints* points );
+
+  // DEPRECATED - Sets the input node to be processed
+  void SetMarkupsNode( vtkMRMLMarkupsFiducialNode* newMarkups, vtkMRMLMarkupsToModelNode* moduleNode );
 
 protected:
   vtkSlicerMarkupsToModelLogic();
@@ -96,11 +113,9 @@ protected:
 
 private:
   vtkSlicerMarkupsToModelLogic(const vtkSlicerMarkupsToModelLogic&); // Not implemented
-  void operator=(const vtkSlicerMarkupsToModelLogic&); // Not implemented  
+  void operator=(const vtkSlicerMarkupsToModelLogic&); // Not implemented
 
-  // Create an output model based on the control points, and parameters in the markupsToModelModuleNode
-  void GenerateCurvePolyData( vtkMRMLMarkupsToModelNode* markupsToModelModuleNode, vtkPoints* controlPoints, vtkPolyData* outputPolyData );
-  void GenerateClosedSurfacePolyData( vtkMRMLMarkupsToModelNode* markupsToModelModuleNode, vtkPoints* controlPoints, vtkPolyData* outputPolyData );
+  static void AssignPolyDataToOutput( vtkMRMLMarkupsToModelNode* moduleNode, vtkPolyData* polyData );
 };
 
 #endif
