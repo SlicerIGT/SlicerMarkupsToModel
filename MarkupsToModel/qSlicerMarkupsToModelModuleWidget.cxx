@@ -37,7 +37,6 @@
 // module includes
 #include "vtkMRMLMarkupsToModelNode.h"
 #include "vtkSlicerMarkupsToModelLogic.h"
-#include "vtkCreateCurveUtil.h"
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate

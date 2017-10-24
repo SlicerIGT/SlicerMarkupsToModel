@@ -1,5 +1,5 @@
-#ifndef __vtkCreateClosedSurfaceUtil_h
-#define __vtkCreateClosedSurfaceUtil_h
+#ifndef __vtkSlicerMarkupsToModelClosedSurfaceGeneration_h
+#define __vtkSlicerMarkupsToModelClosedSurfaceGeneration_h
 
 #include "vtkMRMLMarkupsToModelNode.h"
 
@@ -10,13 +10,13 @@
 
 #include "vtkSlicerMarkupsToModelModuleLogicExport.h"
 
-class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCreateClosedSurfaceUtil : public vtkObject
+class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkSlicerMarkupsToModelClosedSurfaceGeneration : public vtkObject
 {
   public:
     // standard vtk object methods
-    vtkTypeMacro( vtkCreateClosedSurfaceUtil, vtkObject );
+    vtkTypeMacro( vtkSlicerMarkupsToModelClosedSurfaceGeneration, vtkObject );
     void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
-    static vtkCreateClosedSurfaceUtil *New();
+    static vtkSlicerMarkupsToModelClosedSurfaceGeneration *New();
 
     enum PointArrangement
     {
@@ -31,8 +31,8 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCreateClosedSurfaceUtil :
     static bool GenerateClosedSurfaceModel( vtkPoints* points, vtkPolyData* outputPolyData, double delaunayAlpha, bool smoothing, bool forceConvex );
 
   protected:
-    vtkCreateClosedSurfaceUtil();
-    ~vtkCreateClosedSurfaceUtil();
+    vtkSlicerMarkupsToModelClosedSurfaceGeneration();
+    ~vtkSlicerMarkupsToModelClosedSurfaceGeneration();
 
   private:
     // Compute the best fit plane through the points, as well as the major and minor axes which describe variation in points.
@@ -54,8 +54,8 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCreateClosedSurfaceUtil :
     static void GetNthColumnInMatrix( vtkMatrix4x4* matrix, int n, double outputAxis[ 3 ] );
 
     // not used
-    vtkCreateClosedSurfaceUtil ( const vtkCreateClosedSurfaceUtil& ) VTK_DELETE_FUNCTION;
-    void operator= ( const vtkCreateClosedSurfaceUtil& ) VTK_DELETE_FUNCTION;
+    vtkSlicerMarkupsToModelClosedSurfaceGeneration ( const vtkSlicerMarkupsToModelClosedSurfaceGeneration& ) VTK_DELETE_FUNCTION;
+    void operator= ( const vtkSlicerMarkupsToModelClosedSurfaceGeneration& ) VTK_DELETE_FUNCTION;
 };
 
 #endif
