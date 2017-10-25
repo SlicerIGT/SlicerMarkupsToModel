@@ -399,17 +399,17 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
     // Generates a polynomial curve model.
     case vtkMRMLMarkupsToModelNode::Linear:
     {
-      vtkSlicerMarkupsToModelCurveGeneration::GenerateLinearCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop );
+      vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop );
       break;
     }
     case vtkMRMLMarkupsToModelNode::CardinalSpline:
     {
-      vtkSlicerMarkupsToModelCurveGeneration::GenerateCardinalCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop );
+      vtkSlicerMarkupsToModelCurveGeneration::GenerateCardinalSplineCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop );
       break;
     }
     case vtkMRMLMarkupsToModelNode::KochanekSpline:
     {
-      vtkSlicerMarkupsToModelCurveGeneration::GenerateKochanekCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop, kochanekBias, kochanekContinuity, kochanekTension, kochanekEndsCopyNearestDerivatives );
+      vtkSlicerMarkupsToModelCurveGeneration::GenerateKochanekSplineCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop, kochanekBias, kochanekContinuity, kochanekTension, kochanekEndsCopyNearestDerivatives );
       break;
     }
     case vtkMRMLMarkupsToModelNode::Polynomial:
@@ -419,12 +419,12 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
       {
         case vtkMRMLMarkupsToModelNode::RawIndices:
         {
-          vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersRawIndices( controlPoints, controlPointParameters );
+          vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersFromIndices( controlPoints, controlPointParameters );
           break;
         }
         case vtkMRMLMarkupsToModelNode::MinimumSpanningTree:
         {
-          vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersMinimumSpanningTree( controlPoints, controlPointParameters );
+          vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersFromMinimumSpanningTree( controlPoints, controlPointParameters );
           break;
         }
         default:

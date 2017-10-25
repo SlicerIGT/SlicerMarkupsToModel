@@ -210,7 +210,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GetTubePolyDataFromPoints(vtkPoints
 }
 
 //------------------------------------------------------------------------------
-void vtkSlicerMarkupsToModelCurveGeneration::GenerateLinearCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
+void vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
   double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints, bool tubeLoop)
 {
   if (controlPoints == NULL)
@@ -291,7 +291,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GenerateLinearCurveModel(vtkPoints*
 }
 
 //------------------------------------------------------------------------------
-void vtkSlicerMarkupsToModelCurveGeneration::GenerateCardinalCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
+void vtkSlicerMarkupsToModelCurveGeneration::GenerateCardinalSplineCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
   double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints, bool tubeLoop)
 {
   if (controlPoints == NULL)
@@ -318,7 +318,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GenerateCardinalCurveModel(vtkPoint
   if (numberControlPoints == NUMBER_OF_LINE_POINTS_MIN)
   {
     vtkGenericWarningMacro("Only " << NUMBER_OF_LINE_POINTS_MIN << " provided. Fitting line.");
-    vtkSlicerMarkupsToModelCurveGeneration::GenerateLinearCurveModel(controlPoints, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
+    vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel(controlPoints, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
     return;
   }
 
@@ -376,7 +376,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GenerateCardinalCurveModel(vtkPoint
 }
 
 //------------------------------------------------------------------------------
-void vtkSlicerMarkupsToModelCurveGeneration::GenerateKochanekCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
+void vtkSlicerMarkupsToModelCurveGeneration::GenerateKochanekSplineCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
   double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints, bool tubeLoop,
   double kochanekBias, double kochanekContinuity, double kochanekTension, bool kochanekEndsCopyNearestDerivatives)
 {
@@ -404,7 +404,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GenerateKochanekCurveModel(vtkPoint
   if (numberControlPoints == NUMBER_OF_LINE_POINTS_MIN)
   {
     vtkGenericWarningMacro("Only " << NUMBER_OF_LINE_POINTS_MIN << " provided. Fitting line.");
-    GenerateLinearCurveModel(controlPoints, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
+    GeneratePiecewiseLinearCurveModel(controlPoints, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
     return;
   }
 
@@ -463,13 +463,13 @@ void vtkSlicerMarkupsToModelCurveGeneration::GenerateKochanekCurveModel(vtkPoint
 }
 
 //------------------------------------------------------------------------------
-void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
+void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoints* points, vtkPolyData* outputTubePolyData,
   double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints, bool tubeLoop,
   int polynomialOrder, vtkDoubleArray* inputPointParameters)
 {
-  if (controlPoints == NULL)
+  if (points == NULL)
   {
-    vtkGenericWarningMacro("Control points are null. No model generated.");
+    vtkGenericWarningMacro("Input points are null. No model generated.");
     return;
   }
 
@@ -479,7 +479,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
     return;
   }
 
-  int numPoints = controlPoints->GetNumberOfPoints();
+  int numPoints = points->GetNumberOfPoints();
   // redundant error checking, to be safe
   if (numPoints < NUMBER_OF_LINE_POINTS_MIN)
   {
@@ -491,19 +491,19 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
   if (numPoints == NUMBER_OF_LINE_POINTS_MIN)
   {
     vtkGenericWarningMacro("Only " << NUMBER_OF_LINE_POINTS_MIN << " provided. Fitting line.");
-    GenerateLinearCurveModel(controlPoints, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
+    GeneratePiecewiseLinearCurveModel(points, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
     return;
   }
 
-  vtkSmartPointer<vtkDoubleArray> controlPointParameters = vtkDoubleArray::SafeDownCast(inputPointParameters);
-  if (controlPointParameters == NULL) // if not defined, create an array based on the raw indices
+  vtkSmartPointer<vtkDoubleArray> pointParameters = vtkDoubleArray::SafeDownCast(inputPointParameters);
+  if (pointParameters == NULL) // if not defined, create an array based on the raw indices
   {
-    controlPointParameters = vtkSmartPointer<vtkDoubleArray>::New();
-    vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersRawIndices(controlPoints, controlPointParameters);
+    pointParameters = vtkSmartPointer<vtkDoubleArray>::New();
+    vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersFromIndices(points, pointParameters);
   }
-  else if (controlPointParameters->GetNumberOfTuples() != numPoints) // check size of point parameters array for consistency
+  else if (pointParameters->GetNumberOfTuples() != numPoints) // check size of point parameters array for consistency
   {
-    vtkGenericWarningMacro("Incorrect number of point parameters provided. Should have " << numPoints << " parameters (one for each point), but " << controlPointParameters->GetNumberOfTuples() << " are provided. No output created.");
+    vtkGenericWarningMacro("Incorrect number of point parameters provided. Should have " << numPoints << " parameters (one for each point), but " << pointParameters->GetNumberOfTuples() << " are provided. No output created.");
     return; // this should not happen at all, so best course of action is to simply return and let the user handle this situation appropriately
   }
 
@@ -534,7 +534,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
   // special case, if polynomial is underdetermined, change the order of the polynomial
   std::set<double> uniquePointParameters;
   for (int i = 0; i < numPoints; i++)
-    uniquePointParameters.insert(controlPointParameters->GetValue(i));
+    uniquePointParameters.insert(pointParameters->GetValue(i));
   int numUniquePointParameters = uniquePointParameters.size();
   if (numUniquePointParameters < numPolynomialCoefficients)
   {
@@ -552,7 +552,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
   {
     for (int p = 0; p < numPoints; p++) // p = point index
     {
-      double value = std::pow(controlPointParameters->GetValue(p), c);
+      double value = std::pow(pointParameters->GetValue(p), c);
       independentValues[p * numPolynomialCoefficients + c] = value;
     }
   }
@@ -571,7 +571,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
   dependentValues.assign(numDependentValues, 0.0);
   for (int p = 0; p < numPoints; p++) // p = point index
   {
-    double* currentPoint = controlPoints->GetPoint(p);
+    double* currentPoint = points->GetPoint(p);
     for (int d = 0; d < numDimensions; d++) // d = dimension index
     {
       double value = currentPoint[d];
@@ -638,21 +638,21 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
 }
 
 //------------------------------------------------------------------------------
-void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersRawIndices(vtkPoints* controlPoints, vtkDoubleArray* controlPointParameters)
+void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersFromIndices(vtkPoints* points, vtkDoubleArray* pointParameters)
 {
-  if (controlPoints == NULL)
+  if (points == NULL)
   {
     vtkGenericWarningMacro("Input control points are null. Returning.");
     return;
   }
   
-  if (controlPointParameters == NULL)
+  if (pointParameters == NULL)
   {
     vtkGenericWarningMacro("Output control point parameters are null. Returning.");
     return;
   }
 
-  int numPoints = controlPoints->GetNumberOfPoints();
+  int numPoints = points->GetNumberOfPoints();
   // redundant error checking, to be safe
   if (numPoints < NUMBER_OF_LINE_POINTS_MIN)
   {
@@ -660,37 +660,37 @@ void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersRawIndices(vt
     return;
   }
 
-  if (controlPointParameters->GetNumberOfTuples())
+  if (pointParameters->GetNumberOfTuples())
   {
     // this should never happen, but in case it does, output a warning
-    vtkGenericWarningMacro("controlPointParameters already has contents. Clearing.");
-    while (controlPointParameters->GetNumberOfTuples()) // clear contents just in case
-      controlPointParameters->RemoveLastTuple();
+    vtkGenericWarningMacro("pointParameters already has contents. Clearing.");
+    while (pointParameters->GetNumberOfTuples()) // clear contents just in case
+      pointParameters->RemoveLastTuple();
   }
 
   for (int v = 0; v < numPoints; v++)
   {
-    controlPointParameters->InsertNextTuple1(v / double(numPoints - 1));
+    pointParameters->InsertNextTuple1(v / double(numPoints - 1));
     // division to clamp all values to range 0.0 - 1.0
   }
 }
 
 //------------------------------------------------------------------------------
-void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersMinimumSpanningTree(vtkPoints * controlPoints, vtkDoubleArray* controlPointParameters)
+void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersFromMinimumSpanningTree(vtkPoints * points, vtkDoubleArray* pointParameters)
 {
-  if (controlPoints == NULL)
+  if (points == NULL)
   {
-    vtkGenericWarningMacro("Input control points are null. Returning");
+    vtkGenericWarningMacro("Input points are null. Returning");
     return;
   }
 
-  if (controlPointParameters == NULL)
+  if (pointParameters == NULL)
   {
-    vtkGenericWarningMacro("Output control point parameters are null. Returning");
+    vtkGenericWarningMacro("Output point parameters are null. Returning");
     return;
   }
 
-  int numPoints = controlPoints->GetNumberOfPoints();
+  int numPoints = points->GetNumberOfPoints();
   // redundant error checking, to be safe
   if (numPoints < NUMBER_OF_LINE_POINTS_MIN)
   {
@@ -720,8 +720,8 @@ void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersMinimumSpanni
     for (int u = 0; u < numPoints; u++)
     {
       double pointU[3], pointV[3];
-      controlPoints->GetPoint(u, pointU);
-      controlPoints->GetPoint(v, pointV);
+      points->GetPoint(u, pointU);
+      points->GetPoint(v, pointV);
       double distX = (pointU[0] - pointV[0]); double distXsq = distX * distX;
       double distY = (pointU[1] - pointV[1]); double distYsq = distY * distY;
       double distZ = (pointU[2] - pointV[2]); double distZsq = distZ * distZ;
@@ -830,12 +830,12 @@ void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersMinimumSpanni
   pathParameters.push_back(currentDistance / sumOfDistances); // this should be 1.0
 
   // finally assign polynomial parameters to each point, and store in the output array
-  if (controlPointParameters->GetNumberOfTuples() > 0)
+  if (pointParameters->GetNumberOfTuples() > 0)
   {
     // this should never happen, but in case it does, output a warning
-    vtkGenericWarningMacro("controlPointParameters already has contents. Clearing.");
-    while (controlPointParameters->GetNumberOfTuples()) // clear contents just in case
-      controlPointParameters->RemoveLastTuple();
+    vtkGenericWarningMacro("pointParameters already has contents. Clearing.");
+    while (pointParameters->GetNumberOfTuples()) // clear contents just in case
+      pointParameters->RemoveLastTuple();
   }
 
   for (int i = 0; i < numPoints; i++)
@@ -865,7 +865,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersMinimumSpanni
         }
       }
     }
-    controlPointParameters->InsertNextTuple1(pathParameters[indexAlongPath]);
+    pointParameters->InsertNextTuple1(pathParameters[indexAlongPath]);
   }
 }
 
