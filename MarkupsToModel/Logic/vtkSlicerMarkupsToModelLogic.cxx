@@ -433,7 +433,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
           return false;
         }
       }
-      vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop, polynomialOrder );
+      vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop, polynomialOrder, controlPointParameters );
       break;
     }
     default:
