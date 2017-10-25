@@ -34,22 +34,44 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkSlicerMarkupsToModelCurve
     // note: each default value below needs to be preceded explicitly with "vtkSlicerMarkupsToModelCurveGeneration::"
     //       otherwise python wrapping breaks...
 
-    // Generates the linear curve model connecting linear tubes from each markup.
-    static void GenerateLinearCurveModel( vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
+    // Generates the piecewise linear curve model connecting linear tubes from each markup.
+    //   controlPoints - the curve will pass through each point defined here.
+    //   outputTubePolyData - the curve will be stored as a tube mesh in this poly data.
+    //   tubeRadius - the radius of the tube in outputTubePolyData.
+    //   tubeNumberOfSides - The number of sides of the tube in outputTubePolyData (higher = smoother).
+    //   tubeSegmentsBetweenControlPoints - The number of points sampled between each control point (higher = smoother).
+    //   tubeLoop - Indicates whether the tube will loop back to the first point or not in outputTubePolyData.
+    static void GeneratePiecewiseLinearCurveModel( vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
       double tubeRadius=vtkSlicerMarkupsToModelCurveGeneration::TUBE_RADIUS_DEFAULT,
       int tubeNumberOfSides=vtkSlicerMarkupsToModelCurveGeneration::TUBE_NUMBER_OF_SIDES_DEFAULT,
       int tubeSegmentsBetweenControlPoints=vtkSlicerMarkupsToModelCurveGeneration::TUBE_SEGMENTS_BETWEEN_CONTROL_POINTS_DEFAULT,
       bool tubeLoop=vtkSlicerMarkupsToModelCurveGeneration::TUBE_LOOP_DEFAULT );
 
     // Generates Cardinal Spline curve model.
-    static void GenerateCardinalCurveModel( vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
+    //   controlPoints - the curve will pass through each point defined here.
+    //   outputTubePolyData - the curve will be stored as a tube mesh in this poly data.
+    //   tubeRadius - the radius of the tube in outputTubePolyData.
+    //   tubeNumberOfSides - The number of sides of the tube in outputTubePolyData (higher = smoother).
+    //   tubeSegmentsBetweenControlPoints - The number of points sampled between each control point (higher = smoother).
+    //   tubeLoop - Indicates whether the tube will loop back to the first point or not in outputTubePolyData.
+    static void GenerateCardinalSplineCurveModel( vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
       double tubeRadius=vtkSlicerMarkupsToModelCurveGeneration::TUBE_RADIUS_DEFAULT, 
       int tubeNumberOfSides=vtkSlicerMarkupsToModelCurveGeneration::TUBE_NUMBER_OF_SIDES_DEFAULT,
       int tubeSegmentsBetweenControlPoints=vtkSlicerMarkupsToModelCurveGeneration::TUBE_SEGMENTS_BETWEEN_CONTROL_POINTS_DEFAULT,
       bool tubeLoop=vtkSlicerMarkupsToModelCurveGeneration::TUBE_LOOP_DEFAULT );
 
     // Generates Kochanek Spline curve model.
-    static void GenerateKochanekCurveModel( vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
+    //   controlPoints - the curve will pass through each point defined here.
+    //   outputTubePolyData - the curve will be stored as a tube mesh in this poly data.
+    //   tubeRadius - the radius of the tube in outputTubePolyData.
+    //   tubeNumberOfSides - The number of sides of the tube in outputTubePolyData (higher = smoother).
+    //   tubeSegmentsBetweenControlPoints - The number of points sampled between each control point (higher = smoother).
+    //   tubeLoop - Indicates whether the tube will loop back to the first point or not in outputTubePolyData.
+    //   kochanekBias - Alters the bias parameter for the kochanek spline.
+    //   kochanekContinuity - Alters the bias parameter for the kochanek spline.
+    //   kochanekTension - Alters the bias parameter for the kochanek spline.
+    //   kochanekEndsCopyNearestDerivative - Copy the curvature on either end of the spline from the nearest point.
+    static void GenerateKochanekSplineCurveModel( vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
       double tubeRadius=vtkSlicerMarkupsToModelCurveGeneration::TUBE_RADIUS_DEFAULT,
       int tubeNumberOfSides=vtkSlicerMarkupsToModelCurveGeneration::TUBE_NUMBER_OF_SIDES_DEFAULT,
       int tubeSegmentsBetweenControlPoints=vtkSlicerMarkupsToModelCurveGeneration::TUBE_SEGMENTS_BETWEEN_CONTROL_POINTS_DEFAULT,
@@ -60,7 +82,17 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkSlicerMarkupsToModelCurve
       bool kochanekEndsCopyNearestDerivatives=vtkSlicerMarkupsToModelCurveGeneration::KOCHANEK_ENDS_COPY_NEAREST_DERIVATIVE_DEFAULT );
 
     // Generates a polynomial curve model.
-    static void GeneratePolynomialCurveModel( vtkPoints* controlPoints, vtkPolyData* outputPolyData,
+    //   controlPoints - the curve will be fit through these points.
+    //   outputTubePolyData - the curve will be stored as a tube mesh in this poly data.
+    //   tubeRadius - the radius of the tube in outputTubePolyData.
+    //   tubeNumberOfSides - The number of sides of the tube in outputTubePolyData (higher = smoother).
+    //   tubeSegmentsBetweenControlPoints - The number of points sampled between each control point (higher = smoother).
+    //   tubeLoop - Indicates whether the tube will loop back to the first point or not in outputTubePolyData.
+    //   polynomial - The order of polynomial to fit. Higher = fit the points better, but slower and risk of 'overfitting'
+    //   markupsPointsParameters - Indicate the parameter (independent) values for fitting each point. See also:
+    //     - ComputePointParametersFromIndices
+    //     - ComputePointParametersFromMinimumSpanningTree
+    static void GeneratePolynomialCurveModel( vtkPoints* points, vtkPolyData* outputPolyData,
       double tubeRadius=vtkSlicerMarkupsToModelCurveGeneration::TUBE_RADIUS_DEFAULT,
       int tubeNumberOfSides=vtkSlicerMarkupsToModelCurveGeneration::TUBE_NUMBER_OF_SIDES_DEFAULT,
       int tubeSegmentsBetweenControlPoints=vtkSlicerMarkupsToModelCurveGeneration::TUBE_SEGMENTS_BETWEEN_CONTROL_POINTS_DEFAULT,
@@ -69,10 +101,17 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkSlicerMarkupsToModelCurve
       vtkDoubleArray* markupsPointsParameters=NULL );
 
     // Assign parameter values to points based on their position in the markups list (good for ordered point sets)
-    static void ComputePointParametersRawIndices(vtkPoints* controlPoints, vtkDoubleArray* outputPointParameters);
+    // Either ComputePointParametersFromIndices or ComputePointParametersFromMinimumSpanningTree should be used
+    // before GeneratePolynomialCurve
+    static void ComputePointParametersFromIndices( vtkPoints* points, vtkDoubleArray* outputPointParameters );
 
-    // Assign parameter values to points based on their position in a minimum spanning tree between the two farthest points (good for unordered point sets)
-    static void ComputePointParametersMinimumSpanningTree(vtkPoints* controlPoints, vtkDoubleArray* outputPointParameters);
+    // Assign parameter values to points based on their position in a minimum spanning tree between the two
+    // farthest points (good for unordered point sets)
+    // Parameters are assigned based on the length along the MST path connecting the two farthest points.
+    // For points that branch off this path, the parameter will be copied from the branching point.
+    // Either ComputePointParametersFromIndices or ComputePointParametersFromMinimumSpanningTree should be used
+    // before GeneratePolynomialCurve
+    static void ComputePointParametersFromMinimumSpanningTree( vtkPoints* points, vtkDoubleArray* outputPointParameters );
 
   protected:
     vtkSlicerMarkupsToModelCurveGeneration();
