@@ -22,6 +22,7 @@
 //------------------------------------------------------------------------------
 // constants within this file
 static const double COMPARE_TO_ZERO_TOLERANCE = 0.0001;
+static const double MINIMUM_SURFACE_EXTRUSION_AMOUNT = 0.01; // if a surface is flat/linear, give it at least this much depth
 
 //------------------------------------------------------------------------------
 vtkStandardNewMacro( vtkSlicerMarkupsToModelClosedSurfaceGeneration );
@@ -92,7 +93,13 @@ bool vtkSlicerMarkupsToModelClosedSurfaceGeneration::GenerateClosedSurfaceModel(
     case POINT_ARRANGEMENT_SINGULAR:
     {
       vtkSmartPointer<vtkCubeSource> cubeSource = vtkSmartPointer<vtkCubeSource>::New();
-      double extrusionMagnitude = ComputeSurfaceExtrusionAmount(smallestBoundingExtentRanges); // need to give some depth
+      // there is only one point, we cannot compute extent or extrusion from this.
+      double extrusionMagnitude = MINIMUM_SURFACE_EXTRUSION_AMOUNT;
+      if ( numberOfPoints > 1 )
+      {
+        vtkGenericWarningMacro( "There is more than one input point, but they form a singularity. " <<
+                                "Giving depth of " << MINIMUM_SURFACE_EXTRUSION_AMOUNT << "." );
+      }
       cubeSource->SetBounds(-extrusionMagnitude, extrusionMagnitude,
         -extrusionMagnitude, extrusionMagnitude,
         -extrusionMagnitude, extrusionMagnitude);
@@ -384,7 +391,6 @@ void vtkSlicerMarkupsToModelClosedSurfaceGeneration::ComputeTransformedExtentRan
 double vtkSlicerMarkupsToModelClosedSurfaceGeneration::ComputeSurfaceExtrusionAmount(const double extents[3])
 {
   // MINIMUM_SURFACE_EXTRUSION_AMOUNT is the value returned by default, and the final result cannot be less than this.
-  const double MINIMUM_SURFACE_EXTRUSION_AMOUNT = 0.01;
   if (extents == NULL)
   {
     vtkGenericWarningMacro("extents is null. Returning MINIMUM_SURFACE_EXTRUSION_AMOUNT: " << MINIMUM_SURFACE_EXTRUSION_AMOUNT << ".");
