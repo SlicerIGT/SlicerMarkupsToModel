@@ -56,7 +56,7 @@ Closed surfaces are [convex models](https://en.wikipedia.org/wiki/Convex_hull) t
 # Curves
 
 ![CurveExample](https://raw.githubusercontent.com/tavaughan/SlicerMarkupsToModel/add-documentation/Screenshots/CurveExample.png)
-> Left: Example of a closed surface. Right: Example of how a closed surface might look in slice view.
+> Left: Example of a curve. Right: Example of how a curve might look in slice view.
 
 Curves are models shaped like a tube that either [interpolate](https://en.wikipedia.org/wiki/Spline_interpolation) the input points, or [approximate](https://en.wikipedia.org/wiki/Polynomial_regression) them in a best fit. There are in fact four types of curve in this module: Piecewise Linear, Cardinal Spline, Kochanek Spline, and Polynomial. All curves share the following parameters that can be seen on the **Advanced Panel**.
 
