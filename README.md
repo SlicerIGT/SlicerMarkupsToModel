@@ -1,11 +1,11 @@
-## Overview
+# Overview
 
 **Slicer Markups to Model** is an extension of [3D Slicer](https://www.slicer.org/) for creating 3D surface models. The user first specifies a series of input points (as fiducial markups), then the module creates a model from those points. Currently there are two types of surface models that can be created: closed surfaces and curves.
 
 ![Overview](https://raw.githubusercontent.com/tavaughan/SlicerMarkupsToModel/add-documentation/Screenshots/Overview.png?raw=true)
 > Example models created using SlicerMarkupsToModel. Left: Closed Surface. Right: Curves.
 
-###Main GUI Features
+# GUI Features
 
 ![GUI](https://raw.githubusercontent.com/tavaughan/SlicerMarkupsToModel/add-documentation/Screenshots/GUI.png)
 > The main GUI for this module
@@ -35,7 +35,7 @@ The **Display Panel** allows convenient access to change basic rendering propert
 
 - **Markups Text Scale**: Change the size of text beside each input markup fiducial.
 
-###Closed Surfaces
+# Closed Surfaces
 
 ![ClosedSurfaceExample](https://raw.githubusercontent.com/tavaughan/SlicerMarkupsToModel/add-documentation/Screenshots/ClosedSurfaceExample.png)
 > Left: Example of a closed surface. Right: Example of how a closed surface might look in slice view.
@@ -53,7 +53,7 @@ Closed surfaces are [convex models](https://en.wikipedia.org/wiki/Convex_hull) t
 
 - **Force Convex Output**: The model will become fully convex after all other operations. Used to correct self-intersections introduced by butterfly subdivision.
 
-###Curves
+# Curves
 
 ![CurveExample](https://raw.githubusercontent.com/tavaughan/SlicerMarkupsToModel/add-documentation/Screenshots/CurveExample.png)
 > Left: Example of a closed surface. Right: Example of how a closed surface might look in slice view.
