@@ -62,7 +62,6 @@ protected slots:
   void updateMRMLFromGUI();
 
   void updateGUIFromMRML();
-  void updateFromRenderedNodes();
 
   void blockAllSignals(bool block);
   void enableAllWidgets(bool enable);

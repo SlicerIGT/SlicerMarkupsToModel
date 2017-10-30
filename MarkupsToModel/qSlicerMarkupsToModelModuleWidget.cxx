@@ -198,7 +198,6 @@ void qSlicerMarkupsToModelModuleWidget::setMRMLScene(vtkMRMLScene* scene)
 //-----------------------------------------------------------------------------
 void qSlicerMarkupsToModelModuleWidget::onSceneImportedEvent()
 {
-  Q_D(qSlicerMarkupsToModelModuleWidget);
   this->updateGUIFromMRML();
 }
 
@@ -233,8 +232,6 @@ void qSlicerMarkupsToModelModuleWidget::onOutputModelComboBoxSelectionChanged( v
 //-----------------------------------------------------------------------------
 void qSlicerMarkupsToModelModuleWidget::onOutputModelComboBoxNodeAdded( vtkMRMLNode* addedNode )
 {
-  Q_D(qSlicerMarkupsToModelModuleWidget);
-
   vtkMRMLModelNode* modelNode = vtkMRMLModelNode::SafeDownCast(addedNode);
   if (modelNode == NULL)
   {
@@ -298,8 +295,6 @@ void qSlicerMarkupsToModelModuleWidget::onInputNodeComboBoxSelectionChanged( vtk
 //-----------------------------------------------------------------------------
 void qSlicerMarkupsToModelModuleWidget::onInputNodeComboBoxNodeAdded( vtkMRMLNode* addedNode )
 {
-  Q_D( qSlicerMarkupsToModelModuleWidget );
-
   vtkMRMLMarkupsNode* inputMarkupsNode = vtkMRMLMarkupsNode::SafeDownCast( addedNode );
   vtkMRMLModelNode* inputModelNode = vtkMRMLModelNode::SafeDownCast( addedNode );
   if ( inputMarkupsNode != NULL )
@@ -593,13 +588,6 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerMarkupsToModelModuleWidget::updateFromRenderedNodes()
-{
-  Q_D(qSlicerMarkupsToModelModuleWidget);
-
-}
-
-//-----------------------------------------------------------------------------
 void qSlicerMarkupsToModelModuleWidget::blockAllSignals(bool block)
 {
   Q_D(qSlicerMarkupsToModelModuleWidget);
@@ -693,8 +681,6 @@ vtkMRMLNode* qSlicerMarkupsToModelModuleWidget::GetInputNode()
   }
   return markupsToModelNode->GetInputNode();
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //------------------------------------------------------------------------------
 void qSlicerMarkupsToModelModuleWidget::onUpdateButtonClicked()
