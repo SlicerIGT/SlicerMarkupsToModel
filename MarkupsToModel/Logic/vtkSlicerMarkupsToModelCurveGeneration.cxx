@@ -318,7 +318,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GenerateCardinalSplineCurveModel(vt
   if (numberControlPoints == NUMBER_OF_LINE_POINTS_MIN)
   {
     vtkGenericWarningMacro("Only " << NUMBER_OF_LINE_POINTS_MIN << " provided. Fitting line.");
-    vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel(controlPoints, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
+    vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel(controlPoints, outputTubePolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop);
     return;
   }
 
@@ -404,7 +404,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GenerateKochanekSplineCurveModel(vt
   if (numberControlPoints == NUMBER_OF_LINE_POINTS_MIN)
   {
     vtkGenericWarningMacro("Only " << NUMBER_OF_LINE_POINTS_MIN << " provided. Fitting line.");
-    GeneratePiecewiseLinearCurveModel(controlPoints, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
+    GeneratePiecewiseLinearCurveModel(controlPoints, outputTubePolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop);
     return;
   }
 
@@ -491,7 +491,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
   if (numPoints == NUMBER_OF_LINE_POINTS_MIN)
   {
     vtkGenericWarningMacro("Only " << NUMBER_OF_LINE_POINTS_MIN << " provided. Fitting line.");
-    GeneratePiecewiseLinearCurveModel(points, outputTubePolyData, tubeSegmentsBetweenControlPoints, tubeLoop, tubeRadius, tubeNumberOfSides);
+    GeneratePiecewiseLinearCurveModel(points, outputTubePolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop );
     return;
   }
 
