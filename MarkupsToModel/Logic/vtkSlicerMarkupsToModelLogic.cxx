@@ -394,6 +394,25 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
     vtkSlicerMarkupsToModelLogic::RemoveDuplicatePoints( controlPoints );
   }
 
+  // check a few special cases before handling the different types of curve
+  if ( controlPoints->GetNumberOfPoints() <= 0 )
+  {
+    // don't need to do anything for 0 points
+    return true;
+  }
+
+  if ( controlPoints->GetNumberOfPoints() == 1 )
+  {
+    vtkSlicerMarkupsToModelCurveGeneration::GenerateSphereModel( controlPoints->GetPoint( 0 ), outputPolyData, tubeRadius, tubeNumberOfSides );
+    return true;
+  }
+  
+  if ( controlPoints->GetNumberOfPoints() == 2 )
+  {
+    vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop );
+    return true;
+  }
+
   switch ( interpolationType )
   {
     // Generates a polynomial curve model.

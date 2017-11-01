@@ -10,12 +10,9 @@
 #include <vtkNew.h>
 #include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
+#include <vtkSphereSource.h>
 #include <vtkSplineFilter.h>
 #include <vtkTubeFilter.h>
-
-//------------------------------------------------------------------------------
-// constant within this file
-static const int NUMBER_OF_LINE_POINTS_MIN = 2;
 
 //------------------------------------------------------------------------------
 // constant default values defined here due to VS2013 compile issue C2864
@@ -210,6 +207,32 @@ void vtkSlicerMarkupsToModelCurveGeneration::GetTubePolyDataFromPoints(vtkPoints
 }
 
 //------------------------------------------------------------------------------
+// note: point *must* contain three values
+void vtkSlicerMarkupsToModelCurveGeneration::GenerateSphereModel(double* point, vtkPolyData* outputSphere, double sphereRadius, int sphereNumberOfSides)
+{
+  if ( point == NULL )
+  {
+    vtkGenericWarningMacro("Input point for sphere generation is null. No model generated.");
+    return;
+  }
+
+  if ( outputSphere == NULL )
+  {
+    vtkGenericWarningMacro("Output sphere poly data is null. No model generated.");
+    return;
+  }
+
+  vtkSmartPointer< vtkSphereSource > sphereSource = vtkSmartPointer< vtkSphereSource >::New();
+  sphereSource->SetRadius( sphereRadius );
+  sphereSource->SetThetaResolution( sphereNumberOfSides );
+  sphereSource->SetPhiResolution( sphereNumberOfSides );
+  sphereSource->SetCenter( point );
+  sphereSource->Update();
+
+  outputSphere->DeepCopy( sphereSource->GetOutput() );
+}
+
+//------------------------------------------------------------------------------
 void vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel(vtkPoints* controlPoints, vtkPolyData* outputTubePolyData,
   double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints, bool tubeLoop)
 {
@@ -226,10 +249,17 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel(v
   }
 
   int numberControlPoints = controlPoints->GetNumberOfPoints();
-  // redundant error checking, to be safe
-  if (numberControlPoints < NUMBER_OF_LINE_POINTS_MIN)
+  
+  // special cases
+  if ( numberControlPoints <= 0 )
   {
-    // TODO: Sphere if there is one point?
+    // no way to make a model from 0 points
+    return;
+  }
+
+  if (numberControlPoints == 1)
+  {
+    vtkSlicerMarkupsToModelCurveGeneration::GenerateSphereModel( controlPoints->GetPoint( 0 ), outputTubePolyData, tubeRadius, tubeNumberOfSides );
     return;
   }
 
@@ -307,15 +337,21 @@ void vtkSlicerMarkupsToModelCurveGeneration::GenerateCardinalSplineCurveModel(vt
   }
 
   int numberControlPoints = controlPoints->GetNumberOfPoints();
-  // redundant error checking, to be safe
-  if (numberControlPoints < NUMBER_OF_LINE_POINTS_MIN)
+  
+  // special cases
+  if ( numberControlPoints <= 0 )
   {
-    // TODO: Sphere if there is one point?
+    // no way to make a model from 0 points
     return;
   }
 
-  // special case, fit a line. Spline fitting will not work with fewer than 3 points
-  if (numberControlPoints == NUMBER_OF_LINE_POINTS_MIN)
+  if (numberControlPoints == 1)
+  {
+    vtkSlicerMarkupsToModelCurveGeneration::GenerateSphereModel( controlPoints->GetPoint( 0 ), outputTubePolyData, tubeRadius, tubeNumberOfSides );
+    return;
+  }
+
+  if (numberControlPoints == 2)
   {
     vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel(controlPoints, outputTubePolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop);
     return;
@@ -392,15 +428,21 @@ void vtkSlicerMarkupsToModelCurveGeneration::GenerateKochanekSplineCurveModel(vt
   }
 
   int numberControlPoints = controlPoints->GetNumberOfPoints();
-  // redundant error checking, to be safe
-  if (numberControlPoints < NUMBER_OF_LINE_POINTS_MIN)
+  
+  // special cases
+  if ( numberControlPoints <= 0 )
   {
-    // TODO: Sphere if there is one point?
+    // no way to make a model from 0 points
     return;
   }
 
-  // special case, fit a line. Spline fitting will not work with fewer than 3 points
-  if (numberControlPoints == NUMBER_OF_LINE_POINTS_MIN)
+  if (numberControlPoints == 1)
+  {
+    vtkSlicerMarkupsToModelCurveGeneration::GenerateSphereModel( controlPoints->GetPoint( 0 ), outputTubePolyData, tubeRadius, tubeNumberOfSides );
+    return;
+  }
+
+  if (numberControlPoints == 2)
   {
     GeneratePiecewiseLinearCurveModel(controlPoints, outputTubePolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop);
     return;
@@ -478,15 +520,21 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
   }
 
   int numPoints = points->GetNumberOfPoints();
-  // redundant error checking, to be safe
-  if (numPoints < NUMBER_OF_LINE_POINTS_MIN)
+  
+  // special cases
+  if ( numPoints <= 0 )
   {
-    // TODO: Sphere if there is one point?
+    // no way to make a model from 0 points
     return;
   }
 
-  // special case, fit a line. The polynomial solver does not work with only 2 points.
-  if (numPoints == NUMBER_OF_LINE_POINTS_MIN)
+  if (numPoints == 1)
+  {
+    vtkSlicerMarkupsToModelCurveGeneration::GenerateSphereModel( points->GetPoint( 0 ), outputTubePolyData, tubeRadius, tubeNumberOfSides );
+    return;
+  }
+
+  if (numPoints == 2)
   {
     GeneratePiecewiseLinearCurveModel(points, outputTubePolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop );
     return;
@@ -649,9 +697,9 @@ void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersFromIndices(v
 
   int numPoints = points->GetNumberOfPoints();
   // redundant error checking, to be safe
-  if (numPoints < NUMBER_OF_LINE_POINTS_MIN)
+  if (numPoints < 2)
   {
-    vtkGenericWarningMacro("Not enough points to compute polynomial parameters. Need at least " << NUMBER_OF_LINE_POINTS_MIN << " points but " << numPoints << " are provided.");
+    vtkGenericWarningMacro("Not enough points to compute polynomial parameters. Need at least 2 points but " << numPoints << " are provided.");
     return;
   }
 
@@ -687,9 +735,9 @@ void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersFromMinimumSp
 
   int numPoints = points->GetNumberOfPoints();
   // redundant error checking, to be safe
-  if (numPoints < NUMBER_OF_LINE_POINTS_MIN)
+  if (numPoints < 2)
   {
-    vtkGenericWarningMacro("Not enough points to compute polynomial parameters. Need at least " << NUMBER_OF_LINE_POINTS_MIN << " points but " << numPoints << " are provided.");
+    vtkGenericWarningMacro("Not enough points to compute polynomial parameters. Need at least 2 points but " << numPoints << " are provided.");
     return;
   }
 

@@ -34,6 +34,15 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkSlicerMarkupsToModelCurve
     // note: each default value below needs to be preceded explicitly with "vtkSlicerMarkupsToModelCurveGeneration::"
     //       otherwise python wrapping breaks...
 
+    // Generate a sphere at the point specified. Special case to be called when only one point is input.
+    //   point - center of the sphere
+    //   outputTubePolyData - the sphere will be stored as a tube mesh in this poly data.
+    //   sphereRadius - the radius of the sphere in outputSphere.
+    //   sphereNumberOfSides - The phi and theta resolution for sphere tesselation (higher = smoother).
+    static void GenerateSphereModel( double point[3], vtkPolyData* outputSpherePolyData,
+      double sphereRadius=vtkSlicerMarkupsToModelCurveGeneration::TUBE_RADIUS_DEFAULT,
+      int sphereNumberOfSides=vtkSlicerMarkupsToModelCurveGeneration::TUBE_NUMBER_OF_SIDES_DEFAULT );
+
     // Generates the piecewise linear curve model connecting linear tubes from each markup.
     //   controlPoints - the curve will pass through each point defined here.
     //   outputTubePolyData - the curve will be stored as a tube mesh in this poly data.
