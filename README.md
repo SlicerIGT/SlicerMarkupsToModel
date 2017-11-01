@@ -6,10 +6,10 @@
 > Example models created using SlicerMarkupsToModel. Left: Closed Surface. Right: Curves.
 
 ![UseCaseClosedSurface](https://raw.githubusercontent.com/SlicerIGT/SlicerMarkupsToModel/master/Screenshots/UseCaseIntraopTumorSegmentation.PNG)
-> A tumor (in phantom) is segmented on ultrasound as a closed surface. [Link](http://imno.ca/sites/default/files/ImNO%202017%20Full%20Program.pdf) (See "Electromagnetically-generated catheter paths for breast brachytherapy")
+> A simulated tumor is segmented on live ultrasound as a closed surface. [Link](https://dx.doi.org/10.1109/TBME.2015.2466591)
 
 ![UseCaseCurve](https://raw.githubusercontent.com/SlicerIGT/SlicerMarkupsToModel/master/Screenshots/UseCaseCatheterReconstruction.PNG)
-> Curves are used to reconstruct catheter paths in a phantom. [Link](https://dx.doi.org/10.1109/TBME.2015.2466591)
+> Curves are used to reconstruct catheter paths in a phantom. [Link](http://imno.ca/sites/default/files/ImNO%202017%20Full%20Program.pdf) (See "Electromagnetically-generated catheter paths for breast brachytherapy")
 
 # GUI Features
 
