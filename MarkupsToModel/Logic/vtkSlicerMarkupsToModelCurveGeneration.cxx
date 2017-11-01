@@ -229,7 +229,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel(v
   // redundant error checking, to be safe
   if (numberControlPoints < NUMBER_OF_LINE_POINTS_MIN)
   {
-    vtkGenericWarningMacro("Not enough points to create an output spline model. Need at least " << NUMBER_OF_LINE_POINTS_MIN << " points but " << numberControlPoints << " are provided. No output created.");
+    // TODO: Sphere if there is one point?
     return;
   }
 
@@ -310,14 +310,13 @@ void vtkSlicerMarkupsToModelCurveGeneration::GenerateCardinalSplineCurveModel(vt
   // redundant error checking, to be safe
   if (numberControlPoints < NUMBER_OF_LINE_POINTS_MIN)
   {
-    vtkGenericWarningMacro("Not enough points to create an output spline model. Need at least " << NUMBER_OF_LINE_POINTS_MIN << " points but " << numberControlPoints << " are provided. No output created.");
+    // TODO: Sphere if there is one point?
     return;
   }
 
   // special case, fit a line. Spline fitting will not work with fewer than 3 points
   if (numberControlPoints == NUMBER_OF_LINE_POINTS_MIN)
   {
-    vtkGenericWarningMacro("Only " << NUMBER_OF_LINE_POINTS_MIN << " provided. Fitting line.");
     vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel(controlPoints, outputTubePolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop);
     return;
   }
@@ -396,14 +395,13 @@ void vtkSlicerMarkupsToModelCurveGeneration::GenerateKochanekSplineCurveModel(vt
   // redundant error checking, to be safe
   if (numberControlPoints < NUMBER_OF_LINE_POINTS_MIN)
   {
-    vtkGenericWarningMacro("Not enough points to create an output spline model. Need at least " << NUMBER_OF_LINE_POINTS_MIN << " points but " << numberControlPoints << " are provided. No output created.");
+    // TODO: Sphere if there is one point?
     return;
   }
 
   // special case, fit a line. Spline fitting will not work with fewer than 3 points
   if (numberControlPoints == NUMBER_OF_LINE_POINTS_MIN)
   {
-    vtkGenericWarningMacro("Only " << NUMBER_OF_LINE_POINTS_MIN << " provided. Fitting line.");
     GeneratePiecewiseLinearCurveModel(controlPoints, outputTubePolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop);
     return;
   }
@@ -483,14 +481,13 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
   // redundant error checking, to be safe
   if (numPoints < NUMBER_OF_LINE_POINTS_MIN)
   {
-    vtkGenericWarningMacro("Not enough points to compute a polynomial fit. Need at least " << NUMBER_OF_LINE_POINTS_MIN << " points but " << numPoints << " are provided. No output created.");
+    // TODO: Sphere if there is one point?
     return;
   }
 
   // special case, fit a line. The polynomial solver does not work with only 2 points.
   if (numPoints == NUMBER_OF_LINE_POINTS_MIN)
   {
-    vtkGenericWarningMacro("Only " << NUMBER_OF_LINE_POINTS_MIN << " provided. Fitting line.");
     GeneratePiecewiseLinearCurveModel(points, outputTubePolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop );
     return;
   }
@@ -538,9 +535,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
   int numUniquePointParameters = uniquePointParameters.size();
   if (numUniquePointParameters < numPolynomialCoefficients)
   {
-    vtkGenericWarningMacro("Not enough points to compute a polynomial fit. " << "For an order " << polynomialOrder << " polynomial, at least " << numPolynomialCoefficients << " points with unique parameters are needed. "
-      << numUniquePointParameters << " points with unique parameters were found. "
-      << "An order " << (numUniquePointParameters - 1) << " polynomial will be created instead.");
+    // must reduce the order of polynomial according to the amount of information is available
     numPolynomialCoefficients = numUniquePointParameters;
   }
 
@@ -815,7 +810,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersFromMinimumSp
   // check this to prevent a division by zero (in case all points are duplicates)
   if (sumOfDistances == 0)
   {
-    vtkGenericWarningMacro("Minimum spanning tree path has distance zero. No parameters will be assigned. Check inputs.");
+    vtkGenericWarningMacro("Minimum spanning tree path has distance zero. No parameters will be assigned. Check inputs (are there duplicate points?).");
     return;
   }
 
