@@ -156,7 +156,7 @@ public:
 
   void SetAndObserveInputNodeID( const char* inputNodeId );
   void SetAndObserveOutputModelNodeID( const char* outputModelNodeId );
-  void ProcessMRMLEvents( vtkObject *caller, unsigned long event, void *callData );
+  void ProcessMRMLEvents( vtkObject *caller, unsigned long event, void *callData ) VTK_OVERRIDE;
 
   vtkMRMLNode * GetInputNode( );
   vtkMRMLModelNode* GetOutputModelNode( );

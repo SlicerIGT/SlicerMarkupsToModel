@@ -15,9 +15,6 @@
 
 ==============================================================================*/
 
-// Qt includes
-#include <QtPlugin>
-
 // MarkupsToModel Logic includes
 #include <vtkSlicerMarkupsToModelLogic.h>
 
@@ -28,7 +25,10 @@
 #include "qSlicerModuleManager.h"
 
 //-----------------------------------------------------------------------------
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+#include <QtPlugin>
 Q_EXPORT_PLUGIN2(qSlicerMarkupsToModelModule, qSlicerMarkupsToModelModule);
+#endif
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_ExtensionTemplate
