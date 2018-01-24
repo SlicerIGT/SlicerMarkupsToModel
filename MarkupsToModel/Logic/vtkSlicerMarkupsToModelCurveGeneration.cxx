@@ -195,15 +195,20 @@ void vtkSlicerMarkupsToModelCurveGeneration::GetTubePolyDataFromPoints(vtkPoints
   linePolyData->SetPoints(pointsToConnect);
   linePolyData->SetLines(lineCellArray);
 
-  vtkSmartPointer< vtkTubeFilter> tubeSegmentFilter = vtkSmartPointer< vtkTubeFilter>::New();
-  tubeSegmentFilter->SetInputData(linePolyData);
-
-  tubeSegmentFilter->SetRadius(tubeRadius);
-  tubeSegmentFilter->SetNumberOfSides(tubeNumberOfSides);
-  tubeSegmentFilter->CappingOn();
-  tubeSegmentFilter->Update();
-
-  outputTube->DeepCopy(tubeSegmentFilter->GetOutput());
+  if (tubeRadius > 0.0)
+    {
+    vtkSmartPointer< vtkTubeFilter > tubeSegmentFilter = vtkSmartPointer< vtkTubeFilter >::New();
+    tubeSegmentFilter->SetInputData(linePolyData);
+    tubeSegmentFilter->SetRadius(tubeRadius);
+    tubeSegmentFilter->SetNumberOfSides(tubeNumberOfSides);
+    tubeSegmentFilter->CappingOn();
+    tubeSegmentFilter->Update();
+    outputTube->DeepCopy(tubeSegmentFilter->GetOutput());
+    }
+  else
+    {
+    outputTube->DeepCopy(linePolyData);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -670,14 +675,21 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
   smoothedSegments->SetPoints(smoothedPoints);
   smoothedSegments->SetLines(smoothedLines);
 
-  vtkSmartPointer< vtkTubeFilter> tubeFilter = vtkSmartPointer< vtkTubeFilter>::New();
-  tubeFilter->SetInputData(smoothedSegments);
-  tubeFilter->SetRadius(tubeRadius);
-  tubeFilter->SetNumberOfSides(tubeNumberOfSides);
-  tubeFilter->CappingOn();
-  tubeFilter->Update();
+  if (tubeRadius > 0.0)
+    {
+    vtkSmartPointer< vtkTubeFilter > tubeFilter = vtkSmartPointer< vtkTubeFilter >::New();
+    tubeFilter->SetInputData(smoothedSegments);
+    tubeFilter->SetRadius(tubeRadius);
+    tubeFilter->SetNumberOfSides(tubeNumberOfSides);
+    tubeFilter->CappingOn();
+    tubeFilter->Update();
+    outputTubePolyData->DeepCopy(tubeFilter->GetOutput());
+    }
+  else
+    {
+    outputTube->DeepCopy(smoothedSegments);
+    }
 
-  outputTubePolyData->DeepCopy(tubeFilter->GetOutput());
 }
 
 //------------------------------------------------------------------------------

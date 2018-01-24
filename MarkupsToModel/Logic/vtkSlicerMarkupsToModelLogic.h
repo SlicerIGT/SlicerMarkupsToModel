@@ -72,7 +72,8 @@ public:
   static bool UpdateClosedSurfaceModel( vtkPoints* controlPoints, vtkPolyData* polyData,
     bool smoothing = true, bool forceConvex = false, double delaunayAlpha = 0.0, bool cleanMarkups = true );
 
-  // lower-level access to functionality for making a curve model
+  // Lower-level access to functionality for making a curve model.
+  // If tubeRadius<=0.0 then a line will be created instead of a tube.
   static bool UpdateOutputCurveModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
       int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
       bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
