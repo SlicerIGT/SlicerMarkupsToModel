@@ -687,7 +687,7 @@ void vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel(vtkPoi
     }
   else
     {
-    outputTube->DeepCopy(smoothedSegments);
+    outputTubePolyData->DeepCopy(smoothedSegments);
     }
 
 }
