@@ -225,12 +225,16 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
     vtkErrorMacro( "No markupsToModelModuleNode provided to UpdateOutputModel. No operation performed." );
     return;
   }
-  
-  // check if the input node is defined
-  // (no need to worry about output. if not defined, it will be created later on)
+
   vtkMRMLNode* inputNode = markupsToModelModuleNode->GetInputNode();
-  if ( inputNode == NULL )
+  if (inputNode == NULL)
   {
+    return;
+  }
+
+  if (markupsToModelModuleNode->GetOutputModelNode() == NULL)
+  {
+    vtkErrorMacro("No output model node provided to UpdateOutputModel. No operation performed.");
     return;
   }
 
@@ -592,25 +596,9 @@ void vtkSlicerMarkupsToModelLogic::RemoveDuplicatePoints( vtkPoints* points )
 void vtkSlicerMarkupsToModelLogic::AssignPolyDataToOutput( vtkMRMLMarkupsToModelNode* markupsToModelModuleNode, vtkPolyData* outputPolyData )
 {  
   vtkMRMLModelNode* outputModelNode = markupsToModelModuleNode->GetOutputModelNode();
-  // set up the output model node if needed
   if ( outputModelNode == NULL )
   {
-    if ( markupsToModelModuleNode->GetScene() == NULL )
-    {
-      vtkGenericWarningMacro( "Output model node is not specified and markupsToModelModuleNode is not associated with any scene. No operation performed." );
-      return;
-    }
-    outputModelNode = vtkMRMLModelNode::SafeDownCast( markupsToModelModuleNode->GetScene()->AddNewNodeByClass( "vtkMRMLModelNode" ) );
-    if ( markupsToModelModuleNode->GetName() )
-    {
-      std::string outputModelNodeName = std::string( markupsToModelModuleNode->GetName() ).append( "Model" );
-      outputModelNode->SetName( outputModelNodeName.c_str() );
-    }
-    markupsToModelModuleNode->SetAndObserveOutputModelNodeID( outputModelNode->GetID() );
-  }
-  if ( outputModelNode == NULL )
-  {
-    vtkGenericWarningMacro( "Failed to create output model node. No operation performed." );
+    vtkGenericWarningMacro( "Output model node is not specified. No operation performed." );
     return;
   }
   outputModelNode->SetAndObservePolyData( outputPolyData );

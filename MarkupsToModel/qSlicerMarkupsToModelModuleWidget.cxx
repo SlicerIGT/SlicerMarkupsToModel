@@ -653,6 +653,25 @@ void qSlicerMarkupsToModelModuleWidget::UpdateOutputModel()
     qCritical("Model node changed with no module node selection");
     return;
   }
+  
+  // set up the output model node if needed
+  vtkMRMLModelNode* outputModelNode = markupsToModelModuleNode->GetOutputModelNode();
+  if (outputModelNode == NULL)
+  {
+    if (markupsToModelModuleNode->GetScene() == NULL)
+    {
+      vtkGenericWarningMacro("Output model node is not specified and markupsToModelModuleNode is not associated with any scene. No operation performed.");
+      return;
+    }
+    outputModelNode = vtkMRMLModelNode::SafeDownCast(markupsToModelModuleNode->GetScene()->AddNewNodeByClass("vtkMRMLModelNode"));
+    if (markupsToModelModuleNode->GetName())
+    {
+      std::string outputModelNodeName = std::string(markupsToModelModuleNode->GetName()).append("Model");
+      outputModelNode->SetName(outputModelNodeName.c_str());
+    }
+    markupsToModelModuleNode->SetAndObserveOutputModelNodeID(outputModelNode->GetID());
+  }
+
   d->logic()->UpdateOutputModel(markupsToModelModuleNode);
 }
 
