@@ -18,7 +18,7 @@
 // MarkupsToModel Logic includes
 #include "vtkSlicerMarkupsToModelLogic.h"
 #include "vtkSlicerMarkupsToModelClosedSurfaceGeneration.h"
-#include "vtkSlicerMarkupsToModelCurveGeneration.h"
+#include "vtkCurveGenerator.h"
 
 // MRML includes
 #include "vtkMRMLMarkupsFiducialNode.h"
@@ -29,23 +29,18 @@
 #include <vtkMRMLScene.h>
 
 // VTK includes
-#include <vtkAppendPolyData.h>
 #include <vtkCellArray.h>
 #include <vtkCleanPolyData.h>
 #include <vtkCollection.h>
 #include <vtkCollectionIterator.h>
 #include <vtkDoubleArray.h>
-#include <vtkDataSetSurfaceFilter.h>
 #include <vtkIntArray.h>
 #include <vtkMath.h>
-#include <vtkMatrix4x4.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 #include <vtkPoints.h>
-#include <vtkPolyDataNormals.h>
-#include <vtkTransform.h>
-#include <vtkTransformFilter.h>
-#include <vtkUnstructuredGrid.h>
+#include <vtkSphereSource.h>
+#include <vtkTubeFilter.h>
 
 // STD includes
 #include <cassert>
@@ -257,7 +252,7 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
   }
 
   // Create the model from the points
-  vtkSmartPointer<vtkPolyData> outputPolyData = vtkSmartPointer<vtkPolyData>::New();
+  vtkSmartPointer< vtkPolyData > outputPolyData = vtkSmartPointer< vtkPolyData >::New();
   bool cleanMarkups = markupsToModelModuleNode->GetCleanMarkups();
   switch ( markupsToModelModuleNode->GetModelType() )
   {
@@ -324,7 +319,7 @@ void vtkSlicerMarkupsToModelLogic::ProcessMRMLNodesEvents(vtkObject* caller, uns
 // DEPRECATED
 void vtkSlicerMarkupsToModelLogic::SetMarkupsNode( vtkMRMLMarkupsFiducialNode* newMarkups, vtkMRMLMarkupsToModelNode* moduleNode )
 {
-  vtkWarningMacro( "vtkSlicerMarkupsToModelLogic::SetMarkupsNode() is deprecated. Use vtkMRMLMarkupsToModelNode::SetAndObserveOutputModelNodeID() instead." );
+  vtkWarningMacro( "vtkSlicerMarkupsToModelLogic::SetMarkupsNode() is deprecated. Use vtkMRMLMarkupsToModelNode::SetAndObserveInputNodeID() instead." );
 
   if (moduleNode == NULL)
   {
@@ -407,56 +402,78 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
 
   if ( controlPoints->GetNumberOfPoints() == 1 )
   {
-    vtkSlicerMarkupsToModelCurveGeneration::GenerateSphereModel( controlPoints->GetPoint( 0 ), outputPolyData, tubeRadius, tubeNumberOfSides );
-    return true;
-  }
-  
-  if ( controlPoints->GetNumberOfPoints() == 2 )
-  {
-    vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop );
+    vtkSlicerMarkupsToModelLogic::GenerateSphereModel( controlPoints->GetPoint( 0 ), outputPolyData, tubeRadius, tubeNumberOfSides );
     return true;
   }
 
+  vtkSmartPointer< vtkCurveGenerator > curveGenerator = vtkSmartPointer< vtkCurveGenerator >::New();
+  curveGenerator->SetInputPoints( controlPoints );
+  curveGenerator->SetNumberOfPointsPerInterpolatingSegment( tubeSegmentsBetweenControlPoints );
+  vtkPoints* curvePoints = NULL; // temporary value
+  
+  // special case
+  if ( controlPoints->GetNumberOfPoints() == 2 )
+  {
+    curveGenerator->SetCurveTypeToLinearSpline();
+    curveGenerator->Update();
+    curvePoints = curveGenerator->GetOutputPoints();
+    vtkSlicerMarkupsToModelLogic::GenerateTubeModel( curvePoints, outputPolyData, tubeRadius, tubeNumberOfSides );
+    return true;
+  }
+
+  curveGenerator->SetCurveIsLoop( tubeLoop ); // can't loop 2 points, so this has to come after the special case
   switch ( interpolationType )
   {
     // Generates a polynomial curve model.
     case vtkMRMLMarkupsToModelNode::Linear:
     {
-      vtkSlicerMarkupsToModelCurveGeneration::GeneratePiecewiseLinearCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop );
+      curveGenerator->SetCurveTypeToLinearSpline();
+      curveGenerator->Update();
+      curvePoints = curveGenerator->GetOutputPoints();
       break;
     }
     case vtkMRMLMarkupsToModelNode::CardinalSpline:
     {
-      vtkSlicerMarkupsToModelCurveGeneration::GenerateCardinalSplineCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop );
+      curveGenerator->SetCurveTypeToCardinalSpline();
+      curveGenerator->Update();
+      curvePoints = curveGenerator->GetOutputPoints();
       break;
     }
     case vtkMRMLMarkupsToModelNode::KochanekSpline:
     {
-      vtkSlicerMarkupsToModelCurveGeneration::GenerateKochanekSplineCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop, kochanekBias, kochanekContinuity, kochanekTension, kochanekEndsCopyNearestDerivatives );
+      curveGenerator->SetCurveTypeToKochanekSpline();
+      curveGenerator->SetKochanekBias( kochanekBias );
+      curveGenerator->SetKochanekContinuity( kochanekContinuity );
+      curveGenerator->SetKochanekTension( kochanekTension );
+      curveGenerator->SetKochanekEndsCopyNearestDerivatives( kochanekEndsCopyNearestDerivatives );
+      curveGenerator->Update();
+      curvePoints = curveGenerator->GetOutputPoints();
       break;
     }
     case vtkMRMLMarkupsToModelNode::Polynomial:
     {
-      vtkSmartPointer< vtkDoubleArray > controlPointParameters = vtkSmartPointer< vtkDoubleArray >::New();
+      curveGenerator->SetCurveTypeToPolynomialGlobalLeastSquares();
+      curveGenerator->SetPolynomialOrder( polynomialOrder );
       switch ( pointParameterType )
       {
         case vtkMRMLMarkupsToModelNode::RawIndices:
         {
-          vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersFromIndices( controlPoints, controlPointParameters );
+          curveGenerator->SetPolynomialPointSortingMethodToIndex();
           break;
         }
         case vtkMRMLMarkupsToModelNode::MinimumSpanningTree:
         {
-          vtkSlicerMarkupsToModelCurveGeneration::ComputePointParametersFromMinimumSpanningTree( controlPoints, controlPointParameters );
+          curveGenerator->SetPolynomialPointSortingMethodToMinimumSpanningTreePosition();
           break;
         }
         default:
         {
-          vtkGenericWarningMacro( "Unknown point parameter type. Aborting." );
-          return false;
+          vtkGenericWarningMacro( "Unrecognized method for generating parameters from points. No parameters generated." );
+          break;
         }
       }
-      vtkSlicerMarkupsToModelCurveGeneration::GeneratePolynomialCurveModel( controlPoints, outputPolyData, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, tubeLoop, polynomialOrder, controlPointParameters );
+      curveGenerator->Update();
+      curvePoints = curveGenerator->GetOutputPoints();
       break;
     }
     default:
@@ -465,6 +482,18 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
       return false;
     }
   }
+
+  if ( curvePoints == NULL )
+  {
+    vtkGenericWarningMacro( "No curve points generated. No model can be generated." );
+    return false;
+  }
+
+  if ( tubeLoop && interpolationType != vtkMRMLMarkupsToModelNode::Polynomial ) // looping not supported for global fit polynomials
+  {
+    vtkSlicerMarkupsToModelLogic::MakeLoopContinuous( curvePoints );
+  }
+  vtkSlicerMarkupsToModelLogic::GenerateTubeModel( curvePoints, outputPolyData, tubeRadius, tubeNumberOfSides );
   return true;
 }
 
@@ -593,6 +622,76 @@ void vtkSlicerMarkupsToModelLogic::RemoveDuplicatePoints( vtkPoints* points )
 }
 
 //------------------------------------------------------------------------------
+void vtkSlicerMarkupsToModelLogic::GenerateSphereModel( double point[ 3 ], vtkPolyData* outputSphere, double sphereRadius, int sphereNumberOfSides )
+{
+  if ( point == NULL )
+  {
+    vtkGenericWarningMacro( "Input point for sphere generation is null. No model generated." );
+    return;
+  }
+
+  if ( outputSphere == NULL )
+  {
+    vtkGenericWarningMacro( "Output sphere poly data is null. No model generated." );
+    return;
+  }
+
+  vtkSmartPointer< vtkSphereSource > sphereSource = vtkSmartPointer< vtkSphereSource >::New();
+  sphereSource->SetRadius( sphereRadius );
+  sphereSource->SetThetaResolution( sphereNumberOfSides );
+  sphereSource->SetPhiResolution( sphereNumberOfSides );
+  sphereSource->SetCenter( point );
+  sphereSource->Update();
+
+  outputSphere->DeepCopy( sphereSource->GetOutput() );
+}
+
+//------------------------------------------------------------------------------
+void vtkSlicerMarkupsToModelLogic::GenerateTubeModel( vtkPoints* pointsToConnect, vtkPolyData* outputTubePolyData, double tubeRadius, int tubeNumberOfSides )
+{
+  if ( pointsToConnect == NULL )
+  {
+    vtkGenericWarningMacro( "Points to connect is null. No model generated." );
+    return;
+  }
+
+  if ( outputTubePolyData == NULL )
+  {
+    vtkGenericWarningMacro( "Output tube poly data is null. No model generated." );
+    return;
+  }
+
+  int numPoints = pointsToConnect->GetNumberOfPoints();
+
+  vtkSmartPointer< vtkCellArray > lineCellArray = vtkSmartPointer< vtkCellArray >::New();
+  lineCellArray->InsertNextCell( numPoints );
+  for ( int i = 0; i < numPoints; i++ )
+  {
+    lineCellArray->InsertCellPoint( i );
+  }
+
+  vtkSmartPointer< vtkPolyData > linePolyData = vtkSmartPointer< vtkPolyData >::New();
+  linePolyData->Initialize();
+  linePolyData->SetPoints( pointsToConnect );
+  linePolyData->SetLines( lineCellArray );
+
+  if (tubeRadius > 0.0)
+  {
+    vtkSmartPointer< vtkTubeFilter > tubeSegmentFilter = vtkSmartPointer< vtkTubeFilter >::New();
+    tubeSegmentFilter->SetInputData( linePolyData );
+    tubeSegmentFilter->SetRadius( tubeRadius );
+    tubeSegmentFilter->SetNumberOfSides( tubeNumberOfSides );
+    tubeSegmentFilter->CappingOn();
+    tubeSegmentFilter->Update();
+    outputTubePolyData->DeepCopy( tubeSegmentFilter->GetOutput() );
+  }
+  else
+  {
+    outputTubePolyData->DeepCopy( linePolyData );
+  }
+}
+
+//------------------------------------------------------------------------------
 void vtkSlicerMarkupsToModelLogic::AssignPolyDataToOutput( vtkMRMLMarkupsToModelNode* markupsToModelModuleNode, vtkPolyData* outputPolyData )
 {  
   vtkMRMLModelNode* outputModelNode = markupsToModelModuleNode->GetOutputModelNode();
@@ -612,4 +711,21 @@ void vtkSlicerMarkupsToModelLogic::AssignPolyDataToOutput( vtkMRMLMarkupsToModel
     std::string name = std::string( outputModelNode->GetName() ).append( "ModelDisplay" );
     displayNode->SetName( name.c_str() );
   }
+}
+
+//------------------------------------------------------------------------------
+void vtkSlicerMarkupsToModelLogic::MakeLoopContinuous( vtkPoints* curvePoints )
+{
+  // Move the starting point a tiny bit and add an *extra* point to join the curve 
+  // to the new starting position.
+  double point0[ 3 ];
+  curvePoints->GetPoint( 0, point0 );
+  double point1[ 3 ];
+  curvePoints->GetPoint( 1, point1 );
+  double finalPoint[ 3 ];
+  finalPoint[ 0 ] = point0[ 0 ] * 0.5 + point1[ 0 ] * 0.5;
+  finalPoint[ 1 ] = point0[ 1 ] * 0.5 + point1[ 1 ] * 0.5;
+  finalPoint[ 2 ] = point0[ 2 ] * 0.5 + point1[ 2 ] * 0.5;
+  curvePoints->SetPoint( 0, finalPoint );
+  curvePoints->InsertNextPoint( finalPoint );
 }

@@ -116,6 +116,25 @@ private:
   vtkSlicerMarkupsToModelLogic(const vtkSlicerMarkupsToModelLogic&); // Not implemented
   void operator=(const vtkSlicerMarkupsToModelLogic&); // Not implemented
 
+  // Generate a sphere at the point specified. Special case to be called when only one point is input.
+  //   point - center of the sphere
+  //   outputSpherePolyData - the sphere will be stored in this poly data.
+  //   sphereRadius - the radius of the sphere in outputSphere.
+  //   sphereNumberOfSides - The phi and theta resolution for sphere tesselation (higher = smoother).
+  static void GenerateSphereModel( double point[ 3 ], vtkPolyData* outputSpherePolyData, double sphereRadius, int sphereNumberOfSides );
+
+  // Generate a tube that passes through the points specified.
+  //   points - the points that the tube passes through
+  //   outputTubePolyData - the tube mesh will be stored in this poly data.
+  //   tubeRadius - the radius of the tube in outputTubePolyData.
+  //   tubeNumberOfSides - The resolution for tube tesselation (higher = smoother).
+  static void GenerateTubeModel( vtkPoints* points, vtkPolyData* outputTubePolyData, double tubeRadius, int tubeNumberOfSides );
+
+  // If looped, the first and last segment of the curve must be exactly parallel.
+  // Otherwise the curve will have two caps that don't line up and the curve will
+  // not appear continuous.
+  static void MakeLoopContinuous( vtkPoints* curvePoints );
+
   static void AssignPolyDataToOutput( vtkMRMLMarkupsToModelNode* moduleNode, vtkPolyData* polyData );
 };
 

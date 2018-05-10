@@ -12,8 +12,12 @@ set(${KIT}_SRCS
   vtkSlicer${MODULE_NAME}Logic.h
   vtkSlicer${MODULE_NAME}ClosedSurfaceGeneration.cxx
   vtkSlicer${MODULE_NAME}ClosedSurfaceGeneration.h
-  vtkSlicer${MODULE_NAME}CurveGeneration.cxx
-  vtkSlicer${MODULE_NAME}CurveGeneration.h
+  vtkCurveGenerator.cxx
+  vtkCurveGenerator.h
+  vtkLinearSpline.cxx
+  vtkLinearSpline.h
+  vtkParametricPolynomialApproximation.cxx
+  vtkParametricPolynomialApproximation.h
   )
 
 set(${KIT}_TARGET_LIBRARIES
