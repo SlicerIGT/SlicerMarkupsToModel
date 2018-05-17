@@ -559,7 +559,9 @@ void vtkCurveGenerator::SortByMinimumSpanningTreePosition( vtkPoints* points, vt
   double sumOfDistances = 0.0;
   for ( unsigned int i = 0; i < pathIndices.size() - 1; i++ )
   {
-    sumOfDistances += graph[ i ][ i + 1 ];
+    int pathVertexIndexI = pathIndices[ i ];
+    int pathVertexIndexIPlus1 = pathIndices[ i + 1 ];
+    sumOfDistances += graph[ pathVertexIndexI ][ pathVertexIndexIPlus1 ];
   }
 
   // check this to prevent a division by zero (in case all points are duplicates)
@@ -575,7 +577,9 @@ void vtkCurveGenerator::SortByMinimumSpanningTreePosition( vtkPoints* points, vt
   for ( unsigned int i = 0; i < pathIndices.size() - 1; i++ )
   {
     pathParameters.push_back( currentDistance / sumOfDistances );
-    currentDistance += graph[ i ][ i + 1 ];
+    int pathVertexIndexI = pathIndices[ i ];
+    int pathVertexIndexIPlus1 = pathIndices[ i + 1 ];
+    currentDistance += graph[ pathVertexIndexI ][ pathVertexIndexIPlus1 ];
   }
   pathParameters.push_back( currentDistance / sumOfDistances ); // this should be 1.0
 
