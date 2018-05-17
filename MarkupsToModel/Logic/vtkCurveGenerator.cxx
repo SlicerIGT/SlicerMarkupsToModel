@@ -17,8 +17,8 @@ vtkStandardNewMacro( vtkCurveGenerator );
 //------------------------------------------------------------------------------
 vtkCurveGenerator::vtkCurveGenerator()
 {
-  this->InputPoints = vtkSmartPointer< vtkPoints >::New();
-  this->InputParameters = vtkSmartPointer< vtkDoubleArray >::New();
+  this->InputPoints = NULL;
+  this->InputParameters = NULL;
   this->SetCurveTypeToLinearSpline();
   this->CurveIsLoop = false;
   this->NumberOfPointsPerInterpolatingSegment = 5;
@@ -28,12 +28,10 @@ vtkCurveGenerator::vtkCurveGenerator()
   this->KochanekEndsCopyNearestDerivatives = false;
   this->PolynomialOrder = 1; // linear
   this->PolynomialPointSortingMethod = vtkCurveGenerator::SORTING_METHOD_INDEX;
-  this->OutputPoints = vtkSmartPointer< vtkPoints >::New();
-  this->OutputChangedTime.Modified();
+  this->OutputPoints = NULL;
 
   // timestamps for input and output are the same, initially
   this->Modified();
-  this->OutputChangedTime.Modified();
 
   // local storage variables
   this->ParametricFunction = NULL;
@@ -48,8 +46,8 @@ vtkCurveGenerator::~vtkCurveGenerator()
 void vtkCurveGenerator::PrintSelf( std::ostream &os, vtkIndent indent )
 {
   Superclass::PrintSelf( os, indent );
-  os << indent << "InputPoints size: " << ( InputPoints != NULL ? this->InputPoints->GetNumberOfPoints() : 0 ) << std::endl;
-  os << indent << "InputParameters size: " << ( InputParameters != NULL ? this->InputParameters->GetNumberOfTuples() : 0 ) << std::endl;
+  os << indent << "InputPoints size: " << ( this->InputPoints != NULL ? this->InputPoints->GetNumberOfPoints() : 0 ) << std::endl;
+  os << indent << "InputParameters size: " << ( this->InputParameters != NULL ? this->InputParameters->GetNumberOfTuples() : 0 ) << std::endl;
   os << indent << "CurveType: " << this->GetCurveTypeAsString() << std::endl;
   os << indent << "CurveIsLoop: " << this->CurveIsLoop << std::endl;
   os << indent << "KochanekBias: " << this->KochanekBias << std::endl;
@@ -57,11 +55,11 @@ void vtkCurveGenerator::PrintSelf( std::ostream &os, vtkIndent indent )
   os << indent << "KochanekTension: " << this->KochanekTension << std::endl;
   os << indent << "KochanekEndsCopyNearestDerivatives: " << this->KochanekEndsCopyNearestDerivatives << std::endl;
   os << indent << "PolynomialOrder: " << this->PolynomialOrder << std::endl;
-  os << indent << "OutputPoints size: " << ( OutputPoints != NULL ? this->OutputPoints->GetNumberOfPoints() : 0 ) << std::endl;
+  os << indent << "OutputPoints size: " << ( this->OutputPoints != NULL ? this->OutputPoints->GetNumberOfPoints() : 0 ) << std::endl;
 }
 
 //------------------------------------------------------------------------------
-// INPUT ACCESSORS/MUTATORS
+// ACCESSORS/MUTATORS
 //------------------------------------------------------------------------------
 std::string vtkCurveGenerator::GetCurveTypeAsString()
 {
@@ -85,25 +83,31 @@ std::string vtkCurveGenerator::GetCurveTypeAsString()
     }
     default:
     {
-      return "unknown_curve_type";
+      vtkErrorMacro( "Unknown curve type - cannot return as string." );
+      return "";
     }
   }
 }
 
 //------------------------------------------------------------------------------
-bool vtkCurveGenerator::IsCurveTypeInterpolating()
+std::string vtkCurveGenerator::GetPolynomialPointSortingMethodAsString()
 {
-  bool isInterpolating = ( this->CurveType == CURVE_TYPE_LINEAR_SPLINE ) ||
-                         ( this->CurveType == CURVE_TYPE_CARDINAL_SPLINE ) ||
-                         ( this->CurveType == CURVE_TYPE_KOCHANEK_SPLINE );
-  return isInterpolating;
-}
-
-//------------------------------------------------------------------------------
-bool vtkCurveGenerator::IsCurveTypeApproximating()
-{
-  bool isApproximating = ( this->CurveType == CURVE_TYPE_POLYNOMIAL_GLOBAL_LEAST_SQUARES );
-  return isApproximating;
+  switch ( this->PolynomialPointSortingMethod )
+  {
+    case vtkCurveGenerator::SORTING_METHOD_INDEX:
+    {
+      return "indices";
+    }
+    case vtkCurveGenerator::SORTING_METHOD_MINIMUM_SPANNING_TREE_POSITION:
+    {
+      return "minimum_spanning_tree_position";
+    }
+    default:
+    {
+      vtkErrorMacro( "Unknown sorting method - cannot return as string." );
+      return "";
+    }
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -115,12 +119,10 @@ vtkPoints* vtkCurveGenerator::GetInputPoints()
 //------------------------------------------------------------------------------
 void vtkCurveGenerator::SetInputPoints( vtkPoints* points )
 {
-  this->InputPoints->DeepCopy( points );
+  this->InputPoints = points;
   this->Modified();
 }
 
-//------------------------------------------------------------------------------
-// OUTPUT ACCESSORS
 //------------------------------------------------------------------------------
 vtkPoints* vtkCurveGenerator::GetOutputPoints()
 {
@@ -133,6 +135,13 @@ vtkPoints* vtkCurveGenerator::GetOutputPoints()
 }
 
 //------------------------------------------------------------------------------
+void vtkCurveGenerator::SetOutputPoints( vtkPoints* points )
+{
+  this->OutputPoints = points;
+  this->Modified();
+}
+
+//------------------------------------------------------------------------------
 // LOGIC
 //------------------------------------------------------------------------------
 void vtkCurveGenerator::Update()
@@ -140,7 +149,6 @@ void vtkCurveGenerator::Update()
   if ( this->InputPoints == NULL )
   {
     vtkWarningMacro( "No input points. No curve generation possible." );
-    this->OutputChangedTime.Modified();
     return;
   }
 
@@ -180,20 +188,41 @@ void vtkCurveGenerator::Update()
     }
     default:
     {
-      vtkErrorMacro( "Error: Unrecognized curve type." );
+      vtkErrorMacro( "Error: Unrecognized curve type: " << this->CurveType << "." );
       break;
     }
   }
 
   this->GeneratePoints();
-
-  this->OutputChangedTime.Modified();
 }
 
 //------------------------------------------------------------------------------
 bool vtkCurveGenerator::UpdateNeeded()
 {
-  return ( this->GetMTime() > this->OutputChangedTime );
+  // assume that if any of these is null, then the user intends for everything to be computed
+  // in normal use, none of these should be null
+  if ( this->OutputPoints == NULL || this->InputPoints == NULL )
+  {
+    return true;
+  }
+
+  // If this->InputParameters ever become modifiable by the user,
+  // then that modified time will need to be checked here too.
+
+  vtkMTimeType outputModifiedTime = this->OutputPoints->GetMTime();
+  vtkMTimeType curveGeneratorModifiedTime = this->GetMTime();
+  if ( curveGeneratorModifiedTime > outputModifiedTime )
+  {
+    return true;
+  }
+
+  vtkMTimeType inputPointsModifiedTime = this->InputPoints->GetMTime();
+  if ( inputPointsModifiedTime > outputModifiedTime )
+  {
+    return true;
+  }
+  
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -255,6 +284,7 @@ void vtkCurveGenerator::SetParametricFunctionToKochanekSpline()
     xSpline->SetLeftConstraint( 1 );
     ySpline->SetLeftConstraint( 1 );
     zSpline->SetLeftConstraint( 1 );
+    // we assume there are at least 2 points, this is already checked in the Update() functions
     double point0[ 3 ];
     this->InputPoints->GetPoint( 0, point0 );
     double point1[ 3 ];
@@ -299,6 +329,11 @@ void vtkCurveGenerator::SetParametricFunctionToPolynomial()
   polynomial->SetPoints( this->InputPoints );
   polynomial->SetPolynomialOrder( this->PolynomialOrder );
 
+  if ( this->InputParameters == NULL )
+  {
+    this->InputParameters = vtkSmartPointer< vtkDoubleArray >::New();
+  }
+
   if ( this->PolynomialPointSortingMethod == vtkCurveGenerator::SORTING_METHOD_INDEX )
   {
     vtkCurveGenerator::SortByIndex( this->InputPoints, this->InputParameters );
@@ -319,12 +354,24 @@ void vtkCurveGenerator::SetParametricFunctionToPolynomial()
 //------------------------------------------------------------------------------
 void vtkCurveGenerator::GeneratePoints()
 {
-  this->OutputPoints->Reset();
-
+  if ( this->InputPoints == NULL )
+  {
+    vtkErrorMacro( "Input points are null, so curve points cannot be generated." );
+    return;
+  }
   if ( this->ParametricFunction == NULL )
   {
     vtkErrorMacro( "Parametric function is null, so curve points cannot be generated." );
     return;
+  }
+
+  if ( this->OutputPoints == NULL )
+  {
+    this->OutputPoints = vtkSmartPointer< vtkPoints >::New();
+  }
+  else
+  {
+    this->OutputPoints->Reset();
   }
 
   int numberOfInputPoints = this->InputPoints->GetNumberOfPoints();
@@ -421,11 +468,12 @@ void vtkCurveGenerator::SortByMinimumSpanningTreePosition( vtkPoints* points, vt
   // iterate through all points
   for ( int v = 0; v < numberOfPoints; v++ )
   {
+    double pointV[ 3 ];
+    points->GetPoint( v, pointV );
     for ( int u = 0; u < numberOfPoints; u++ )
     {
-      double pointU[ 3 ], pointV[ 3 ];
+      double pointU[ 3 ];
       points->GetPoint( u, pointU );
-      points->GetPoint( v, pointV );
       double distanceSquared = vtkMath::Distance2BetweenPoints( pointU, pointV );
       double distance = sqrt( distanceSquared );
       distances[ v * numberOfPoints + u ] = distance;

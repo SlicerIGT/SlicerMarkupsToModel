@@ -36,9 +36,15 @@ double vtkLinearSpline::Evaluate( double t )
 
   // make sure we have at least 2 points
   int size = this->PiecewiseFunction->GetSize();
-  if ( size < 2 )
+  if ( size == 0 )
   {
     return 0.0;
+  }
+  else if ( size == 1 )
+  {
+    double node[ 4 ];
+    this->PiecewiseFunction->GetNodeValue( 0, node );
+    return node[ 1 ]; // dependent value
   }
 
   if ( this->Closed )
@@ -83,27 +89,21 @@ void vtkLinearSpline::Compute()
     return;
   }
 
-  // how many points to interpolate between?
-  int numberOfInterpolatingPoints = 0; // temporary value
+  // this->Closed determines how many points to interpolate between
   if ( this->Closed )
   {
-    numberOfInterpolatingPoints = numberOfInputPoints + 1;
-  }
-  else
-  {
-    numberOfInterpolatingPoints = numberOfInputPoints;
-  }
+    delete [] this->Intervals;
+    this->Intervals = new double[ numberOfInputPoints + 1 ];
+    std::vector< double > values = std::vector< double >( numberOfInputPoints + 1 );
+    for ( int pointIndex = 0; pointIndex < numberOfInputPoints; pointIndex++ )
+    {
+      double node[ 4 ];
+      this->PiecewiseFunction->GetNodeValue( pointIndex, node );
+      this->Intervals[ pointIndex ] = node[ 0 ]; // independent value
+      values[ pointIndex ] = node[ 1 ]; // dependant value
+    }
 
-  // independent values
-  delete [] this->Intervals;
-  this->Intervals = new double[ numberOfInterpolatingPoints ];
-  double* intervalsStartPtr = this->PiecewiseFunction->GetDataPointer();
-  for ( int pointIndex = 0; pointIndex < numberOfInputPoints; pointIndex++ )
-  {
-    this->Intervals[ pointIndex ] = *( intervalsStartPtr + 2 * pointIndex );
-  }
-  if ( this->Closed ) // there is still one more point
-  {
+    // last point interval
     if ( this->ParametricRange[ 0 ] != this->ParametricRange[ 1 ] ) // has user specified last range?
     {
       this->Intervals[ numberOfInputPoints ] = this->ParametricRange[ 1 ];
@@ -112,32 +112,46 @@ void vtkLinearSpline::Compute()
     {
       this->Intervals[ numberOfInputPoints ] = this->Intervals[ numberOfInputPoints - 1 ] + 1.0;
     }
-  }
-
-  // dependent values
-  std::vector< double > values = std::vector< double >( numberOfInterpolatingPoints );
-  double* valuesStartPtr = this->PiecewiseFunction->GetDataPointer() + 1;
-  for ( int pointIndex = 0; pointIndex < numberOfInputPoints; pointIndex++ )
-  {
-    double nextValue = *( valuesStartPtr + 2 * pointIndex );
-    values[ pointIndex ] = nextValue;
-  }
-  if ( this->Closed ) // there is still one more point, just repeat the first
-  {
+    // last point value
     double nextValue = values[ 0 ];
     values[ numberOfInputPoints ] = nextValue;
-  }
 
-  // compute coefficients
-  delete [] this->Coefficients;
-  int numberOfSegments = numberOfInterpolatingPoints - 1;
-  this->Coefficients = new double [ 2 * numberOfSegments ];
-  for ( int segmentIndex = 0; segmentIndex < numberOfSegments; segmentIndex++ )
+    // compute coefficients
+    delete [] this->Coefficients;
+    int numberOfSegments = numberOfInputPoints;
+    this->Coefficients = new double [ 2 * numberOfSegments ];
+    for ( int segmentIndex = 0; segmentIndex < numberOfSegments; segmentIndex++ )
+    {
+      double intervalWidth = this->Intervals[ segmentIndex + 1 ] - this->Intervals[ segmentIndex ];
+      double changeInValue = values[ segmentIndex + 1 ] - values[ segmentIndex ];
+      this->Coefficients[ segmentIndex * 2 ] = changeInValue / intervalWidth;
+      this->Coefficients[ segmentIndex * 2 + 1 ] = values[ segmentIndex ];
+    }
+  }
+  else
   {
-    double intervalWidth = this->Intervals[ segmentIndex + 1 ] - this->Intervals[ segmentIndex ];
-    double changeInValue = values[ segmentIndex + 1 ] - values[ segmentIndex ];
-    this->Coefficients[ segmentIndex * 2 ] = changeInValue / intervalWidth;
-    this->Coefficients[ segmentIndex * 2 + 1 ] = values[ segmentIndex ];
+    delete [] this->Intervals;
+    this->Intervals = new double[ numberOfInputPoints ];
+    std::vector< double > values = std::vector< double >( numberOfInputPoints );
+    for ( int pointIndex = 0; pointIndex < numberOfInputPoints; pointIndex++ )
+    {
+      double node[ 4 ];
+      this->PiecewiseFunction->GetNodeValue( pointIndex, node );
+      this->Intervals[ pointIndex ] = node[ 0 ]; // independent value
+      values[ pointIndex ] = node[ 1 ]; // dependant value
+    }
+
+    // compute coefficients
+    delete [] this->Coefficients;
+    int numberOfSegments = numberOfInputPoints - 1;
+    this->Coefficients = new double [ 2 * numberOfSegments ];
+    for ( int segmentIndex = 0; segmentIndex < numberOfSegments; segmentIndex++ )
+    {
+      double intervalWidth = this->Intervals[ segmentIndex + 1 ] - this->Intervals[ segmentIndex ];
+      double changeInValue = values[ segmentIndex + 1 ] - values[ segmentIndex ];
+      this->Coefficients[ segmentIndex * 2 ] = changeInValue / intervalWidth;
+      this->Coefficients[ segmentIndex * 2 + 1 ] = values[ segmentIndex ];
+    }
   }
 
   // update compute time

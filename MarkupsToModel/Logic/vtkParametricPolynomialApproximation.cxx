@@ -29,13 +29,11 @@ vtkParametricPolynomialApproximation::vtkParametricPolynomialApproximation()
   this->MaximumU = 1.0;
   this->JoinU = 0;
 
-  this->Points = vtkSmartPointer< vtkPoints >::New();
-  this->Parameters = vtkSmartPointer< vtkDoubleArray >::New();
+  this->Points = NULL;
+  this->Parameters = NULL;
   this->PolynomialOrder = 1;
   
-  this->Coefficients = vtkSmartPointer< vtkDoubleArray >::New();
-
-  this->FitTime = 0;
+  this->Coefficients = NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -44,27 +42,15 @@ vtkParametricPolynomialApproximation::~vtkParametricPolynomialApproximation() {}
 //----------------------------------------------------------------------------
 void vtkParametricPolynomialApproximation::SetPoints( vtkPoints* points )
 {
-  if ( points == NULL )
-  {
-    vtkWarningMacro( "Points are null. Setting points to empty." );
-    this->Points->Reset();
-    return;
-  }
-
-  this->Points->DeepCopy( points );
+  this->Points = points;
+  this->Modified();
 }
 
 //----------------------------------------------------------------------------
 void vtkParametricPolynomialApproximation::SetParameters( vtkDoubleArray* array )
 {
-  if ( array == NULL )
-  {
-    vtkWarningMacro( "Parameters are null. Setting parameters to empty." );
-    this->Parameters->Reset();
-    return;
-  }
-
-  this->Parameters->DeepCopy( array );
+  this->Parameters = array;
+  this->Modified();
 }
 
 //----------------------------------------------------------------------------
@@ -74,16 +60,19 @@ void vtkParametricPolynomialApproximation::Evaluate( double u[ 3 ], double outpu
   outputPoint[ 0 ] = outputPoint[ 1 ] = outputPoint[ 2 ] = 0;
 
   // make sure everything has been set up
-  if ( this->FitTime < this->GetMTime() )
+  if ( this->ComputeCoefficientsNeeded() )
   {
-    if ( !this->Fit() )
-    {
-      return;
-    }
+    this->ComputeCoefficients();
   }
 
-  double sampleParameter = u[ 0 ];
-  sampleParameter = vtkMath::ClampValue< double >( sampleParameter, 0.0, 1.0 );
+  // error cases, just return
+  if ( this->Coefficients == NULL || this->Coefficients->GetNumberOfTuples() == 0 )
+  {
+    vtkErrorMacro( "Polynomial coefficients were not computed. Returning without evaluating." );
+    return;
+  }
+
+  double sampleParameter = vtkMath::ClampValue< double >( u[ 0 ], 0.0, 1.0 );
 
   const int numberOfDimensions = 3;
   int numberOfCoefficients = this->Coefficients->GetNumberOfComponents();
@@ -105,32 +94,64 @@ double vtkParametricPolynomialApproximation::EvaluateScalar( double u[ 3 ], doub
 }
 
 //----------------------------------------------------------------------------
-bool vtkParametricPolynomialApproximation::Fit()
+void vtkParametricPolynomialApproximation::ComputeCoefficients()
 {
-  if ( !this->Points || this->Points->GetNumberOfPoints() == 0 )
+  this->Coefficients = NULL; // this indicates that the coefficients have not been computed (yet)
+
+  if ( this->Points == NULL || this->Points->GetNumberOfPoints() == 0 )
   {
-    vtkErrorMacro( "Points are missing. Aborting." );
-    return false;
+    vtkErrorMacro( "Points are missing. Cannot compute coefficients." );
+    return;
   }
 
-  if ( !this->Parameters || this->Parameters->GetNumberOfTuples() == 0 )
+  if ( this->Parameters == NULL || this->Parameters->GetNumberOfTuples() == 0 )
   {
-    vtkErrorMacro( "Parameters are missing. Aborting." );
-    return false;
+    vtkErrorMacro( "Parameters are missing. Cannot compute coefficients." );
+    return;
   }
 
   int numberOfPoints = this->Points->GetNumberOfPoints();
   int numberOfParameters = this->Parameters->GetNumberOfTuples();
   if ( numberOfPoints != numberOfParameters )
   {
-    vtkErrorMacro( "Need equal number of parameters and points. Got " << numberOfParameters << " and " << numberOfPoints << ", respectively. Aborting." );
-    return false;
+    vtkErrorMacro( "Need equal number of parameters and points. Got " << numberOfParameters << " and " << numberOfPoints << ", respectively. Cannot compute coefficients." );
+    return;
   }
 
+  this->Coefficients = vtkSmartPointer< vtkDoubleArray >::New();
   this->FitLeastSquaresPolynomials( this->Parameters, this->Points, this->PolynomialOrder, this->Coefficients );
+}
 
-  this->FitTime = this->GetMTime();
-  return true;
+//------------------------------------------------------------------------------
+bool vtkParametricPolynomialApproximation::ComputeCoefficientsNeeded()
+{
+  // assume that if anything is null, then the user intends for everything to be computed
+  // in normal use, none of these should be null
+  if ( this->Coefficients == NULL || this->Points == NULL || this->Parameters == NULL )
+  {
+    return true;
+  }
+
+  vtkMTimeType coefficientsModifiedTime = this->Coefficients->GetMTime();
+  vtkMTimeType approximatorModifiedTime = this->GetMTime();
+  if ( approximatorModifiedTime > coefficientsModifiedTime )
+  {
+    return true;
+  }
+
+  vtkMTimeType pointsModifiedTime = this->Points->GetMTime();
+  if ( pointsModifiedTime > coefficientsModifiedTime )
+  {
+    return true;
+  }
+
+  vtkMTimeType parametersModifiedTime = this->Parameters->GetMTime();
+  if ( parametersModifiedTime > coefficientsModifiedTime )
+  {
+    return true;
+  }
+  
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -149,7 +170,7 @@ void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDouble
   //    higher-order fits (see for example this page for related discussion:
   //    http://digital.ni.com/public.nsf/allkb/45C2016C23B3B0298525645F0073B828). 
   //    See an example how VNL is used in Plus:
-  //    https://app.assembla.com/spaces/plus/subversion/source/HEAD/trunk/PlusLib/src/PlusCommon/PlusMath.cxx#ln111
+  //    https://github.com/PlusToolkit/PlusLib/blob/master/src/PlusCommon/PlusMath.cxx#L111
   // 2. Mathematica uses different basis functions for polynomial fitting (shifted Chebyshev polynomials) instead 
   //    of basis functions that are simple powers of a variable to make the fitting more robust (the source code
   //    is available here: http://library.wolfram.com/infocenter/MathSource/6780/).
@@ -157,9 +178,17 @@ void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDouble
   if ( polynomialOrder > maximumPolynomialOrder )
   {
     vtkGenericWarningMacro( "Desired polynomial order " << polynomialOrder << " is not supported. "
-      << "Maximum polynomial order is " << maximumPolynomialOrder << ". "
+      << "Maximum supported order is " << maximumPolynomialOrder << ". "
       << "Will attempt to create polynomial order " << maximumPolynomialOrder << " instead." );
     polynomialOrder = maximumPolynomialOrder;
+  }
+  const int minimumPolynomialOrder = 0; // It's a pretty weird input, but it does work. Just creates an average.
+  if ( polynomialOrder < minimumPolynomialOrder )
+  {
+    vtkGenericWarningMacro( "Desired polynomial order " << polynomialOrder << " is not supported. "
+      << "Minimum supported order is " << minimumPolynomialOrder << ". "
+      << "Will attempt to create constant average instead." );
+    polynomialOrder = minimumPolynomialOrder;
   }
 
   int numberOfPoints = points->GetNumberOfPoints();
@@ -181,8 +210,7 @@ void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDouble
 
   // independent values (parameter along the curve)
   int numIndependentValues = numberOfPoints * numberOfCoefficients;
-  std::vector< double > independentValues( numIndependentValues );
-  independentValues.assign( numIndependentValues, 0.0 );
+  std::vector< double > independentValues( numIndependentValues, 0.0 );
   for ( int coefficientIndex = 0; coefficientIndex < numberOfCoefficients; coefficientIndex++ )
   {
     for ( int pointIndex = 0; pointIndex < numberOfPoints; pointIndex++ )
@@ -192,8 +220,7 @@ void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDouble
       independentValues[ pointIndex * numberOfCoefficients + coefficientIndex ] = independentValue;
     }
   }
-  std::vector< double* > independentMatrix( numberOfPoints );
-  independentMatrix.assign( numberOfPoints, NULL );
+  std::vector< double* > independentMatrix( numberOfPoints, NULL );
   for ( int pointIndex = 0; pointIndex < numberOfPoints; pointIndex++ )
   {
     independentMatrix[ pointIndex ] = &( independentValues[ pointIndex * numberOfCoefficients ] );
@@ -203,8 +230,7 @@ void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDouble
   // dependent values
   const int numberOfDimensions = 3;
   int numDependentValues = numberOfPoints * numberOfDimensions;
-  std::vector< double > dependentValues( numDependentValues );
-  dependentValues.assign( numDependentValues, 0.0 );
+  std::vector< double > dependentValues( numDependentValues, 0.0 );
   for ( int pointIndex = 0; pointIndex < numberOfPoints; pointIndex++ )
   {
     double* currentPoint = points->GetPoint( pointIndex );
@@ -214,8 +240,7 @@ void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDouble
       dependentValues[ pointIndex * numberOfDimensions + dimensionIndex ] = value;
     }
   }
-  std::vector< double* > dependentMatrix( numberOfPoints );
-  dependentMatrix.assign( numberOfPoints, NULL );
+  std::vector< double* > dependentMatrix( numberOfPoints, NULL );
   for ( int pointIndex = 0; pointIndex < numberOfPoints; pointIndex++ )
   {
     dependentMatrix[ pointIndex ] = &( dependentValues[ pointIndex * numberOfDimensions ] );
@@ -223,8 +248,8 @@ void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDouble
   double** dependentMatrixPtr = &( dependentMatrix[ 0 ] );
 
   // solution to least squares
-  std::vector< double > coefficientValues( numberOfDimensions * numberOfCoefficients );
-  std::vector< double* > coefficientMatrix( numberOfCoefficients );
+  std::vector< double > coefficientValues( numberOfDimensions * numberOfCoefficients, 0.0 );
+  std::vector< double* > coefficientMatrix( numberOfCoefficients, NULL );
   for ( int coefficientIndex = 0; coefficientIndex < numberOfCoefficients; coefficientIndex++ )
   {
     coefficientMatrix[ coefficientIndex ] = &( coefficientValues[ coefficientIndex * numberOfDimensions ] );
@@ -254,7 +279,7 @@ void vtkParametricPolynomialApproximation::PrintSelf( ostream& os, vtkIndent ind
   this->Superclass::PrintSelf( os, indent );
 
   os << indent << "Parameters: ";
-  if ( this->Parameters )
+  if ( this->Parameters != NULL )
   {
     os << this->Parameters << "\n";
   }
@@ -264,7 +289,7 @@ void vtkParametricPolynomialApproximation::PrintSelf( ostream& os, vtkIndent ind
   }
 
   os << indent << "Points: ";
-  if ( this->Points )
+  if ( this->Points != NULL )
   {
     os << this->Points << "\n";
   }
@@ -276,7 +301,7 @@ void vtkParametricPolynomialApproximation::PrintSelf( ostream& os, vtkIndent ind
   os << indent << this->PolynomialOrder << "\n";
 
   os << indent << "Coefficients: ";
-  if ( this->Coefficients )
+  if ( this->Coefficients != NULL )
   {
     os << this->Coefficients << "\n";
   }

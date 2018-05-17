@@ -4,7 +4,6 @@
 // vtk includes
 #include <vtkSetGet.h>
 #include <vtkObject.h>
-#include <vtkTimeStamp.h>
 #include <vtkSmartPointer.h>
 
 class vtkPoints;
@@ -29,6 +28,7 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
     // connecting the last point back to the first point (disabled by default).
     vtkSetMacro( CurveIsLoop, bool );
     vtkGetMacro( CurveIsLoop, bool );
+    vtkBooleanMacro( CurveIsLoop, bool );
 
     // type of curve to generate
     enum
@@ -46,8 +46,6 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
     void SetCurveTypeToCardinalSpline() { this->SetCurveType( CURVE_TYPE_CARDINAL_SPLINE ); }
     void SetCurveTypeToKochanekSpline() { this->SetCurveType( CURVE_TYPE_KOCHANEK_SPLINE ); }
     void SetCurveTypeToPolynomialGlobalLeastSquares() { this->SetCurveType( CURVE_TYPE_POLYNOMIAL_GLOBAL_LEAST_SQUARES ); }
-    bool IsCurveTypeApproximating();
-    bool IsCurveTypeInterpolating();
 
     // Sample an *interpolating* curve this many times per segment (pair of points in sequence). Range 1 and up. Default 5.
     vtkSetMacro( NumberOfPointsPerInterpolatingSegment, int );
@@ -73,6 +71,20 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
     vtkGetMacro( PolynomialOrder, int );
     vtkSetMacro( PolynomialOrder, int );
 
+    // Set the points that the curve should be based on
+    vtkPoints* GetInputPoints();
+    void SetInputPoints( vtkPoints* );
+
+    // Wednesday May 9, 2018 TODO
+    // InputParameters is currently computed by this class depending on the 
+    // value of PolynomialPointSortingMethod, and is only supported for polynomials.
+    // In the future this could be expanded to support splines, and to allow 
+    // the user to specify their own parameters (make a SetInputParameters function)
+    // e.g. through functions below
+    // Set the parameter values (e.g. point distances) that the curve should be based on
+    //virtual void SetInputParameters( vtkDoubleArray* );
+    //virtual vtkDoubleArray* GetInputParameters();
+
     // Set the sorting method for points in a polynomial.
     enum {
       SORTING_METHOD_INDEX = 0,
@@ -81,15 +93,13 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
     };
     vtkGetMacro( PolynomialPointSortingMethod, int );
     vtkSetMacro( PolynomialPointSortingMethod, int );
+    std::string GetPolynomialPointSortingMethodAsString();
     void SetPolynomialPointSortingMethodToIndex() { this->SetPolynomialPointSortingMethod( vtkCurveGenerator::SORTING_METHOD_INDEX ); }
     void SetPolynomialPointSortingMethodToMinimumSpanningTreePosition() { this->SetPolynomialPointSortingMethod( vtkCurveGenerator::SORTING_METHOD_MINIMUM_SPANNING_TREE_POSITION ); }
 
-    // The points used to fit the curve
-    void SetInputPoints( vtkPoints* );
-    vtkPoints* GetInputPoints();
-
     // output sampled points
     vtkPoints* GetOutputPoints();
+    void SetOutputPoints( vtkPoints* );
 
     // logic
     void Update();
@@ -101,12 +111,6 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
   private:
     // inputs
     vtkSmartPointer< vtkPoints > InputPoints;
-    vtkSmartPointer< vtkDoubleArray > InputParameters;
-    // Wednesday May 9, 2018 TODO
-    // InputParameters is currently computed by this class depending on the 
-    // value of PolynomialPointSortingMethod, and is only supported for polynomials.
-    // In the future this could be expanded to support splines, and to allow 
-    // the user to specify their own parameters (make a SetInputParameters function)
 
     // input parameters
     int NumberOfPointsPerInterpolatingSegment;
@@ -120,11 +124,11 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
     int PolynomialPointSortingMethod;
 
     // internal storage
+    vtkSmartPointer< vtkDoubleArray > InputParameters;
     vtkSmartPointer< vtkParametricFunction > ParametricFunction;
 
     // output
     vtkSmartPointer< vtkPoints > OutputPoints;
-    vtkTimeStamp OutputChangedTime;
 
     // logic
     void SetParametricFunctionToSpline( vtkSpline* xSpline, vtkSpline* ySpline, vtkSpline* zSpline );

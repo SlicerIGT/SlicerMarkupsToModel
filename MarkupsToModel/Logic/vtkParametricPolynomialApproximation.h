@@ -84,15 +84,16 @@ protected:
 
 private:
   // Fitting the polynomial
-  vtkMTimeType FitTime;
-  bool Fit();
+  void ComputeCoefficients();
+  bool ComputeCoefficientsNeeded();
   static void FitLeastSquaresPolynomials( vtkDoubleArray* parameters, vtkPoints* points, int polynomialOrder, vtkDoubleArray* coefficients );
 
   int PolynomialOrder;
   vtkSmartPointer< vtkPoints > Points;
   vtkSmartPointer< vtkDoubleArray > Parameters;
 
-  // polynomial coefficients are computed in the fitting operation
+  // this is directly used to evaluate points in 3D
+  // in a sense this is the "output"
   vtkSmartPointer< vtkDoubleArray > Coefficients;
 
   vtkParametricPolynomialApproximation( const vtkParametricPolynomialApproximation& ) = delete;

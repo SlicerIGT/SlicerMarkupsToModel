@@ -54,6 +54,7 @@ vtkStandardNewMacro(vtkSlicerMarkupsToModelLogic);
 //----------------------------------------------------------------------------
 vtkSlicerMarkupsToModelLogic::vtkSlicerMarkupsToModelLogic()
 {
+  curveGenerator = vtkSmartPointer< vtkCurveGenerator >::New();
 }
 
 //----------------------------------------------------------------------------
@@ -277,7 +278,7 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
       double kochanekBias = markupsToModelModuleNode->GetKochanekBias();
       double kochanekContinuity = markupsToModelModuleNode->GetKochanekContinuity();
       double kochanekTension = markupsToModelModuleNode->GetKochanekTension();
-      vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, interpolationType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, kochanekEndsCopyNearestDerivatives, kochanekBias, kochanekContinuity, kochanekTension );
+      vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, interpolationType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, kochanekEndsCopyNearestDerivatives, kochanekBias, kochanekContinuity, kochanekTension, curveGenerator );
       break;
     }
   }
@@ -340,7 +341,7 @@ void vtkSlicerMarkupsToModelLogic::SetMarkupsNode( vtkMRMLMarkupsFiducialNode* n
 //------------------------------------------------------------------------------
 bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* outputModelNode,
   int interpolationType, bool tubeLoop, double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints,
-  bool cleanMarkups, int polynomialOrder, int pointParameterType )
+  bool cleanMarkups, int polynomialOrder, int pointParameterType, vtkCurveGenerator* curveGenerator )
 {
   if ( markupsNode == NULL )
   {
@@ -358,7 +359,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkMRMLMarkupsFiducia
   vtkSmartPointer< vtkPoints > controlPoints = vtkSmartPointer< vtkPoints >::New();
   vtkSlicerMarkupsToModelLogic::MarkupsToPoints( markupsNode, controlPoints );
   vtkSmartPointer< vtkPolyData > outputPolyData = vtkSmartPointer< vtkPolyData >::New();
-  bool success = vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, interpolationType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType );
+  bool success = vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, interpolationType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, curveGenerator );
   if ( !success )
   {
     return false;
@@ -373,7 +374,8 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkMRMLMarkupsFiducia
 bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoints, vtkPolyData* outputPolyData,
   int interpolationType, bool tubeLoop, double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints,
   bool cleanMarkups, int polynomialOrder, int pointParameterType,
-  bool kochanekEndsCopyNearestDerivatives, double kochanekBias, double kochanekContinuity, double kochanekTension )
+  bool kochanekEndsCopyNearestDerivatives, double kochanekBias, double kochanekContinuity, double kochanekTension,
+  vtkCurveGenerator* curveGenerator )
 {
   if ( controlPoints == NULL )
   {
@@ -406,7 +408,12 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
     return true;
   }
 
-  vtkSmartPointer< vtkCurveGenerator > curveGenerator = vtkSmartPointer< vtkCurveGenerator >::New();
+  vtkSmartPointer< vtkCurveGenerator > temporaryCurveGenerator = NULL; // needed in case curveGenerator is null
+  if ( curveGenerator == NULL )
+  {
+    temporaryCurveGenerator = vtkSmartPointer< vtkCurveGenerator >::New();
+    curveGenerator = temporaryCurveGenerator;
+  }
   curveGenerator->SetInputPoints( controlPoints );
   curveGenerator->SetNumberOfPointsPerInterpolatingSegment( tubeSegmentsBetweenControlPoints );
   vtkPoints* curvePoints = NULL; // temporary value
