@@ -4,11 +4,7 @@ set(KIT ${PROJECT_NAME})
 
 set(${KIT}_EXPORT_DIRECTIVE "VTK_SLICER_${MODULE_NAME_UPPER}_MODULE_LOGIC_EXPORT")
 
-
-#Really wierd!!
 set(${KIT}_INCLUDE_DIRECTORIES
-  ${CMAKE_CURRENT_SOURCE_DIR}/../MRML
-  ${CMAKE_CURRENT_BINARY_DIR}/../MRML
   )
 
 set(${KIT}_SRCS
@@ -16,8 +12,12 @@ set(${KIT}_SRCS
   vtkSlicer${MODULE_NAME}Logic.h
   vtkSlicer${MODULE_NAME}ClosedSurfaceGeneration.cxx
   vtkSlicer${MODULE_NAME}ClosedSurfaceGeneration.h
-  vtkSlicer${MODULE_NAME}CurveGeneration.cxx
-  vtkSlicer${MODULE_NAME}CurveGeneration.h
+  vtkCurveGenerator.cxx
+  vtkCurveGenerator.h
+  vtkLinearSpline.cxx
+  vtkLinearSpline.h
+  vtkParametricPolynomialApproximation.cxx
+  vtkParametricPolynomialApproximation.h
   )
 
 set(${KIT}_TARGET_LIBRARIES

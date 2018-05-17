@@ -47,6 +47,7 @@ class vtkMRMLMarkupsFiducialNode;
 class vtkMRMLMarkupsToModelNode;
 class vtkMRMLModelNode;
 class vtkPolyData;
+class vtkCurveGenerator;
 
 /// \ingroup Slicer_QtModules_ExtensionTemplate
 class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkSlicerMarkupsToModelLogic :
@@ -77,14 +78,16 @@ public:
   static bool UpdateOutputCurveModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
       int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
       bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
-      bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices );
+      bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices,
+      vtkCurveGenerator* curveGenerator = NULL );
   
   static bool UpdateOutputCurveModel( vtkPoints* controlPoints, vtkPolyData* polyData,
       int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
       bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
       bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices,
       bool kochanekEndsCopyNearestDerivative = false, double kochanekBias = 0.0,
-      double kochanekContinuity = 0.0, double kochanekTension = 0.0 );
+      double kochanekContinuity = 0.0, double kochanekTension = 0.0,
+      vtkCurveGenerator* curveGenerator = NULL );
 
   // Get the points store in a vtkMRMLMarkupsFiducialNode
   static void MarkupsToPoints( vtkMRMLMarkupsFiducialNode* markupsNode, vtkPoints* outputPoints );
@@ -113,10 +116,31 @@ protected:
   virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
 
 private:
-  vtkSlicerMarkupsToModelLogic(const vtkSlicerMarkupsToModelLogic&); // Not implemented
-  void operator=(const vtkSlicerMarkupsToModelLogic&); // Not implemented
+  vtkSmartPointer< vtkCurveGenerator > curveGenerator;
+
+  // Generate a sphere at the point specified. Special case to be called when only one point is input.
+  //   point - center of the sphere
+  //   outputSpherePolyData - the sphere will be stored in this poly data.
+  //   sphereRadius - the radius of the sphere in outputSphere.
+  //   sphereNumberOfSides - The phi and theta resolution for sphere tesselation (higher = smoother).
+  static void GenerateSphereModel( double point[ 3 ], vtkPolyData* outputSpherePolyData, double sphereRadius, int sphereNumberOfSides );
+
+  // Generate a tube that passes through the points specified.
+  //   points - the points that the tube passes through
+  //   outputTubePolyData - the tube mesh will be stored in this poly data.
+  //   tubeRadius - the radius of the tube in outputTubePolyData.
+  //   tubeNumberOfSides - The resolution for tube tesselation (higher = smoother).
+  static void GenerateTubeModel( vtkPoints* points, vtkPolyData* outputTubePolyData, double tubeRadius, int tubeNumberOfSides );
+
+  // If looped, the first and last segment of the curve must be exactly parallel.
+  // Otherwise the curve will have two caps that don't line up and the curve will
+  // not appear continuous.
+  static void MakeLoopContinuous( vtkPoints* curvePoints );
 
   static void AssignPolyDataToOutput( vtkMRMLMarkupsToModelNode* moduleNode, vtkPolyData* polyData );
+
+  vtkSlicerMarkupsToModelLogic(const vtkSlicerMarkupsToModelLogic&); // Not implemented
+  void operator=(const vtkSlicerMarkupsToModelLogic&); // Not implemented
 };
 
 #endif
