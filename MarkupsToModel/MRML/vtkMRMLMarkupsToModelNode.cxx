@@ -59,9 +59,9 @@ vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
   this->TubeSegmentsBetweenControlPoints = 5;
   this->TubeNumberOfSides = 8;
   this->TubeLoop = false;
-  this->ModelType = 0;
-  this->InterpolationType = 0;
-  this->PointParameterType = 0;
+  this->ModelType = vtkMRMLMarkupsToModelNode::ClosedSurface;
+  this->InterpolationType = vtkMRMLMarkupsToModelNode::Linear;
+  this->PointParameterType = vtkMRMLMarkupsToModelNode::RawIndices;
 
   this->KochanekTension = 0;
   this->KochanekBias = 0;
@@ -70,6 +70,9 @@ vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
   this->KochanekEndsCopyNearestDerivatives = false;
 
   this->PolynomialOrder = 3;
+  this->PolynomialFitType = vtkMRMLMarkupsToModelNode::GlobalLeastSquares;
+  this->PolynomialSampleWidth = 0.5;
+  this->PolynomialWeightType = vtkMRMLMarkupsToModelNode::Rectangular;
 }
 
 //-----------------------------------------------------------------
@@ -113,6 +116,9 @@ void vtkMRMLMarkupsToModelNode::WriteXML( ostream& of, int nIndent )
   of << indent << " KochanekContinuity=\"" << this->KochanekContinuity << "\"";
   of << indent << " KochanekTension=\"" << this->KochanekTension << "\"";
   of << indent << " PolynomialOrder=\"" << this->PolynomialOrder << "\"";
+  of << indent << " PolynomialFitType=\"" << this->GetPolynomialFitTypeAsString( this->PolynomialFitType ) << "\"";
+  of << indent << " PolynomialSampleWidth=\"" << this->PolynomialSampleWidth << "\"";
+  of << indent << " PolynomialWeightType=\"" << this->GetPolynomialWeightTypeAsString( this->PolynomialWeightType ) << "\"";
 }
 
 //-----------------------------------------------------------------
@@ -130,173 +136,202 @@ void vtkMRMLMarkupsToModelNode::ReadXMLAttributes( const char** atts )
   {
     attName  = *(atts++);
     attValue = *(atts++);
-    if ( ! strcmp( attName, "ModelType" ) )
+    if ( strcmp( attName, "ModelType" ) == 0 )
     {
-      int typeAsInt = GetModelTypeFromString( attValue );
-      if ( typeAsInt >= 0 && typeAsInt < ModelType_Last)
+      int typeAsInt = this->GetModelTypeFromString( attValue );
+      if ( typeAsInt < 0 || typeAsInt >= ModelType_Last)
       {
-        this->ModelType = typeAsInt;
+        vtkWarningMacro( "Unrecognized model type read from MRML node: " << attValue << ". Setting to ClosedSurface." );
+        typeAsInt = this->ClosedSurface;
       }
-      else
-      {
-        vtkWarningMacro("Unrecognized model type read from MRML node: " << attValue << ". Setting to ClosedSurface.");
-        this->ModelType = this->ClosedSurface;
-      }
+      this->SetModelType( typeAsInt );
     }
-    else if ( ! strcmp( attName, "AutoUpdateOutput" ) )
+    else if ( strcmp( attName, "AutoUpdateOutput" ) == 0 )
     {
-      SetAutoUpdateOutput(!strcmp(attValue,"true"));
+      this->SetAutoUpdateOutput(!strcmp(attValue,"true"));
     }
-    else if ( ! strcmp( attName, "CleanMarkups" ) )
+    else if ( strcmp( attName, "CleanMarkups" ) == 0 )
     {
-      SetCleanMarkups(!strcmp(attValue,"true"));
+      this->SetCleanMarkups(!strcmp(attValue,"true"));
     }
-    else if ( ! strcmp( attName, "ConvexHull" ) )
+    else if ( strcmp( attName, "ConvexHull" ) == 0 )
     {
-      SetConvexHull(!strcmp(attValue,"true"));
+      this->SetConvexHull(!strcmp(attValue,"true"));
     }
-    else if ( ! strcmp( attName, "ButterflySubdivision" ) )
+    else if ( strcmp( attName, "ButterflySubdivision" ) == 0 )
     {
-      SetButterflySubdivision(!strcmp(attValue,"true"));
+      this->SetButterflySubdivision(!strcmp(attValue,"true"));
     }
-    else if ( ! strcmp( attName, "DelaunayAlpha" ) )
+    else if ( strcmp( attName, "DelaunayAlpha" ) == 0 )
     {
       double delaunayAlpha = 0.0;
       std::stringstream nameString;
       nameString << attValue;
       nameString >> delaunayAlpha;
-      SetDelaunayAlpha(delaunayAlpha);
+      this->SetDelaunayAlpha( delaunayAlpha );
     }
-    else if ( ! strcmp( attName, "InterpolationType" ) )
+    else if ( strcmp( attName, "InterpolationType" ) == 0 )
     {
-      int typeAsInt = GetInterpolationTypeFromString( attValue );
-      if ( typeAsInt >= 0 && typeAsInt < InterpolationType_Last)
+      int typeAsInt = this->GetInterpolationTypeFromString( attValue );
+      if ( typeAsInt < 0 || typeAsInt >= InterpolationType_Last )
       {
-        this->InterpolationType = typeAsInt;
+        vtkWarningMacro( "Unrecognized interpolation type read from MRML node: " << attValue << ". Setting to Linear." );
+        typeAsInt = this->Linear;
       }
-      else
-      {
-        vtkWarningMacro("Unrecognized interpolation type read from MRML node: " << attValue << ". Setting to Linear.");
-        this->InterpolationType = this->Linear;
-      }
+      this->SetInterpolationType( typeAsInt );
     }
-    else if ( ! strcmp( attName, "PointParameterType" ) )
+    else if ( strcmp( attName, "PointParameterType" ) == 0 )
     {
-      int typeAsInt = GetPointParameterTypeFromString( attValue );
-      if ( typeAsInt >= 0 && typeAsInt < PointParameterType_Last)
+      int typeAsInt = this->GetPointParameterTypeFromString( attValue );
+      if ( typeAsInt < 0 || typeAsInt >= PointParameterType_Last )
       {
-        this->PointParameterType = typeAsInt;
+        vtkWarningMacro( "Unrecognized point parameter type read from MRML node: " << attValue << ". Setting to RawIndices." );
+        typeAsInt = this->RawIndices;
       }
-      else
-      {
-        vtkWarningMacro("Unrecognized point parameter type read from MRML node: " << attValue << ". Setting to RawIndices.");
-        this->PointParameterType = this->RawIndices;
-      }
+      this->SetPointParameterType( typeAsInt );
     }
-    else if ( ! strcmp( attName, "TubeRadius" ) )
+    else if ( strcmp( attName, "TubeRadius" ) == 0 )
     {
       double tubeRadius = 0.0;
       std::stringstream nameString;
       nameString << attValue;
       nameString >> tubeRadius;
-      SetTubeRadius(tubeRadius);
+      this->SetTubeRadius( tubeRadius );
     }
-    else if ( ! strcmp( attName, "TubeNumberOfSides" ) )
+    else if ( strcmp( attName, "TubeNumberOfSides" ) == 0 )
     {
       double tubeNumberOfSides = 0.0;
       std::stringstream nameString;
       nameString << attValue;
       nameString >> tubeNumberOfSides;
-      SetTubeNumberOfSides(tubeNumberOfSides);
+      this->SetTubeNumberOfSides( tubeNumberOfSides );
     }
-    else if ( ! strcmp( attName, "TubeSegmentsBetweenControlPoints" ) )
+    else if ( strcmp( attName, "TubeSegmentsBetweenControlPoints" ) == 0 )
     {
       double tubeSegmentsBetweenControlPoints = 0.0;
       std::stringstream nameString;
       nameString << attValue;
       nameString >> tubeSegmentsBetweenControlPoints;
-      SetTubeSegmentsBetweenControlPoints(tubeSegmentsBetweenControlPoints);
+      this->SetTubeSegmentsBetweenControlPoints( tubeSegmentsBetweenControlPoints );
     }
-    else if ( ! strcmp( attName, "TubeLoop" ) )
+    else if ( strcmp( attName, "TubeLoop" ) == 0 )
     {
       bool isTrue = !strcmp( attValue, "true" );
-      SetTubeLoop( isTrue );
+      this->SetTubeLoop( isTrue );
     }
-    else if ( ! strcmp( attName, "KochanekEndsCopyNearestDerivatives" ) )
+    else if ( strcmp( attName, "KochanekEndsCopyNearestDerivatives" ) == 0 )
     {
       bool isTrue = !strcmp( attValue, "true" );
-      SetKochanekEndsCopyNearestDerivatives( isTrue );
+      this->SetKochanekEndsCopyNearestDerivatives( isTrue );
     }
-    else if ( ! strcmp( attName, "KochanekBias" ) )
+    else if ( strcmp( attName, "KochanekBias" ) == 0 )
     {
       double kochanekBias = 0.0;
       std::stringstream nameString;
       nameString << attValue;
       nameString >> kochanekBias;
-      if (kochanekBias < -1.0)
+      if ( kochanekBias < -1.0 )
       {
-        vtkWarningMacro("Kochanek Bias " << kochanekBias << " is too small. Setting to -1.0.)");
+        vtkWarningMacro( "Kochanek Bias " << kochanekBias << " is too small. Setting to -1.0.)" );
         kochanekBias = -1.0;
       }
-      else if (kochanekBias > 1.0)
+      else if ( kochanekBias > 1.0 )
       {
-        vtkWarningMacro("Kochanek Bias " << kochanekBias << " is too large. Setting to 1.0.)");
+        vtkWarningMacro( "Kochanek Bias " << kochanekBias << " is too large. Setting to 1.0.)" );
         kochanekBias = 1.0;
       }
-      SetKochanekBias(kochanekBias);
+      this->SetKochanekBias( kochanekBias );
     }
-    else if ( ! strcmp( attName, "KochanekContinuity" ) )
+    else if ( strcmp( attName, "KochanekContinuity" ) == 0 )
     {
       double kochanekContinuity = 0.0;
       std::stringstream nameString;
       nameString << attValue;
       nameString >> kochanekContinuity;
-      if (kochanekContinuity < -1.0)
+      if ( kochanekContinuity < -1.0 )
       {
-        vtkWarningMacro("Kochanek Continuity " << kochanekContinuity << " is too small. Setting to -1.0.)");
+        vtkWarningMacro( "Kochanek Continuity " << kochanekContinuity << " is too small. Setting to -1.0.)" );
         kochanekContinuity = -1.0;
       }
-      else if (kochanekContinuity > 1.0)
+      else if ( kochanekContinuity > 1.0 )
       {
-        vtkWarningMacro("Kochanek Continuity " << kochanekContinuity << " is too large. Setting to 1.0.)");
+        vtkWarningMacro( "Kochanek Continuity " << kochanekContinuity << " is too large. Setting to 1.0.)" );
         kochanekContinuity = 1.0;
       }
-      SetKochanekContinuity(kochanekContinuity);
+      this->SetKochanekContinuity( kochanekContinuity );
     }
-    else if ( ! strcmp( attName, "KochanekTension" ) )
+    else if ( strcmp( attName, "KochanekTension" ) == 0 )
     {
       double kochanekTension = 0.0;
       std::stringstream nameString;
       nameString << attValue;
       nameString >> kochanekTension;
-      if (kochanekTension < -1.0)
+      if ( kochanekTension < -1.0 )
       {
-        vtkWarningMacro("Kochanek Tension " << kochanekTension << " is too small. Setting to -1.0.)");
+        vtkWarningMacro( "Kochanek Tension " << kochanekTension << " is too small. Setting to -1.0.)" );
         kochanekTension = -1.0;
       }
-      else if (kochanekTension > 1.0)
+      else if ( kochanekTension > 1.0 )
       {
-        vtkWarningMacro("Kochanek Tension " << kochanekTension << " is too large. Setting to 1.0.)");
+        vtkWarningMacro( "Kochanek Tension " << kochanekTension << " is too large. Setting to 1.0.)" );
         kochanekTension = 1.0;
       }
-      SetKochanekTension(kochanekTension);
+      this->SetKochanekTension( kochanekTension );
     }
-    else if ( ! strcmp( attName, "PolynomialOrder" ) )
+    else if ( strcmp( attName, "PolynomialOrder" ) == 0 )
     {
-      double polynomialOrder = 0.0;
+      int polynomialOrder = 1;
       std::stringstream nameString;
       nameString << attValue;
       nameString >> polynomialOrder;
-      if (polynomialOrder < 1.0)
+      if ( polynomialOrder < 1 )
       {
-        vtkWarningMacro("Polynomial Order " << polynomialOrder << " is too small. Setting to 1.)");
-        polynomialOrder = 1.0;
+        vtkWarningMacro( "Polynomial Order " << polynomialOrder << " is too small. Setting to 1.)" );
+        polynomialOrder = 1;
       }
-      SetPolynomialOrder(polynomialOrder);
+      this->SetPolynomialOrder( polynomialOrder );
+    }
+    else if ( strcmp( attName, "PolynomialFitType" ) == 0 )
+    {
+      int typeAsInt = this->GetPolynomialFitTypeFromString( attValue );
+      if ( typeAsInt < 0 || typeAsInt >= PolynomialFitType_Last )
+      {
+        vtkWarningMacro( "Unrecognized polynomial fit type read from MRML node: " << attValue << ". Setting to GlobalLeastSquares." );
+        typeAsInt = this->GlobalLeastSquares;
+      }
+      this->SetPolynomialFitType( typeAsInt );
+    }
+    else if ( strcmp( attName, "PolynomialSampleWidth" ) == 0 )
+    {
+      double polynomialSampleWidth = 0.0;
+      std::stringstream nameString;
+      nameString << attValue;
+      nameString >> polynomialSampleWidth;
+      if ( polynomialSampleWidth < 0.0 )
+      {
+        vtkWarningMacro( "Polynomial sample width " << polynomialSampleWidth << " is too small. Setting to 0.0.)" );
+        polynomialSampleWidth = 0.0;
+      }
+      else if ( polynomialSampleWidth > 1.0 )
+      {
+        vtkWarningMacro( "Polynomial sample width " << polynomialSampleWidth << " is too large. Setting to 1.0.)" );
+        polynomialSampleWidth = 1.0;
+      }
+      this->SetPolynomialSampleWidth( polynomialSampleWidth );
+    }
+    else if ( strcmp( attName, "PolynomialWeightType" ) == 0 )
+    {
+      int typeAsInt = this->GetPolynomialWeightTypeFromString( attValue );
+      if ( typeAsInt < 0 || typeAsInt >= PolynomialWeightType_Last )
+      {
+        vtkWarningMacro("Unrecognized polynomial weight type read from MRML node: " << attValue << ". Setting to Rectangular.");
+        typeAsInt = vtkMRMLMarkupsToModelNode::Rectangular;
+      }
+      this->SetPolynomialWeightType( typeAsInt );
     }
   }
 
-  this->EndModify(disabledModify);
+  this->EndModify( disabledModify );
 }
 
 //-----------------------------------------------------------------
@@ -409,6 +444,34 @@ const char* vtkMRMLMarkupsToModelNode::GetPointParameterTypeAsString( int id )
 }
 
 //------------------------------------------------------------------------------
+const char* vtkMRMLMarkupsToModelNode::GetPolynomialFitTypeAsString( int id )
+{
+  switch ( id )
+  {
+  case GlobalLeastSquares: return "globalLeastSquares";
+  case MovingLeastSquares: return "movingLeastSquares";
+  default:
+    // invalid id
+    return "";
+  }
+}
+
+//------------------------------------------------------------------------------
+const char* vtkMRMLMarkupsToModelNode::GetPolynomialWeightTypeAsString( int id )
+{
+  switch ( id )
+  {
+  case Rectangular: return "rectangular";
+  case Triangular: return "triangular";
+  case Cosine: return "cosine";
+  case Gaussian: return "gaussian";
+  default:
+    // invalid id
+    return "";
+  }
+}
+
+//------------------------------------------------------------------------------
 int vtkMRMLMarkupsToModelNode::GetModelTypeFromString( const char* name )
 {
   if ( name == NULL )
@@ -459,6 +522,47 @@ int vtkMRMLMarkupsToModelNode::GetPointParameterTypeFromString( const char* name
   for ( int i = 0; i < PointParameterType_Last; i++ )
   {
     if ( strcmp( name, GetPointParameterTypeAsString( i ) ) == 0 )
+    {
+      // found a matching name
+      return i;
+    }
+  }
+  // unknown name
+  return -1;
+}
+
+//------------------------------------------------------------------------------
+int vtkMRMLMarkupsToModelNode::GetPolynomialFitTypeFromString( const char* name )
+{
+  if ( name == NULL )
+  {
+    // invalid name
+    return -1;
+  }
+  for ( int i = 0; i < PolynomialFitType_Last; i++ )
+  {
+    if ( strcmp( name, GetPolynomialFitTypeAsString( i ) ) == 0 )
+    {
+      // found a matching name
+      return i;
+    }
+  }
+  // unknown name
+  return -1;
+}
+
+
+//------------------------------------------------------------------------------
+int vtkMRMLMarkupsToModelNode::GetPolynomialWeightTypeFromString( const char* name )
+{
+  if ( name == NULL )
+  {
+    // invalid name
+    return -1;
+  }
+  for ( int i = 0; i < PolynomialWeightType_Last; i++ )
+  {
+    if ( strcmp( name, GetPolynomialWeightTypeAsString( i ) ) == 0 )
     {
       // found a matching name
       return i;

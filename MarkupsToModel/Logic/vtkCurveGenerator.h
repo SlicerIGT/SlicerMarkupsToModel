@@ -36,7 +36,7 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
       CURVE_TYPE_LINEAR_SPLINE = 0, // Curve interpolates between input points with straight lines
       CURVE_TYPE_CARDINAL_SPLINE, // Curve interpolates between input points smoothly
       CURVE_TYPE_KOCHANEK_SPLINE, // Curve interpolates between input points smoothly, generalized
-      CURVE_TYPE_POLYNOMIAL_GLOBAL_LEAST_SQUARES, // Curve approximates the input points with a global least-squares polynomial fit
+      CURVE_TYPE_POLYNOMIAL, // Curve approximates the input points with a polynomial fit
       CURVE_TYPE_LAST // Valid types go above this line
     };
     vtkGetMacro( CurveType, int );
@@ -45,7 +45,7 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
     void SetCurveTypeToLinearSpline() { this->SetCurveType( CURVE_TYPE_LINEAR_SPLINE ); }
     void SetCurveTypeToCardinalSpline() { this->SetCurveType( CURVE_TYPE_CARDINAL_SPLINE ); }
     void SetCurveTypeToKochanekSpline() { this->SetCurveType( CURVE_TYPE_KOCHANEK_SPLINE ); }
-    void SetCurveTypeToPolynomialGlobalLeastSquares() { this->SetCurveType( CURVE_TYPE_POLYNOMIAL_GLOBAL_LEAST_SQUARES ); }
+    void SetCurveTypeToPolynomial() { this->SetCurveType( CURVE_TYPE_POLYNOMIAL ); }
 
     // Sample an *interpolating* curve this many times per segment (pair of points in sequence). Range 1 and up. Default 5.
     vtkSetMacro( NumberOfPointsPerInterpolatingSegment, int );
@@ -71,10 +71,6 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
     vtkGetMacro( PolynomialOrder, int );
     vtkSetMacro( PolynomialOrder, int );
 
-    // Set the points that the curve should be based on
-    vtkPoints* GetInputPoints();
-    void SetInputPoints( vtkPoints* );
-
     // Wednesday May 9, 2018 TODO
     // InputParameters is currently computed by this class depending on the 
     // value of PolynomialPointSortingMethod, and is only supported for polynomials.
@@ -96,6 +92,44 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
     std::string GetPolynomialPointSortingMethodAsString();
     void SetPolynomialPointSortingMethodToIndex() { this->SetPolynomialPointSortingMethod( vtkCurveGenerator::SORTING_METHOD_INDEX ); }
     void SetPolynomialPointSortingMethodToMinimumSpanningTreePosition() { this->SetPolynomialPointSortingMethod( vtkCurveGenerator::SORTING_METHOD_MINIMUM_SPANNING_TREE_POSITION ); }
+
+    // Set the type of fit for polynomials
+    // see corresponding entries in vtkParametricPolynomialApproximation.h for more information
+    enum {
+      POLYNOMIAL_FIT_METHOD_GLOBAL_LEAST_SQUARES = 0,
+      POLYNOMIAL_FIT_METHOD_MOVING_LEAST_SQUARES,
+      POLYNOMIAL_FIT_METHOD_LAST // Valid types go above this line
+    };
+    vtkGetMacro( PolynomialFitMethod, double );
+    vtkSetMacro( PolynomialFitMethod, double );
+    std::string GetPolynomialFitMethodAsString();
+    void SetPolynomialFitMethodToGlobalLeastSquares() { this->SetPolynomialFitMethod( vtkCurveGenerator::POLYNOMIAL_FIT_METHOD_GLOBAL_LEAST_SQUARES ); }
+    void SetPolynomialFitMethodToMovingLeastSquares() { this->SetPolynomialFitMethod( vtkCurveGenerator::POLYNOMIAL_FIT_METHOD_MOVING_LEAST_SQUARES ); }
+
+    // Set the sampling distance (in parameter space) for moving least squares sampling
+    vtkGetMacro( PolynomialSampleWidth, double );
+    vtkSetMacro( PolynomialSampleWidth, double );
+
+    // Set the weight function for moving least squares polynomial fits
+    // see corresponding entries in vtkParametricPolynomialApproximation.h for more information
+    enum {
+      POLYNOMIAL_WEIGHT_FUNCTION_RECTANGULAR = 0,
+      POLYNOMIAL_WEIGHT_FUNCTION_TRIANGULAR,
+      POLYNOMIAL_WEIGHT_FUNCTION_COSINE,
+      POLYNOMIAL_WEIGHT_FUNCTION_GAUSSIAN,
+      POLYNOMIAL_WEIGHT_FUNCTION_LAST // Valid types go above this line
+    };
+    vtkGetMacro( PolynomialWeightFunction, double );
+    vtkSetMacro( PolynomialWeightFunction, double );
+    std::string GetPolynomialWeightFunctionAsString();
+    void SetPolynomialWeightFunctionToRectangular() { this->SetPolynomialWeightFunction( vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_RECTANGULAR ); }
+    void SetPolynomialWeightFunctionToTriangular() { this->SetPolynomialWeightFunction( vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_TRIANGULAR ); }
+    void SetPolynomialWeightFunctionToCosine() { this->SetPolynomialWeightFunction( vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_COSINE ); }
+    void SetPolynomialWeightFunctionToGaussian() { this->SetPolynomialWeightFunction( vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_GAUSSIAN ); }
+
+    // Set the points that the curve should be based on
+    vtkPoints* GetInputPoints();
+    void SetInputPoints( vtkPoints* );
 
     // output sampled points
     vtkPoints* GetOutputPoints();
@@ -122,6 +156,9 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
     bool KochanekEndsCopyNearestDerivatives;
     int PolynomialOrder;
     int PolynomialPointSortingMethod;
+    int PolynomialFitMethod;
+    double PolynomialSampleWidth;
+    int PolynomialWeightFunction;
 
     // internal storage
     vtkSmartPointer< vtkDoubleArray > InputParameters;

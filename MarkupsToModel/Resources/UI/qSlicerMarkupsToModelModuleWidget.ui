@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>802</width>
-    <height>524</height>
+    <height>855</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -183,6 +183,13 @@
       <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="AdvancedLayout">
+      <item row="15" column="0">
+       <widget class="QLabel" name="PolynomialFitMethodLabel">
+        <property name="text">
+         <string>Polynomial Fit Method</string>
+        </property>
+       </widget>
+      </item>
       <item row="7" column="1">
        <widget class="QCheckBox" name="TubeLoopCheckBox">
         <property name="text">
@@ -490,7 +497,16 @@
          <bool>false</bool>
         </property>
         <layout class="QGridLayout" name="InterpolationLayout">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <property name="spacing">
@@ -548,7 +564,16 @@
          <string/>
         </property>
         <layout class="QGridLayout" name="PointParameterLayout">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <property name="spacing">
@@ -578,6 +603,126 @@
           </widget>
          </item>
         </layout>
+       </widget>
+      </item>
+      <item row="15" column="1">
+       <widget class="QGroupBox" name="PolynomialFitMethodGroupBox">
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QGridLayout" name="PolynomialFitTypeLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="PolynomialFitMethodGlobalLeastSquaresRadioButton">
+           <property name="text">
+            <string>Global Least Squares</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="PolynomialFitMethodMovingLeastSquaresRadioButton">
+           <property name="text">
+            <string>Moving Least Squares</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="16" column="0">
+       <widget class="QLabel" name="PolynomialSampleWidthLabel">
+        <property name="text">
+         <string>Polynomial Sample Width</string>
+        </property>
+       </widget>
+      </item>
+      <item row="16" column="1">
+       <widget class="QDoubleSpinBox" name="PolynomialSampleWidthDoubleSpinBox">
+        <property name="maximum">
+         <double>2.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="17" column="1">
+       <widget class="QGroupBox" name="PolynomialWeightFunctionGroupBox">
+        <property name="title">
+         <string/>
+        </property>
+        <layout class="QGridLayout" name="PolynomialWeightFunctionLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="PolynomialWeightFunctionRectangularRadioButton">
+           <property name="text">
+            <string>Rectangular</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QRadioButton" name="PolynomialWeightFunctionCosineRadioButton">
+           <property name="text">
+            <string>Cosine</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QRadioButton" name="PolynomialWeightFunctionGaussianRadioButton">
+           <property name="text">
+            <string>Gaussian</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="PolynomialWeightFunctionTriangularRadioButton">
+           <property name="text">
+            <string>Triangular</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="17" column="0">
+       <widget class="QLabel" name="PolynomialWeightFunctionLabel">
+        <property name="text">
+         <string>Polynomial Weight Function</string>
+        </property>
        </widget>
       </item>
      </layout>

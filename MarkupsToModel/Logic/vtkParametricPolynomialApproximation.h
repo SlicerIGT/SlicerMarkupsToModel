@@ -23,6 +23,7 @@
 
 class vtkPoints;
 class vtkDoubleArray;
+class vtkTimeStamp;
 
 #include "vtkSlicerMarkupsToModelModuleLogicExport.h" // For export macro
 
@@ -78,23 +79,101 @@ public:
   void SetParameters( vtkDoubleArray* );
   //@}
 
+  //@{
+  /**
+   * Fitting options, see FitMethod
+   */
+  enum {
+    FIT_METHOD_GLOBAL_LEAST_SQUARES = 0, // global fit
+    FIT_METHOD_MOVING_LEAST_SQUARES, // local fit
+    FIT_METHOD_LAST // valid types go above this line
+  };
+  //@}
+
+  //@{
+  /**
+   * What type of fit should be used (e.g. global/local)
+   */
+  vtkGetMacro( FitMethod, int );
+  vtkSetMacro( FitMethod, int );
+  void SetFitMethodToGlobalLeastSquares() { this->SetFitMethod( vtkParametricPolynomialApproximation::FIT_METHOD_GLOBAL_LEAST_SQUARES ); }
+  void SetFitMethodToMovingLeastSquares() { this->SetFitMethod( vtkParametricPolynomialApproximation::FIT_METHOD_MOVING_LEAST_SQUARES ); }
+  //@}
+  
+  //@{
+  /**
+   * Options for weighing points in moving least squares, see WeightFunction
+   */
+  enum {
+    WEIGHT_FUNCTION_RECTANGULAR = 0, // All points within the sampling width (see above) are treated with equal importance
+    WEIGHT_FUNCTION_TRIANGULAR, // Points closer are treated as more important, falloff is linear
+    WEIGHT_FUNCTION_COSINE, // Points closer are treated as more important, falloff curve follows a smooth cosine
+    WEIGHT_FUNCTION_GAUSSIAN, // Points closer are treated as more important, falloff curve follows a smooth gaussian with 5% cutoff
+    WEIGHT_FUNCTION_LAST // valid types go above this line
+  };
+  //@}
+
+  //@{
+  /**
+   * Specify the order of polynomial (maximum exponent) that should be fit.
+   */
+  vtkGetMacro( WeightFunction, int );
+  vtkSetMacro( WeightFunction, int );
+  void SetWeightFunctionToRectangular() { this->SetWeightFunction( vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_RECTANGULAR ); }
+  void SetWeightFunctionToTriangular() { this->SetWeightFunction( vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_TRIANGULAR ); }
+  void SetWeightFunctionToCosine() { this->SetWeightFunction( vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_COSINE ); }
+  void SetWeightFunctionToGaussian() { this->SetWeightFunction( vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_GAUSSIAN ); }
+  //@}
+
+  //@{
+  /**
+   * The width of sampling for moving least squares (in parameter space)
+   * This is total width, so the space that is sampled is
+   * SamplePosition - ( SampleWidth / 2 ) through to
+   * SamplePosition + ( SampleWidth / 2 ).
+   * Valid range is from 0.0 to 1.0. Default is 0.5.
+   */
+  vtkGetMacro( SampleWidth, double );
+  vtkSetMacro( SampleWidth, double );
+  //@}
+
 protected:
   vtkParametricPolynomialApproximation();
   ~vtkParametricPolynomialApproximation() override;
 
 private:
-  // Fitting the polynomial
+  // What kind of fit (global/local)
+  int FitMethod;
+
+  // These apply to all types of polynomials
+  int PolynomialOrder;
+  vtkSmartPointer< vtkDoubleArray > Parameters;
+  vtkSmartPointer< vtkPoints > Points;
+  double SamplePosition; // Internally store the sample position queried by the user
+
+  // These apply only to moving least squares (for now)
+  vtkSmartPointer< vtkDoubleArray > Weights; // Internally compute and store weights
+  vtkSmartPointer< vtkDoubleArray > SortedParameters; // Internally computed, same values as Parameters but sorted
+  int WeightFunction;
+  double SampleWidth;
+  double SafeSampleWidth; // internally computed, ensures that moving least squares polynomials are always computed in parameters 0..1
+  vtkTimeStamp SafeHalfSampleWidthComputedTime;
+
+  // This is directly used to evaluate points in 3D (in a sense this is the "output")
+  vtkSmartPointer< vtkDoubleArray > Coefficients;
+
+  // Logic functions
   void ComputeCoefficients();
   bool ComputeCoefficientsNeeded();
-  static void FitLeastSquaresPolynomials( vtkDoubleArray* parameters, vtkPoints* points, int polynomialOrder, vtkDoubleArray* coefficients );
-
-  int PolynomialOrder;
-  vtkSmartPointer< vtkPoints > Points;
-  vtkSmartPointer< vtkDoubleArray > Parameters;
-
-  // this is directly used to evaluate points in 3D
-  // in a sense this is the "output"
-  vtkSmartPointer< vtkDoubleArray > Coefficients;
+  void ComputeWeights();
+  void ComputeWeightsGlobalLeastSquares();
+  void ComputeWeightsMovingLeastSquares();
+  bool ComputeWeightsNeeded();
+  void ComputeSortedParameters();
+  bool ComputeSortedParametersNeeded();
+  void ComputeSafeSampleWidth();
+  bool ComputeSafeSampleWidthNeeded();
+  static void FitLeastSquaresPolynomials( vtkDoubleArray* parameters, vtkPoints* points, vtkDoubleArray* weights, int polynomialOrder, vtkDoubleArray* coefficients );
 
   vtkParametricPolynomialApproximation( const vtkParametricPolynomialApproximation& ) = delete;
   void operator=( const vtkParametricPolynomialApproximation& ) = delete;

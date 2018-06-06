@@ -16,11 +16,16 @@
 #include <vtkObjectFactory.h>
 #include <vtkPoints.h>
 #include <vtkSmartPointer.h>
+#include <vtkSortDataArray.h>
+#include <vtkTimeStamp.h>
 
 #include <vector>
 #include <set>
+#include <functional>
 
 vtkStandardNewMacro( vtkParametricPolynomialApproximation );
+
+double EPSILON = 0.001;
 
 //----------------------------------------------------------------------------
 vtkParametricPolynomialApproximation::vtkParametricPolynomialApproximation()
@@ -29,9 +34,19 @@ vtkParametricPolynomialApproximation::vtkParametricPolynomialApproximation()
   this->MaximumU = 1.0;
   this->JoinU = 0;
 
+  this->FitMethod = vtkParametricPolynomialApproximation::FIT_METHOD_GLOBAL_LEAST_SQUARES;
+
   this->Points = NULL;
   this->Parameters = NULL;
   this->PolynomialOrder = 1;
+  this->SamplePosition = 0.0;
+
+  this->Weights = NULL;
+  this->SortedParameters = NULL;
+  this->WeightFunction = vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_RECTANGULAR;
+  this->SampleWidth = 0.5;
+  this->SafeSampleWidth = 0.0; // recomputed as needed by this class
+  this->SafeHalfSampleWidthComputedTime.Modified();
   
   this->Coefficients = NULL;
 }
@@ -59,6 +74,8 @@ void vtkParametricPolynomialApproximation::Evaluate( double u[ 3 ], double outpu
   // Set default value
   outputPoint[ 0 ] = outputPoint[ 1 ] = outputPoint[ 2 ] = 0;
 
+  this->SamplePosition = vtkMath::ClampValue< double >( u[ 0 ], 0.0, 1.0 );
+
   // make sure everything has been set up
   if ( this->ComputeCoefficientsNeeded() )
   {
@@ -72,8 +89,6 @@ void vtkParametricPolynomialApproximation::Evaluate( double u[ 3 ], double outpu
     return;
   }
 
-  double sampleParameter = vtkMath::ClampValue< double >( u[ 0 ], 0.0, 1.0 );
-
   const int numberOfDimensions = 3;
   int numberOfCoefficients = this->Coefficients->GetNumberOfComponents();
   for ( int dimensionIndex = 0; dimensionIndex < numberOfDimensions; dimensionIndex++ )
@@ -81,8 +96,8 @@ void vtkParametricPolynomialApproximation::Evaluate( double u[ 3 ], double outpu
     for ( int coefficientIndex = 0; coefficientIndex < numberOfCoefficients; coefficientIndex++ )
     {
       double coefficient = this->Coefficients->GetComponent( dimensionIndex, coefficientIndex );
-      double sampleParameterToExponent = std::pow( sampleParameter, coefficientIndex );
-      outputPoint[ dimensionIndex ] += coefficient * sampleParameterToExponent;
+      double samplePositionToExponent = std::pow( this->SamplePosition, coefficientIndex );
+      outputPoint[ dimensionIndex ] += coefficient * samplePositionToExponent;
     }
   }
 }
@@ -118,16 +133,28 @@ void vtkParametricPolynomialApproximation::ComputeCoefficients()
     return;
   }
 
+  if ( this->ComputeWeightsNeeded() )
+  {
+    this->ComputeWeights();
+  }
+  
   this->Coefficients = vtkSmartPointer< vtkDoubleArray >::New();
-  this->FitLeastSquaresPolynomials( this->Parameters, this->Points, this->PolynomialOrder, this->Coefficients );
+  this->FitLeastSquaresPolynomials( this->Parameters, this->Points, this->Weights, this->PolynomialOrder, this->Coefficients );
 }
 
 //------------------------------------------------------------------------------
 bool vtkParametricPolynomialApproximation::ComputeCoefficientsNeeded()
 {
-  // assume that if anything is null, then the user intends for everything to be computed
-  // in normal use, none of these should be null
+  // Assume that if anything is null, then the user intends for everything to be computed.
+  // In normal use, none of these should be null
   if ( this->Coefficients == NULL || this->Points == NULL || this->Parameters == NULL )
+  {
+    return true;
+  }
+
+  // In moving least squares the weights (and hence coefficients) change
+  // depending on the sample position, so this should always be recomputed
+  if ( this->FitMethod == vtkParametricPolynomialApproximation::FIT_METHOD_MOVING_LEAST_SQUARES )
   {
     return true;
   }
@@ -150,16 +177,301 @@ bool vtkParametricPolynomialApproximation::ComputeCoefficientsNeeded()
   {
     return true;
   }
+
+  // If weights are made modifiable by the user, they will need to be checked here too
   
   return false;
 }
 
 //------------------------------------------------------------------------------
-// This function formats the data so it works with vtkMath::SolveLeastSquares.
-// TODO: Make a weighted version of this, take a list of weights (length same as number of points and parameters),
-// then multiply each dependent and independent value by the corresponding weight for the point
-void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDoubleArray* parameters, vtkPoints* points, int polynomialOrder, vtkDoubleArray* coefficients )
+void vtkParametricPolynomialApproximation::ComputeWeights()
 {
+  if ( this->Parameters == NULL )
+  {
+    vtkErrorMacro( "Parameters are null. cannot compute weights." );
+    return;
+  }
+
+  if ( this->Weights == NULL )
+  {
+    this->Weights = vtkSmartPointer< vtkDoubleArray >::New();
+  }
+  else
+  {
+    this->Weights->Reset();
+  }
+
+  if ( this->FitMethod == vtkParametricPolynomialApproximation::FIT_METHOD_GLOBAL_LEAST_SQUARES )
+  {
+    this->ComputeWeightsGlobalLeastSquares();
+  }
+  else if ( this->FitMethod == vtkParametricPolynomialApproximation::FIT_METHOD_MOVING_LEAST_SQUARES )
+  {
+    this->ComputeWeightsMovingLeastSquares();
+  }
+  else
+  {
+    vtkErrorMacro( "Unexpected FitMethod case in ComputeWeights: " << this->FitMethod << ". Cannot compute weights." );
+  }
+}
+
+//------------------------------------------------------------------------------
+void vtkParametricPolynomialApproximation::ComputeWeightsGlobalLeastSquares()
+{
+  int numberOfParameters = this->Parameters->GetNumberOfTuples();
+  for ( int parameterIndex = 0; parameterIndex < numberOfParameters; parameterIndex++ )
+  {
+    this->Weights->InsertNextTuple1( 1.0 );
+  }
+}
+
+//------------------------------------------------------------------------------
+void vtkParametricPolynomialApproximation::ComputeWeightsMovingLeastSquares()
+{
+  if ( this->ComputeSafeSampleWidthNeeded() )
+  {
+    this->ComputeSafeSampleWidth();
+  }
+
+  double samplePosition = this->SamplePosition;
+  double halfSampleWidth = this->SafeSampleWidth / 2.0;
+  double maximumDistanceFromSamplePosition = halfSampleWidth + EPSILON;
+
+  int numberOfParameters = this->Parameters->GetNumberOfTuples();
+  for ( int parameterIndex = 0; parameterIndex < numberOfParameters; parameterIndex++ )
+  {
+    double weight = 0.0; // assume this value until we know parameterValue (next line) is in range
+    double parameterValue = this->Parameters->GetValue( parameterIndex );
+    double parameterDistanceFromSamplePosition = abs( parameterValue - samplePosition );
+    if ( parameterDistanceFromSamplePosition <= maximumDistanceFromSamplePosition )
+    {
+      switch ( this->WeightFunction )
+      {
+        case vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_RECTANGULAR:
+        {
+          weight = 1.0;
+          break;
+        }
+        case vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_TRIANGULAR:
+        {
+          weight = 1.0 - ( parameterDistanceFromSamplePosition / halfSampleWidth );
+          break;
+        }
+        case vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_COSINE:
+        {
+          // map between -PI and PI
+          double distanceNormalizedRadians = ( parameterDistanceFromSamplePosition / halfSampleWidth ) * M_PI;
+          double cosine = std::cos( distanceNormalizedRadians );
+          // remap from -1..1 to 0..1
+          weight = cosine / 2.0 + 0.5;
+          break;
+        }
+        case vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_GAUSSIAN:
+        {
+          // halfSampleWidth represents 2 standard deviations, so 95% of the gaussian will be captured
+          double stdev = halfSampleWidth / 2.0;
+          double variance = stdev * stdev;
+          weight = vtkMath::GaussianAmplitude( variance, parameterDistanceFromSamplePosition );
+          break;
+        }
+        default:
+        {
+          vtkErrorMacro( "Unexpected weight function: " << this->WeightFunction << ". Cannot compute weights." );
+          return;
+        }
+      }
+    }
+    this->Weights->InsertNextTuple1( weight );
+  }
+}
+
+//------------------------------------------------------------------------------
+bool vtkParametricPolynomialApproximation::ComputeWeightsNeeded()
+{
+  // Assume that if anything is null, then the user intends for everything to be computed.
+  // In normal use, none of these should be null
+  if ( this->Weights == NULL || this->Parameters == NULL )
+  {
+    return true;
+  }
+
+  if ( this->FitMethod == vtkParametricPolynomialApproximation::FIT_METHOD_MOVING_LEAST_SQUARES )
+  {
+    return true;
+  }
+
+  vtkMTimeType approximatorModifiedTime = this->GetMTime();
+  vtkMTimeType weightsModifiedTime = this->Weights->GetMTime();
+  if ( approximatorModifiedTime > weightsModifiedTime )
+  {
+    return true;
+  }
+
+  vtkMTimeType parametersModifiedTime = this->Parameters->GetMTime();
+  if ( parametersModifiedTime > weightsModifiedTime )
+  {
+    return true;
+  }
+
+  return false;
+}
+
+//------------------------------------------------------------------------------
+void vtkParametricPolynomialApproximation::ComputeSortedParameters()
+{
+  if ( this->Parameters == NULL )
+  {
+    vtkErrorMacro( "Cannot compute sorted parameters. Parameters are null." );
+    return;
+  }
+
+  if ( this->SortedParameters == NULL )
+  {
+    this->SortedParameters = vtkSmartPointer< vtkDoubleArray >::New();
+  }
+  else
+  {
+    this->SortedParameters->Reset();
+  }
+
+  this->SortedParameters->DeepCopy( this->Parameters );
+  vtkSortDataArray::Sort( this->SortedParameters );
+}
+
+//------------------------------------------------------------------------------
+bool vtkParametricPolynomialApproximation::ComputeSortedParametersNeeded()
+{
+  // Assume that if anything is null, then the user intends for everything to be computed.
+  // In normal use, none of these should be null
+  if ( this->SortedParameters == NULL || this->Parameters == NULL )
+  {
+    return true;
+  }
+
+  vtkMTimeType sortedModifiedTime = this->SortedParameters->GetMTime();
+  vtkMTimeType originalModifiedTime = this->Parameters->GetMTime();
+  if ( originalModifiedTime > sortedModifiedTime )
+  {
+    return true;
+  }
+
+  return false;
+}
+
+//------------------------------------------------------------------------------
+// Check to make sure that there are no gaps between parameters larger than sampleWidth,
+// otherwise there is a risk of fitting a polynomial with no underlying data (which is bad)
+void vtkParametricPolynomialApproximation::ComputeSafeSampleWidth()
+{
+  if ( this->ComputeSortedParametersNeeded() )
+  {
+    this->ComputeSortedParameters();
+  }
+
+  if ( this->SortedParameters == NULL || this->SortedParameters->GetNumberOfTuples() == 0 )
+  {
+    vtkErrorMacro( "Sorted parameters are null. " <<
+                   "Cannot compute \"safe\" sample width, will use user-requested sample width " << this->SampleWidth << "." );
+    this->SafeSampleWidth = this->SampleWidth;
+    return;
+  }
+
+  int numberOfParameters = this->Parameters->GetNumberOfTuples();
+  int numberOfSortedParameters = this->SortedParameters->GetNumberOfTuples();
+  if ( numberOfSortedParameters != numberOfParameters )
+  {
+    vtkErrorMacro( "Number of parameters before sorting " << numberOfParameters <<
+                   " is not the same as after " << numberOfSortedParameters << ". " <<
+                   "Cannot compute \"safe\" sample width, will use user-requested sample width " << this->SampleWidth << "." );
+    this->SafeSampleWidth = this->SampleWidth;
+    return;
+  }
+
+  double safeSampleWidth = this->SampleWidth;
+  for ( int parameterIndex = 0; parameterIndex < numberOfParameters - 1; parameterIndex++ )
+  {
+    double firstParameter = this->SortedParameters->GetValue( parameterIndex );
+    double secondParameter = this->SortedParameters->GetValue( parameterIndex + 1 );
+    double widthBetweenParameters = std::abs( secondParameter - firstParameter );
+    if ( safeSampleWidth < widthBetweenParameters )
+    {
+      safeSampleWidth = widthBetweenParameters + EPSILON;
+    }
+  }
+
+  this->SafeSampleWidth = safeSampleWidth;
+  this->SafeHalfSampleWidthComputedTime.Modified();
+  if ( this->SampleWidth != this->SafeSampleWidth )
+  {
+    vtkWarningMacro( "Reqested sample width " << this->SampleWidth << " is too small and will result in singularities. " <<
+                     "Computations will use the smallest \"safe\" value " << this->SafeSampleWidth << " instead." );
+  }
+}
+
+//------------------------------------------------------------------------------
+bool vtkParametricPolynomialApproximation::ComputeSafeSampleWidthNeeded()
+{
+  // Assume that if parameters are null, then the user intends for everything to be computed.
+  // In normal use, none of these should be null
+  if ( this->Parameters == NULL )
+  {
+    return true;
+  }
+
+  vtkMTimeType safeSampleModifiedTime = this->SafeHalfSampleWidthComputedTime.GetMTime();
+  vtkMTimeType parametersModifiedTime = this->Parameters->GetMTime();
+  if ( safeSampleModifiedTime < parametersModifiedTime )
+  {
+    return true;
+  }
+
+  vtkMTimeType approximatorModifiedTime = this->GetMTime(); // last change by user
+  if ( safeSampleModifiedTime < approximatorModifiedTime )
+  {
+    return true;
+  }
+
+  return false;
+}
+
+//------------------------------------------------------------------------------
+// This function formats the data so it works with vtkMath::SolveLeastSquares.
+void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDoubleArray* parameters, vtkPoints* points, vtkDoubleArray* weights, int polynomialOrder, vtkDoubleArray* coefficients )
+{
+  // error checking
+  if ( parameters == NULL )
+  {
+    vtkGenericWarningMacro( "Parameters are null. Aborting least squares fit." );
+    return;
+  }
+
+  if ( points == NULL )
+  {
+    vtkGenericWarningMacro( "Points are null. Aborting least squares fit." );
+    return;
+  }
+
+  if ( weights == NULL )
+  {
+    vtkGenericWarningMacro( "Weights are null. Aborting least squares fit." );
+    return;
+  }
+
+  int numberOfPoints = points->GetNumberOfPoints();
+  int numberOfParameters = parameters->GetNumberOfTuples();
+  if ( numberOfPoints != numberOfParameters )
+  {
+    vtkGenericWarningMacro( "The number of points " << numberOfPoints << " does not match number of parameters " << numberOfParameters << ". Aborting least squares fit." );
+    return;
+  }
+
+  int numberOfWeights = weights->GetNumberOfTuples();
+  if ( numberOfPoints != numberOfWeights )
+  {
+    vtkGenericWarningMacro( "The number of points " << numberOfPoints << " does not match number of weights " << numberOfWeights << ". Aborting least squares fit." );
+    return;
+  }
+
   // The system of equations using high-order polynomials is not well-conditioned.
   // The vtkMath implementation will usually abort with polynomial orders higher than 9.
   // Since there is also numerical instability, we decide to limit the polynomial order to 6.
@@ -191,14 +503,16 @@ void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDouble
     polynomialOrder = minimumPolynomialOrder;
   }
 
-  int numberOfPoints = points->GetNumberOfPoints();
-
   // determine number of coefficients for this polynomial
   std::set< double > uniqueParameters;
   for ( int pointIndex = 0; pointIndex < numberOfPoints; pointIndex++ )
   {
-    double parameterValue = parameters->GetValue( pointIndex );
-    uniqueParameters.insert( parameterValue ); // set cannot contain duplicates
+    double weight = weights->GetValue( pointIndex );
+    if ( weight > EPSILON )
+    {
+      double parameterValue = parameters->GetValue( pointIndex );
+      uniqueParameters.insert( parameterValue ); // set cannot contain duplicates
+    }
   }
   int numberOfUniqueParameters = uniqueParameters.size();
   int numberOfCoefficients = polynomialOrder + 1;
@@ -216,7 +530,8 @@ void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDouble
     for ( int pointIndex = 0; pointIndex < numberOfPoints; pointIndex++ )
     {
       double parameterValue = parameters->GetValue( pointIndex );
-      double independentValue = std::pow( parameterValue, coefficientIndex );
+      double weight = weights->GetValue( pointIndex );
+      double independentValue = std::pow( parameterValue, coefficientIndex ) * weight;
       independentValues[ pointIndex * numberOfCoefficients + coefficientIndex ] = independentValue;
     }
   }
@@ -234,9 +549,10 @@ void vtkParametricPolynomialApproximation::FitLeastSquaresPolynomials( vtkDouble
   for ( int pointIndex = 0; pointIndex < numberOfPoints; pointIndex++ )
   {
     double* currentPoint = points->GetPoint( pointIndex );
+    double weight = weights->GetValue( pointIndex );
     for ( int dimensionIndex = 0; dimensionIndex < numberOfDimensions; dimensionIndex++ )
     {
-      double value = currentPoint[ dimensionIndex ];
+      double value = currentPoint[ dimensionIndex ] * weight;
       dependentValues[ pointIndex * numberOfDimensions + dimensionIndex ] = value;
     }
   }

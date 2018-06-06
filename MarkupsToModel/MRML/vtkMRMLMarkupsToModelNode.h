@@ -94,6 +94,22 @@ public:
     PointParameterType_Last // insert valid types above this line
   };
 
+  enum PolynomialFitType
+  {
+    GlobalLeastSquares = 0,
+    MovingLeastSquares,
+    PolynomialFitType_Last // insert valid types above this line
+  };
+
+  enum PolynomialWeightType
+  {
+    Rectangular = 0,
+    Triangular,
+    Cosine,
+    Gaussian,
+    PolynomialWeightType_Last // insert valid types above this line
+  };
+
   vtkTypeMacro( vtkMRMLMarkupsToModelNode, vtkMRMLNode );
   
   // Standard MRML node methods  
@@ -115,6 +131,12 @@ public:
 
   vtkGetMacro( PolynomialOrder, int );
   vtkSetMacro( PolynomialOrder, int );
+  vtkGetMacro( PolynomialFitType, int );
+  vtkSetMacro( PolynomialFitType, int );
+  vtkGetMacro( PolynomialSampleWidth, double );
+  vtkSetMacro( PolynomialSampleWidth, double );
+  vtkGetMacro( PolynomialWeightType, int );
+  vtkSetMacro( PolynomialWeightType, int );
 
   vtkGetMacro( ModelType, int );
   vtkSetMacro( ModelType, int );
@@ -165,9 +187,13 @@ public:
   static const char* GetModelTypeAsString( int id );
   static const char* GetInterpolationTypeAsString( int id );
   static const char* GetPointParameterTypeAsString( int id );
+  static const char* GetPolynomialFitTypeAsString( int id );
+  static const char* GetPolynomialWeightTypeAsString( int id );
   static int GetModelTypeFromString( const char* name );
   static int GetInterpolationTypeFromString( const char* name );
   static int GetPointParameterTypeFromString( const char* name );
+  static int GetPolynomialFitTypeFromString( const char* name );
+  static int GetPolynomialWeightTypeFromString( const char* name );
 
   // DEPRECATED - Get the input node
   vtkMRMLMarkupsFiducialNode* GetMarkupsNode( );
@@ -199,6 +225,9 @@ private:
   double KochanekBias; 
   double KochanekContinuity;
   int    PolynomialOrder;
+  int    PolynomialFitType;
+  double PolynomialSampleWidth;
+  int    PolynomialWeightType;
 };
 
 #endif

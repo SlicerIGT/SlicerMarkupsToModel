@@ -28,6 +28,9 @@ vtkCurveGenerator::vtkCurveGenerator()
   this->KochanekEndsCopyNearestDerivatives = false;
   this->PolynomialOrder = 1; // linear
   this->PolynomialPointSortingMethod = vtkCurveGenerator::SORTING_METHOD_INDEX;
+  this->PolynomialFitMethod = vtkCurveGenerator::POLYNOMIAL_FIT_METHOD_GLOBAL_LEAST_SQUARES;
+  this->PolynomialWeightFunction = vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_RECTANGULAR;
+  this->PolynomialSampleWidth = 0.5;
   this->OutputPoints = NULL;
 
   // timestamps for input and output are the same, initially
@@ -77,9 +80,9 @@ std::string vtkCurveGenerator::GetCurveTypeAsString()
     {
       return "kochanek_spline";
     }
-    case vtkCurveGenerator::CURVE_TYPE_POLYNOMIAL_GLOBAL_LEAST_SQUARES:
+    case vtkCurveGenerator::CURVE_TYPE_POLYNOMIAL:
     {
-      return "polynomial_global_least_squares";
+      return "polynomial";
     }
     default:
     {
@@ -105,6 +108,56 @@ std::string vtkCurveGenerator::GetPolynomialPointSortingMethodAsString()
     default:
     {
       vtkErrorMacro( "Unknown sorting method - cannot return as string." );
+      return "";
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
+std::string vtkCurveGenerator::GetPolynomialFitMethodAsString()
+{
+  switch ( this->PolynomialFitMethod )
+  {
+    case vtkCurveGenerator::POLYNOMIAL_FIT_METHOD_GLOBAL_LEAST_SQUARES:
+    {
+      return "global_least_squares";
+    }
+    case vtkCurveGenerator::POLYNOMIAL_FIT_METHOD_MOVING_LEAST_SQUARES:
+    {
+      return "moving_least_squares";
+    }
+    default:
+    {
+      vtkErrorMacro( "Unknown fit method method - cannot return as string." );
+      return "";
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
+std::string vtkCurveGenerator::GetPolynomialWeightFunctionAsString()
+{
+  switch ( this->PolynomialWeightFunction )
+  {
+    case vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_RECTANGULAR:
+    {
+      return "rectangular";
+    }
+    case vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_TRIANGULAR:
+    {
+      return "triangular";
+    }
+    case vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_COSINE:
+    {
+      return "cosine";
+    }
+    case vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_GAUSSIAN:
+    {
+      return "gaussian";
+    }
+    default:
+    {
+      vtkErrorMacro( "Unknown weight function - cannot return as string." );
       return "";
     }
   }
@@ -181,7 +234,7 @@ void vtkCurveGenerator::Update()
       this->SetParametricFunctionToKochanekSpline();
       break;
     }
-    case vtkCurveGenerator::CURVE_TYPE_POLYNOMIAL_GLOBAL_LEAST_SQUARES:
+    case vtkCurveGenerator::CURVE_TYPE_POLYNOMIAL:
     {
       this->SetParametricFunctionToPolynomial();
       break;
@@ -344,10 +397,48 @@ void vtkCurveGenerator::SetParametricFunctionToPolynomial()
   }
   else
   {
-    vtkWarningMacro( "Did not recognize point sorting method. Parameters will not be generated." );
+    vtkWarningMacro( "Did not recognize point sorting method: " << this->PolynomialPointSortingMethod << ". Empty parameters will be used." );
+  }
+  polynomial->SetParameters( this->InputParameters );
+
+  polynomial->SetFitMethod ( this->PolynomialFitMethod );
+
+  if ( this->PolynomialFitMethod == vtkCurveGenerator::POLYNOMIAL_FIT_METHOD_GLOBAL_LEAST_SQUARES )
+  {
+    polynomial->SetFitMethodToGlobalLeastSquares();
+  }
+  else if ( this->PolynomialFitMethod == vtkCurveGenerator::POLYNOMIAL_FIT_METHOD_MOVING_LEAST_SQUARES )
+  {
+    polynomial->SetFitMethodToMovingLeastSquares();
+  }
+  else
+  {
+    vtkWarningMacro( "Did not recognize fit method: " << this->PolynomialFitMethod << ". Parametric polynomial will use its default behaviour." );
+  }
+
+  polynomial->SetSampleWidth( this->PolynomialSampleWidth );
+
+  if ( this->PolynomialWeightFunction == vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_RECTANGULAR )
+  {
+    polynomial->SetWeightFunctionToRectangular();
+  }
+  else if ( this->PolynomialWeightFunction == vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_TRIANGULAR )
+  {
+    polynomial->SetWeightFunctionToTriangular();
+  }
+  else if ( this->PolynomialWeightFunction == vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_COSINE )
+  {
+    polynomial->SetWeightFunctionToCosine();
+  }
+  else if ( this->PolynomialWeightFunction == vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_GAUSSIAN )
+  {
+    polynomial->SetWeightFunctionToGaussian();
+  }
+  else
+  {
+    vtkWarningMacro( "Did not recognize weight function: " << this->PolynomialWeightFunction << ". Parametric polynomial will use its default behaviour." );
   }
   
-  polynomial->SetParameters( this->InputParameters );
   this->ParametricFunction = polynomial;
 }
 
@@ -376,7 +467,7 @@ void vtkCurveGenerator::GeneratePoints()
 
   int numberOfInputPoints = this->InputPoints->GetNumberOfPoints();
   int numberOfSegments = 0; // temporary value
-  if ( this->CurveIsLoop && this->CurveType != vtkCurveGenerator::CURVE_TYPE_POLYNOMIAL_GLOBAL_LEAST_SQUARES )
+  if ( this->CurveIsLoop && this->CurveType != vtkCurveGenerator::CURVE_TYPE_POLYNOMIAL )
   {
     numberOfSegments = numberOfInputPoints;
   }

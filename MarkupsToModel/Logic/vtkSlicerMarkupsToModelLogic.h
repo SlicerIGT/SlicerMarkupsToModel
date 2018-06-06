@@ -79,7 +79,9 @@ public:
       int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
       bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
       bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices,
-      vtkCurveGenerator* curveGenerator = NULL );
+      vtkCurveGenerator* curveGenerator = NULL,
+      int polynomialFitType = vtkMRMLMarkupsToModelNode::GlobalLeastSquares, double polynomialSampleWidth = 0.5,
+      int polynomialWeightType = vtkMRMLMarkupsToModelNode::Rectangular );
   
   static bool UpdateOutputCurveModel( vtkPoints* controlPoints, vtkPolyData* polyData,
       int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
@@ -87,7 +89,9 @@ public:
       bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices,
       bool kochanekEndsCopyNearestDerivative = false, double kochanekBias = 0.0,
       double kochanekContinuity = 0.0, double kochanekTension = 0.0,
-      vtkCurveGenerator* curveGenerator = NULL );
+      vtkCurveGenerator* curveGenerator = NULL,
+      int polynomialFitType = vtkMRMLMarkupsToModelNode::GlobalLeastSquares, double polynomialSampleWidth = 0.5,
+      int polynomialWeightType = vtkMRMLMarkupsToModelNode::Rectangular );
 
   // Get the points store in a vtkMRMLMarkupsFiducialNode
   static void MarkupsToPoints( vtkMRMLMarkupsFiducialNode* markupsNode, vtkPoints* outputPoints );
@@ -116,7 +120,7 @@ protected:
   virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
 
 private:
-  vtkSmartPointer< vtkCurveGenerator > curveGenerator;
+  vtkSmartPointer< vtkCurveGenerator > CurveGenerator;
 
   // Generate a sphere at the point specified. Special case to be called when only one point is input.
   //   point - center of the sphere

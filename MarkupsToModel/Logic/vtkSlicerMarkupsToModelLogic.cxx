@@ -54,7 +54,7 @@ vtkStandardNewMacro(vtkSlicerMarkupsToModelLogic);
 //----------------------------------------------------------------------------
 vtkSlicerMarkupsToModelLogic::vtkSlicerMarkupsToModelLogic()
 {
-  curveGenerator = vtkSmartPointer< vtkCurveGenerator >::New();
+  this->CurveGenerator = vtkSmartPointer< vtkCurveGenerator >::New();
 }
 
 //----------------------------------------------------------------------------
@@ -278,7 +278,10 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
       double kochanekBias = markupsToModelModuleNode->GetKochanekBias();
       double kochanekContinuity = markupsToModelModuleNode->GetKochanekContinuity();
       double kochanekTension = markupsToModelModuleNode->GetKochanekTension();
-      vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, interpolationType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, kochanekEndsCopyNearestDerivatives, kochanekBias, kochanekContinuity, kochanekTension, curveGenerator );
+      int polynomialFitType = markupsToModelModuleNode->GetPolynomialFitType();
+      double polynomialSampleWidth = markupsToModelModuleNode->GetPolynomialSampleWidth();
+      int polynomialWeightType = markupsToModelModuleNode->GetPolynomialWeightType();
+      vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, interpolationType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, kochanekEndsCopyNearestDerivatives, kochanekBias, kochanekContinuity, kochanekTension, this->CurveGenerator, polynomialFitType, polynomialSampleWidth, polynomialWeightType );
       break;
     }
   }
@@ -341,7 +344,8 @@ void vtkSlicerMarkupsToModelLogic::SetMarkupsNode( vtkMRMLMarkupsFiducialNode* n
 //------------------------------------------------------------------------------
 bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* outputModelNode,
   int interpolationType, bool tubeLoop, double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints,
-  bool cleanMarkups, int polynomialOrder, int pointParameterType, vtkCurveGenerator* curveGenerator )
+  bool cleanMarkups, int polynomialOrder, int pointParameterType, vtkCurveGenerator* curveGenerator,
+  int polynomialFitType, double polynomialSampleWidth, int polynomialWeightType )
 {
   if ( markupsNode == NULL )
   {
@@ -359,7 +363,11 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkMRMLMarkupsFiducia
   vtkSmartPointer< vtkPoints > controlPoints = vtkSmartPointer< vtkPoints >::New();
   vtkSlicerMarkupsToModelLogic::MarkupsToPoints( markupsNode, controlPoints );
   vtkSmartPointer< vtkPolyData > outputPolyData = vtkSmartPointer< vtkPolyData >::New();
-  bool success = vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, interpolationType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, curveGenerator );
+  const double defaultKochanekEndsCopyNearestDerivative = false;
+  const double defaultKochanekBias = 0.0;
+  const double defaultKochanekContinuity = 0.0;
+  const double defaultKochanekTension = 0.0;
+  bool success = vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, interpolationType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, defaultKochanekEndsCopyNearestDerivative, defaultKochanekBias, defaultKochanekContinuity, defaultKochanekTension, curveGenerator, polynomialFitType, polynomialSampleWidth, polynomialWeightType );
   if ( !success )
   {
     return false;
@@ -375,7 +383,8 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
   int interpolationType, bool tubeLoop, double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints,
   bool cleanMarkups, int polynomialOrder, int pointParameterType,
   bool kochanekEndsCopyNearestDerivatives, double kochanekBias, double kochanekContinuity, double kochanekTension,
-  vtkCurveGenerator* curveGenerator )
+  vtkCurveGenerator* curveGenerator,
+  int polynomialFitType, double polynomialSampleWidth, int polynomialWeightType )
 {
   if ( controlPoints == NULL )
   {
@@ -459,8 +468,9 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
     }
     case vtkMRMLMarkupsToModelNode::Polynomial:
     {
-      curveGenerator->SetCurveTypeToPolynomialGlobalLeastSquares();
+      curveGenerator->SetCurveTypeToPolynomial();
       curveGenerator->SetPolynomialOrder( polynomialOrder );
+      curveGenerator->SetPolynomialSampleWidth( polynomialSampleWidth );
       switch ( pointParameterType )
       {
         case vtkMRMLMarkupsToModelNode::RawIndices:
@@ -475,7 +485,53 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
         }
         default:
         {
-          vtkGenericWarningMacro( "Unrecognized method for generating parameters from points. No parameters generated." );
+          vtkGenericWarningMacro( "Unrecognized method for generating parameters from points " << pointParameterType << ". Will use default." );
+          break;
+        }
+      }
+      switch ( polynomialFitType )
+      {
+        case vtkMRMLMarkupsToModelNode::GlobalLeastSquares:
+        {
+          curveGenerator->SetPolynomialFitMethodToGlobalLeastSquares();
+          break;
+        }
+        case vtkMRMLMarkupsToModelNode::MovingLeastSquares:
+        {
+          curveGenerator->SetPolynomialFitMethodToMovingLeastSquares();
+          break;
+        }
+        default:
+        {
+          vtkGenericWarningMacro( "Unrecognized method for fitting polynomial " << polynomialFitType << ". Will use default." );
+          break;
+        }
+      }
+      switch ( polynomialWeightType )
+      {
+        case vtkMRMLMarkupsToModelNode::Rectangular:
+        {
+          curveGenerator->SetPolynomialWeightFunctionToRectangular();
+          break;
+        }
+        case vtkMRMLMarkupsToModelNode::Triangular:
+        {
+          curveGenerator->SetPolynomialWeightFunctionToTriangular();
+          break;
+        }
+        case vtkMRMLMarkupsToModelNode::Cosine:
+        {
+          curveGenerator->SetPolynomialWeightFunctionToCosine();
+          break;
+        }
+        case vtkMRMLMarkupsToModelNode::Gaussian:
+        {
+          curveGenerator->SetPolynomialWeightFunctionToGaussian();
+          break;
+        }
+        default:
+        {
+          vtkGenericWarningMacro( "Unrecognized weight function " << polynomialWeightType << ". Will use default." );
           break;
         }
       }
