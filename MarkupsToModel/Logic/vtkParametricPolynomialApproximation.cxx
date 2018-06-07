@@ -267,8 +267,8 @@ void vtkParametricPolynomialApproximation::ComputeWeightsMovingLeastSquares()
         }
         case vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_GAUSSIAN:
         {
-          // halfSampleWidth represents 2 standard deviations, so 95% of the gaussian will be captured
-          double stdev = halfSampleWidth / 2.0;
+          // halfSampleWidth represents 3 standard deviations, so 99.7% of the gaussian will be captured
+          double stdev = halfSampleWidth / 3.0;
           double variance = stdev * stdev;
           weight = vtkMath::GaussianAmplitude( variance, parameterDistanceFromSamplePosition );
           break;
