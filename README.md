@@ -105,6 +105,8 @@ There are a few parameters specific to Polynomial curves, as seen in the **Fitti
 
 - **Weight Function**: (Moving Least Squares Polynomial only) This tells the module how local polynomials should treat data that is farther away. *Rectangular* indicates that all data within the sampling width should be treated with equal importance in each fit (fast, but susceptible to noise and sudden turns in underlying data). The other options, *Triangular*, *Cosine*, and *Gaussian*, indicate that data should be treated less importantly if it is far away. Note that the *Gaussian* option uses a curve with three standard deviations (capturing 99.7% of the Gaussian curve area).
 
+Under **Tube Properties** you can change certain aspects of the curve model's geometry (size, resolution).
+
 - **Radius**: (Under Tube Properties) Changes the radius of the tube model (larger = wider tube).
 
 - **Number of Sides**: (Under Tube Properties) Changes the outer smoothness of a tube model (larger = smoother appearance).
