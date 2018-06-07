@@ -78,13 +78,13 @@ public:
     ModelType_Last // insert valid types above this line
   };
   
-  enum InterpolationType
+  enum CurveType
   {
     Linear = 0,
     CardinalSpline,
     KochanekSpline,
     Polynomial,
-    InterpolationType_Last // insert valid types above this line
+    CurveType_Last // insert valid types above this line
   };
 
   enum PointParameterType
@@ -140,8 +140,8 @@ public:
 
   vtkGetMacro( ModelType, int );
   vtkSetMacro( ModelType, int );
-  vtkGetMacro( InterpolationType, int );
-  vtkSetMacro( InterpolationType, int );
+  vtkGetMacro( CurveType, int );
+  vtkSetMacro( CurveType, int );
   vtkGetMacro( PointParameterType, int );
   vtkSetMacro( PointParameterType, int );
   vtkGetMacro( TubeRadius, double );
@@ -185,12 +185,12 @@ public:
 
   // Convert between model and interpolation types IDs and names.
   static const char* GetModelTypeAsString( int id );
-  static const char* GetInterpolationTypeAsString( int id );
+  static const char* GetCurveTypeAsString( int id );
   static const char* GetPointParameterTypeAsString( int id );
   static const char* GetPolynomialFitTypeAsString( int id );
   static const char* GetPolynomialWeightTypeAsString( int id );
   static int GetModelTypeFromString( const char* name );
-  static int GetInterpolationTypeFromString( const char* name );
+  static int GetCurveTypeFromString( const char* name );
   static int GetPointParameterTypeFromString( const char* name );
   static int GetPolynomialFitTypeFromString( const char* name );
   static int GetPolynomialWeightTypeFromString( const char* name );
@@ -207,9 +207,15 @@ public:
   // DEPRECATED - Set the output node
   void SetAndObserveModelNodeID( const char* id );
 
+  // DEPRECATED June 6, 2018 - Get/Set curve type
+  int GetInterpolationType();
+  void SetInterpolationType( int );
+  static int GetInterpolationTypeFromString( const char* name );
+  static const char* GetInterpolationTypeAsString( int id );
+
 private:
   int    ModelType;
-  int    InterpolationType; // Rename to CurveType? Can now be approximating.
+  int    CurveType;
   int    PointParameterType;
   bool   AutoUpdateOutput;
   bool   CleanMarkups;

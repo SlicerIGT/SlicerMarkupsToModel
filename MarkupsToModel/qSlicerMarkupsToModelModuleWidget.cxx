@@ -108,7 +108,7 @@ void qSlicerMarkupsToModelModuleWidget::setup()
 
   connect(d->ButterflySubdivisionCheckBox, SIGNAL(toggled(bool)), this, SLOT(updateMRMLFromGUI()));
   connect(d->ConvexHullCheckBox, SIGNAL(toggled(bool)), this, SLOT(updateMRMLFromGUI()));
-  connect(d->CleanMarkupsCheckBox, SIGNAL(toggled(bool)), this, SLOT(updateMRMLFromGUI()));
+  connect(d->CleanDuplicateInputPointsCheckbox, SIGNAL(toggled(bool)), this, SLOT(updateMRMLFromGUI()));
 
   connect(d->ModeClosedSurfaceRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
   connect(d->ModeCurveRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
@@ -123,16 +123,14 @@ void qSlicerMarkupsToModelModuleWidget::setup()
   connect(d->KochanekContinuityDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(updateMRMLFromGUI()));
   connect(d->KochanekTensionDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(updateMRMLFromGUI()));
 
-  connect(d->PointParameterRawIndicesRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
-  connect(d->PointParameterMinimumSpanningTreeRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
+  connect(d->PointSortingIndicesRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
+  connect(d->PointSortingMinimumSpanningTreeRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
   connect(d->PolynomialOrderSpinBox, SIGNAL(valueChanged(double)), this, SLOT(updateMRMLFromGUI()));
-  connect(d->PolynomialFitMethodGlobalLeastSquaresRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
-  connect(d->PolynomialFitMethodMovingLeastSquaresRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
   connect(d->PolynomialSampleWidthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(updateMRMLFromGUI()));
-  connect(d->PolynomialWeightFunctionRectangularRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
-  connect(d->PolynomialWeightFunctionTriangularRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
-  connect(d->PolynomialWeightFunctionCosineRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
-  connect(d->PolynomialWeightFunctionGaussianRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
+  connect(d->WeightFunctionRectangularRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
+  connect(d->WeightFunctionTriangularRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
+  connect(d->WeightFunctionCosineRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
+  connect(d->WeightFunctionGaussianRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
 
   connect(d->ModelOpacitySlider, SIGNAL(valueChanged(double)), this, SLOT(updateMRMLFromGUI()));
   connect(d->ModelColorSelector, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
@@ -143,7 +141,8 @@ void qSlicerMarkupsToModelModuleWidget::setup()
   connect(d->LinearInterpolationRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
   connect(d->CardinalInterpolationRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
   connect(d->KochanekInterpolationRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
-  connect(d->PolynomialInterpolationRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
+  connect(d->GlobalLeastSquaresPolynomialApproximationRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
+  connect(d->MovingLeastSquaresPolynomialApproximationRadioButton, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
 }
 
 //-----------------------------------------------------------------------------
@@ -347,7 +346,7 @@ void qSlicerMarkupsToModelModuleWidget::updateMRMLFromGUI()
   }
   markupsToModelModuleNode->SetAutoUpdateOutput(d->UpdateButton->isChecked());
 
-  markupsToModelModuleNode->SetCleanMarkups(d->CleanMarkupsCheckBox->isChecked());
+  markupsToModelModuleNode->SetCleanMarkups(d->CleanDuplicateInputPointsCheckbox->isChecked());
   markupsToModelModuleNode->SetDelaunayAlpha(d->DelaunayAlphaDoubleSpinBox->value());
   markupsToModelModuleNode->SetConvexHull(d->ConvexHullCheckBox->isChecked());
   markupsToModelModuleNode->SetButterflySubdivision(d->ButterflySubdivisionCheckBox->isChecked());
@@ -358,56 +357,55 @@ void qSlicerMarkupsToModelModuleWidget::updateMRMLFromGUI()
   markupsToModelModuleNode->SetTubeLoop(d->TubeLoopCheckBox->isChecked());
   if (d->LinearInterpolationRadioButton->isChecked())
   {
-    markupsToModelModuleNode->SetInterpolationType(vtkMRMLMarkupsToModelNode::Linear);
+    markupsToModelModuleNode->SetCurveType(vtkMRMLMarkupsToModelNode::Linear);
   }
   else if (d->CardinalInterpolationRadioButton->isChecked())
   {
-    markupsToModelModuleNode->SetInterpolationType(vtkMRMLMarkupsToModelNode::CardinalSpline);
+    markupsToModelModuleNode->SetCurveType(vtkMRMLMarkupsToModelNode::CardinalSpline);
   }
   else if (d->KochanekInterpolationRadioButton->isChecked())
   {
-    markupsToModelModuleNode->SetInterpolationType(vtkMRMLMarkupsToModelNode::KochanekSpline);
+    markupsToModelModuleNode->SetCurveType(vtkMRMLMarkupsToModelNode::KochanekSpline);
   }
-  else if (d->PolynomialInterpolationRadioButton->isChecked())
+  else if (d->GlobalLeastSquaresPolynomialApproximationRadioButton->isChecked())
   {
-    markupsToModelModuleNode->SetInterpolationType(vtkMRMLMarkupsToModelNode::Polynomial);
+    markupsToModelModuleNode->SetCurveType(vtkMRMLMarkupsToModelNode::Polynomial);
+    markupsToModelModuleNode->SetPolynomialFitType( vtkMRMLMarkupsToModelNode::GlobalLeastSquares );
+  }
+  else if (d->MovingLeastSquaresPolynomialApproximationRadioButton->isChecked())
+  {
+    markupsToModelModuleNode->SetCurveType(vtkMRMLMarkupsToModelNode::Polynomial);
+    markupsToModelModuleNode->SetPolynomialFitType( vtkMRMLMarkupsToModelNode::MovingLeastSquares );
   }
   markupsToModelModuleNode->SetKochanekEndsCopyNearestDerivatives(d->KochanekEndsCopyNearestDerivativesCheckBox->isChecked());
   markupsToModelModuleNode->SetKochanekBias(d->KochanekBiasDoubleSpinBox->value());
   markupsToModelModuleNode->SetKochanekContinuity(d->KochanekContinuityDoubleSpinBox->value());
   markupsToModelModuleNode->SetKochanekTension(d->KochanekTensionDoubleSpinBox->value());
 
-  if (d->PointParameterRawIndicesRadioButton->isChecked())
+  if (d->PointSortingIndicesRadioButton->isChecked())
   {
     markupsToModelModuleNode->SetPointParameterType(vtkMRMLMarkupsToModelNode::RawIndices);
   }
-  else if (d->PointParameterMinimumSpanningTreeRadioButton->isChecked() )
+  else if (d->PointSortingMinimumSpanningTreeRadioButton->isChecked() )
   {
     markupsToModelModuleNode->SetPointParameterType(vtkMRMLMarkupsToModelNode::MinimumSpanningTree);
   }
   markupsToModelModuleNode->SetPolynomialOrder(d->PolynomialOrderSpinBox->value());
-  if ( d->PolynomialFitMethodGlobalLeastSquaresRadioButton->isChecked() )
-  {
-    markupsToModelModuleNode->SetPolynomialFitType( vtkMRMLMarkupsToModelNode::GlobalLeastSquares );
-  }
-  else if ( d->PolynomialFitMethodMovingLeastSquaresRadioButton->isChecked() )
-  {
-    markupsToModelModuleNode->SetPolynomialFitType( vtkMRMLMarkupsToModelNode::MovingLeastSquares );
-  }
+  
   markupsToModelModuleNode->SetPolynomialSampleWidth( d->PolynomialSampleWidthDoubleSpinBox->value() );
-  if ( d->PolynomialWeightFunctionRectangularRadioButton->isChecked() )
+  if ( d->WeightFunctionRectangularRadioButton->isChecked() )
   {
     markupsToModelModuleNode->SetPolynomialWeightType( vtkMRMLMarkupsToModelNode::Rectangular );
   }
-  else if ( d->PolynomialWeightFunctionTriangularRadioButton->isChecked() )
+  else if ( d->WeightFunctionTriangularRadioButton->isChecked() )
   {
     markupsToModelModuleNode->SetPolynomialWeightType( vtkMRMLMarkupsToModelNode::Triangular );
   }
-  else if ( d->PolynomialWeightFunctionCosineRadioButton->isChecked() )
+  else if ( d->WeightFunctionCosineRadioButton->isChecked() )
   {
     markupsToModelModuleNode->SetPolynomialWeightType( vtkMRMLMarkupsToModelNode::Cosine );
   }
-  else if ( d->PolynomialWeightFunctionGaussianRadioButton->isChecked() )
+  else if ( d->WeightFunctionGaussianRadioButton->isChecked() )
   {
     markupsToModelModuleNode->SetPolynomialWeightType( vtkMRMLMarkupsToModelNode::Gaussian );
   }
@@ -449,7 +447,7 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
     this->enableAllWidgets(false);
     return;
   }
-  this->enableAllWidgets(true);
+  this->enableAllWidgets(true); // unless otherwise specified, everything is enabled
 
   // Node selectors
   vtkMRMLNode* inputNode = markupsToModelModuleNode->GetInputNode();
@@ -497,7 +495,7 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
   }
 
   // Advanced options
-  d->CleanMarkupsCheckBox->setChecked(markupsToModelModuleNode->GetCleanMarkups());
+  d->CleanDuplicateInputPointsCheckbox->setChecked(markupsToModelModuleNode->GetCleanMarkups());
   // closed surface
   d->ButterflySubdivisionCheckBox->setChecked(markupsToModelModuleNode->GetButterflySubdivision());
   d->DelaunayAlphaDoubleSpinBox->setValue(markupsToModelModuleNode->GetDelaunayAlpha());
@@ -507,35 +505,81 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
   d->TubeSidesSpinBox->setValue(markupsToModelModuleNode->GetTubeNumberOfSides());
   d->TubeSegmentsSpinBox->setValue(markupsToModelModuleNode->GetTubeSegmentsBetweenControlPoints());
   d->TubeLoopCheckBox->setChecked(markupsToModelModuleNode->GetTubeLoop());
-  switch (markupsToModelModuleNode->GetInterpolationType())
+  int curveType = markupsToModelModuleNode->GetCurveType();
+  if ( curveType == vtkMRMLMarkupsToModelNode::Linear )
   {
-  case vtkMRMLMarkupsToModelNode::Linear: d->LinearInterpolationRadioButton->setChecked(1); break;
-  case vtkMRMLMarkupsToModelNode::CardinalSpline: d->CardinalInterpolationRadioButton->setChecked(1); break;
-  case vtkMRMLMarkupsToModelNode::KochanekSpline: d->KochanekInterpolationRadioButton->setChecked(1); break;
-  case vtkMRMLMarkupsToModelNode::Polynomial: d->PolynomialInterpolationRadioButton->setChecked(1); break;
+    d->LinearInterpolationRadioButton->setChecked(1);
   }
+  else if ( curveType == vtkMRMLMarkupsToModelNode::CardinalSpline )
+  {
+    d->CardinalInterpolationRadioButton->setChecked(1);
+  }
+  else if ( curveType == vtkMRMLMarkupsToModelNode::KochanekSpline )
+  {
+    d->KochanekInterpolationRadioButton->setChecked(1);
+  }
+  else if ( curveType == vtkMRMLMarkupsToModelNode::Polynomial )
+  {
+    int polynomialFitType = markupsToModelModuleNode->GetPolynomialFitType();
+    if ( polynomialFitType == vtkMRMLMarkupsToModelNode::GlobalLeastSquares )
+    {
+      d->GlobalLeastSquaresPolynomialApproximationRadioButton->setChecked(1);
+    }
+    else if ( polynomialFitType == vtkMRMLMarkupsToModelNode::MovingLeastSquares )
+    {
+      d->MovingLeastSquaresPolynomialApproximationRadioButton->setChecked(1);
+    }
+    else
+    {
+      qCritical() << "Unexpected polynomial fit type:" << polynomialFitType << ". Cannot update GUI.";
+    }
+  }
+  else
+  {
+    qCritical() << "Unexpected curve type:" << curveType << ". Cannot update GUI.";
+  }
+
   d->KochanekEndsCopyNearestDerivativesCheckBox->setChecked(markupsToModelModuleNode->GetKochanekEndsCopyNearestDerivatives());
   d->KochanekBiasDoubleSpinBox->setValue(markupsToModelModuleNode->GetKochanekBias());
   d->KochanekContinuityDoubleSpinBox->setValue(markupsToModelModuleNode->GetKochanekContinuity());
   d->KochanekTensionDoubleSpinBox->setValue(markupsToModelModuleNode->GetKochanekTension());
-  switch (markupsToModelModuleNode->GetPointParameterType())
+
+  int pointSortingMethod = markupsToModelModuleNode->GetPointParameterType();
+  if ( pointSortingMethod == vtkMRMLMarkupsToModelNode::RawIndices )
   {
-  case vtkMRMLMarkupsToModelNode::RawIndices: d->PointParameterRawIndicesRadioButton->setChecked(1); break;
-  case vtkMRMLMarkupsToModelNode::MinimumSpanningTree: d->PointParameterMinimumSpanningTreeRadioButton->setChecked(1); break;
+    d->PointSortingIndicesRadioButton->setChecked(1);
   }
+  else if ( pointSortingMethod == vtkMRMLMarkupsToModelNode::MinimumSpanningTree )
+  {
+    d->PointSortingMinimumSpanningTreeRadioButton->setChecked(1);
+  }
+  else
+  {
+    qCritical() << "Unexpected point sorting method:" << pointSortingMethod << ". Cannot update GUI.";
+  }
+
   d->PolynomialOrderSpinBox->setValue(markupsToModelModuleNode->GetPolynomialOrder());
-  switch (markupsToModelModuleNode->GetPolynomialFitType())
-  {
-  case vtkMRMLMarkupsToModelNode::GlobalLeastSquares: d->PolynomialFitMethodGlobalLeastSquaresRadioButton->setChecked(1); break;
-  case vtkMRMLMarkupsToModelNode::MovingLeastSquares: d->PolynomialFitMethodMovingLeastSquaresRadioButton->setChecked(1); break;
-  }
   d->PolynomialSampleWidthDoubleSpinBox->setValue(markupsToModelModuleNode->GetPolynomialSampleWidth());
-  switch (markupsToModelModuleNode->GetPolynomialWeightType())
+  int polynomialWeightType = markupsToModelModuleNode->GetPolynomialWeightType();
+  if ( polynomialWeightType == vtkMRMLMarkupsToModelNode::Rectangular )
   {
-  case vtkMRMLMarkupsToModelNode::Rectangular: d->PolynomialWeightFunctionRectangularRadioButton->setChecked(1); break;
-  case vtkMRMLMarkupsToModelNode::Triangular: d->PolynomialWeightFunctionTriangularRadioButton->setChecked(1); break;
-  case vtkMRMLMarkupsToModelNode::Cosine: d->PolynomialWeightFunctionCosineRadioButton->setChecked(1); break;
-  case vtkMRMLMarkupsToModelNode::Gaussian: d->PolynomialWeightFunctionGaussianRadioButton->setChecked(1); break;
+    d->WeightFunctionRectangularRadioButton->setChecked(1);
+  }
+  else if ( polynomialWeightType == vtkMRMLMarkupsToModelNode::Triangular )
+  {
+    d->WeightFunctionTriangularRadioButton->setChecked(1);
+  }
+  else if ( polynomialWeightType == vtkMRMLMarkupsToModelNode::Cosine )
+  {
+    d->WeightFunctionCosineRadioButton->setChecked(1);
+  }
+  else if ( polynomialWeightType == vtkMRMLMarkupsToModelNode::Gaussian )
+  {
+    d->WeightFunctionGaussianRadioButton->setChecked(1);
+  }
+  else
+  {
+    qCritical() << "Unexpected polynomial weight type:" << polynomialWeightType << ". Cannot update GUI.";
   }
 
   // Model display options
@@ -587,56 +631,49 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
   }
 
   // Determine visibility of widgets
-  bool isSurface = d->ModeClosedSurfaceRadioButton->isChecked();
-  bool isCurve = d->ModeCurveRadioButton->isChecked();
-  bool isPolynomial = d->PolynomialInterpolationRadioButton->isChecked();
-  bool isMovingLeastSquaresPolynomial = d->PolynomialFitMethodMovingLeastSquaresRadioButton->isChecked();
-  bool isKochanek = d->KochanekInterpolationRadioButton->isChecked();
   bool isInputMarkups = ( vtkMRMLMarkupsFiducialNode::SafeDownCast( inputNode ) != NULL );
   
   d->InputMarkupsPlaceWidget->setVisible( isInputMarkups );
   d->MarkupsTextScaleSlider->setVisible( isInputMarkups );
 
-  d->ButterflySubdivisionLabel->setVisible( isSurface );
-  d->ButterflySubdivisionCheckBox->setVisible( isSurface );
-  d->DelaunayAlphaLabel->setVisible( isSurface );
-  d->DelaunayAlphaDoubleSpinBox->setVisible( isSurface );
-  d->ConvexHullLabel->setVisible( isSurface );
-  d->ConvexHullCheckBox->setVisible( isSurface );
+  bool isClosedSurface = d->ModeClosedSurfaceRadioButton->isChecked();
 
-  d->InterpolationGroupBox->setVisible( isCurve );
-  d->InterpolationLabel->setVisible( isCurve );
-  d->TubeRadiusLabel->setVisible( isCurve );
-  d->TubeRadiusDoubleSpinBox->setVisible( isCurve );
-  d->TubeSidesLabel->setVisible( isCurve );
-  d->TubeSidesSpinBox->setVisible( isCurve );
-  d->TubeSegmentsLabel->setVisible( isCurve );
-  d->TubeSegmentsSpinBox->setVisible( isCurve );
+  d->ClosedSurfaceModelGroupBox->setVisible( isClosedSurface );
 
-  d->TubeLoopLabel->setVisible( isCurve && !isPolynomial );
-  d->TubeLoopCheckBox->setVisible( isCurve && !isPolynomial );
+  bool isCurve = d->ModeCurveRadioButton->isChecked();
+  
+  d->CurveModelGroupBox->setVisible( isCurve );
 
-  d->KochanekEndsCopyNearestDerivativesLabel->setVisible( isCurve && isKochanek );
-  d->KochanekEndsCopyNearestDerivativesCheckBox->setVisible( isCurve && isKochanek );
-  d->KochanekBiasLabel->setVisible( isCurve && isKochanek );
-  d->KochanekBiasDoubleSpinBox->setVisible( isCurve && isKochanek );
-  d->KochanekTensionLabel->setVisible( isCurve && isKochanek );
-  d->KochanekTensionDoubleSpinBox->setVisible( isCurve && isKochanek );
-  d->KochanekContinuityLabel->setVisible( isCurve && isKochanek );
-  d->KochanekContinuityDoubleSpinBox->setVisible( isCurve && isKochanek );
+  bool isLinearSpline = d->LinearInterpolationRadioButton->isChecked();
+  bool isCardinalSpline = d->CardinalInterpolationRadioButton->isChecked();
+  bool isKochanekSpline = d->KochanekInterpolationRadioButton->isChecked();
+  bool isSpline = isLinearSpline || isCardinalSpline || isKochanekSpline;
 
-  d->PointParameterLabel->setVisible( isCurve && isPolynomial );
-  d->PointParameterGroupBox->setVisible( isCurve && isPolynomial );
-  d->PointParameterRawIndicesRadioButton->setVisible( isCurve && isPolynomial );
-  d->PointParameterMinimumSpanningTreeRadioButton->setVisible( isCurve && isPolynomial );
-  d->PolynomialOrderLabel->setVisible( isCurve && isPolynomial );
-  d->PolynomialOrderSpinBox->setVisible( isCurve && isPolynomial );
-  d->PolynomialFitMethodLabel->setVisible( isCurve && isPolynomial );
-  d->PolynomialFitMethodGroupBox->setVisible( isCurve && isPolynomial );
-  d->PolynomialSampleWidthLabel->setVisible( isCurve && isPolynomial && isMovingLeastSquaresPolynomial );
-  d->PolynomialSampleWidthDoubleSpinBox->setVisible( isCurve && isPolynomial && isMovingLeastSquaresPolynomial );
-  d->PolynomialWeightFunctionLabel->setVisible( isCurve && isPolynomial && isMovingLeastSquaresPolynomial );
-  d->PolynomialWeightFunctionGroupBox->setVisible( isCurve && isPolynomial && isMovingLeastSquaresPolynomial );
+  d->TubeLoopCheckBox->setEnabled( isSpline );
+
+  bool isGlobalLeastSquaresPolynomial = d->GlobalLeastSquaresPolynomialApproximationRadioButton->isChecked();
+  bool isMovingLeastSquaresPolynomial = d->MovingLeastSquaresPolynomialApproximationRadioButton->isChecked();
+  bool isPolynomial = isGlobalLeastSquaresPolynomial || isMovingLeastSquaresPolynomial;
+
+  d->FittingGroupBox->setVisible( isKochanekSpline || isPolynomial );
+
+  d->KochanekEndsCopyNearestDerivativesLabel->setVisible( isKochanekSpline );
+  d->KochanekEndsCopyNearestDerivativesCheckBox->setVisible( isKochanekSpline );
+  d->KochanekBiasLabel->setVisible( isKochanekSpline );
+  d->KochanekBiasDoubleSpinBox->setVisible( isKochanekSpline );
+  d->KochanekTensionLabel->setVisible( isKochanekSpline );
+  d->KochanekTensionDoubleSpinBox->setVisible( isKochanekSpline );
+  d->KochanekContinuityLabel->setVisible( isKochanekSpline );
+  d->KochanekContinuityDoubleSpinBox->setVisible( isKochanekSpline );
+
+  d->PointSortingLabel->setVisible( isPolynomial );
+  d->PointSortingFrame->setVisible( isPolynomial );
+  d->PolynomialOrderLabel->setVisible( isPolynomial );
+  d->PolynomialOrderSpinBox->setVisible( isPolynomial );
+  d->PolynomialSampleWidthLabel->setVisible( isMovingLeastSquaresPolynomial );
+  d->PolynomialSampleWidthDoubleSpinBox->setVisible( isMovingLeastSquaresPolynomial );
+  d->WeightFunctionLabel->setVisible( isMovingLeastSquaresPolynomial );
+  d->WeightFunctionFrame->setVisible( isMovingLeastSquaresPolynomial );
 
   this->blockAllSignals( false );
 }
@@ -655,7 +692,7 @@ void qSlicerMarkupsToModelModuleWidget::blockAllSignals(bool block)
   d->UpdateButton->blockSignals(block);
 
   // advanced options
-  d->CleanMarkupsCheckBox->blockSignals(block);
+  d->CleanDuplicateInputPointsCheckbox->blockSignals(block);
   // closed surface options
   d->ButterflySubdivisionCheckBox->blockSignals(block);
   d->DelaunayAlphaDoubleSpinBox->blockSignals(block);
@@ -667,13 +704,18 @@ void qSlicerMarkupsToModelModuleWidget::blockAllSignals(bool block)
   d->LinearInterpolationRadioButton->blockSignals(block);
   d->CardinalInterpolationRadioButton->blockSignals(block);
   d->KochanekInterpolationRadioButton->blockSignals(block);
-  d->PolynomialInterpolationRadioButton->blockSignals(block);
+  d->GlobalLeastSquaresPolynomialApproximationRadioButton->blockSignals(block);
+  d->MovingLeastSquaresPolynomialApproximationRadioButton->blockSignals(block);
   d->KochanekBiasDoubleSpinBox->blockSignals(block);
   d->KochanekContinuityDoubleSpinBox->blockSignals(block);
   d->KochanekTensionDoubleSpinBox->blockSignals(block);
-  d->PointParameterRawIndicesRadioButton->blockSignals(block);
-  d->PointParameterMinimumSpanningTreeRadioButton->blockSignals(block);
+  d->PointSortingIndicesRadioButton->blockSignals(block);
+  d->PointSortingMinimumSpanningTreeRadioButton->blockSignals(block);
   d->PolynomialOrderSpinBox->blockSignals(block);
+  d->WeightFunctionRectangularRadioButton->blockSignals(block);
+  d->WeightFunctionTriangularRadioButton->blockSignals(block);
+  d->WeightFunctionCosineRadioButton->blockSignals(block);
+  d->WeightFunctionGaussianRadioButton->blockSignals(block);
 
   // display options
   d->ModelVisiblityButton->blockSignals(block);
@@ -693,7 +735,8 @@ void qSlicerMarkupsToModelModuleWidget::enableAllWidgets(bool enable)
   d->InputMarkupsPlaceWidget->setEnabled(enable);
   d->ModelNodeSelector->setEnabled(enable);
   d->UpdateButton->setEnabled(enable);
-  d->AdvancedGroupBox->setEnabled(enable);
+  d->ClosedSurfaceModelGroupBox->setEnabled(enable);
+  d->CurveModelGroupBox->setEnabled(enable);
   d->DisplayGroupBox->setEnabled(enable);
 }
 

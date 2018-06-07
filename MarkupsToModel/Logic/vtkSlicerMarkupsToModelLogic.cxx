@@ -271,7 +271,7 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
       bool tubeLoop = markupsToModelModuleNode->GetTubeLoop();
       double tubeRadius = markupsToModelModuleNode->GetTubeRadius();
       int tubeNumberOfSides = markupsToModelModuleNode->GetTubeNumberOfSides();
-      int interpolationType = markupsToModelModuleNode->GetInterpolationType();
+      int curveType = markupsToModelModuleNode->GetCurveType();
       int polynomialOrder = markupsToModelModuleNode->GetPolynomialOrder();
       int pointParameterType = markupsToModelModuleNode->GetPointParameterType();
       bool kochanekEndsCopyNearestDerivatives = markupsToModelModuleNode->GetKochanekEndsCopyNearestDerivatives();
@@ -281,7 +281,7 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
       int polynomialFitType = markupsToModelModuleNode->GetPolynomialFitType();
       double polynomialSampleWidth = markupsToModelModuleNode->GetPolynomialSampleWidth();
       int polynomialWeightType = markupsToModelModuleNode->GetPolynomialWeightType();
-      vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, interpolationType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, kochanekEndsCopyNearestDerivatives, kochanekBias, kochanekContinuity, kochanekTension, this->CurveGenerator, polynomialFitType, polynomialSampleWidth, polynomialWeightType );
+      vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, curveType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, kochanekEndsCopyNearestDerivatives, kochanekBias, kochanekContinuity, kochanekTension, this->CurveGenerator, polynomialFitType, polynomialSampleWidth, polynomialWeightType );
       break;
     }
   }
@@ -343,7 +343,7 @@ void vtkSlicerMarkupsToModelLogic::SetMarkupsNode( vtkMRMLMarkupsFiducialNode* n
 
 //------------------------------------------------------------------------------
 bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* outputModelNode,
-  int interpolationType, bool tubeLoop, double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints,
+  int curveType, bool tubeLoop, double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints,
   bool cleanMarkups, int polynomialOrder, int pointParameterType, vtkCurveGenerator* curveGenerator,
   int polynomialFitType, double polynomialSampleWidth, int polynomialWeightType )
 {
@@ -367,7 +367,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkMRMLMarkupsFiducia
   const double defaultKochanekBias = 0.0;
   const double defaultKochanekContinuity = 0.0;
   const double defaultKochanekTension = 0.0;
-  bool success = vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, interpolationType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, defaultKochanekEndsCopyNearestDerivative, defaultKochanekBias, defaultKochanekContinuity, defaultKochanekTension, curveGenerator, polynomialFitType, polynomialSampleWidth, polynomialWeightType );
+  bool success = vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, curveType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, defaultKochanekEndsCopyNearestDerivative, defaultKochanekBias, defaultKochanekContinuity, defaultKochanekTension, curveGenerator, polynomialFitType, polynomialSampleWidth, polynomialWeightType );
   if ( !success )
   {
     return false;
@@ -380,7 +380,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkMRMLMarkupsFiducia
 
 //------------------------------------------------------------------------------
 bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoints, vtkPolyData* outputPolyData,
-  int interpolationType, bool tubeLoop, double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints,
+  int curveType, bool tubeLoop, double tubeRadius, int tubeNumberOfSides, int tubeSegmentsBetweenControlPoints,
   bool cleanMarkups, int polynomialOrder, int pointParameterType,
   bool kochanekEndsCopyNearestDerivatives, double kochanekBias, double kochanekContinuity, double kochanekTension,
   vtkCurveGenerator* curveGenerator,
@@ -438,7 +438,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
   }
 
   curveGenerator->SetCurveIsLoop( tubeLoop ); // can't loop 2 points, so this has to come after the special case
-  switch ( interpolationType )
+  switch ( curveType )
   {
     // Generates a polynomial curve model.
     case vtkMRMLMarkupsToModelNode::Linear:
@@ -541,7 +541,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
     }
     default:
     {
-      vtkGenericWarningMacro( "Unknown interpolation type. Aborting." );
+      vtkGenericWarningMacro( "Unknown curve type. Aborting." );
       return false;
     }
   }
@@ -552,7 +552,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
     return false;
   }
 
-  if ( tubeLoop && interpolationType != vtkMRMLMarkupsToModelNode::Polynomial ) // looping not supported for global fit polynomials
+  if ( tubeLoop && curveType != vtkMRMLMarkupsToModelNode::Polynomial ) // looping not supported for polynomials
   {
     vtkSlicerMarkupsToModelLogic::MakeLoopContinuous( curvePoints );
   }

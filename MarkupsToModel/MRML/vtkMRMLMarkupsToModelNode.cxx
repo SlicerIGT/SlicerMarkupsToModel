@@ -60,7 +60,7 @@ vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
   this->TubeNumberOfSides = 8;
   this->TubeLoop = false;
   this->ModelType = vtkMRMLMarkupsToModelNode::ClosedSurface;
-  this->InterpolationType = vtkMRMLMarkupsToModelNode::Linear;
+  this->CurveType = vtkMRMLMarkupsToModelNode::Linear;
   this->PointParameterType = vtkMRMLMarkupsToModelNode::RawIndices;
 
   this->KochanekTension = 0;
@@ -105,7 +105,7 @@ void vtkMRMLMarkupsToModelNode::WriteXML( ostream& of, int nIndent )
   of << indent << " ConvexHull =\"" << (this->ConvexHull ? "true" : "false") << "\"";
   of << indent << " ButterflySubdivision =\"" << (this->ButterflySubdivision ? "true" : "false") << "\"";
   of << indent << " DelaunayAlpha =\"" << this->DelaunayAlpha << "\"";
-  of << indent << " InterpolationType=\"" << this->GetInterpolationTypeAsString(this->InterpolationType) << "\"";
+  of << indent << " CurveType=\"" << this->GetCurveTypeAsString(this->CurveType) << "\"";
   of << indent << " PointParameterType=\"" << this->GetPointParameterTypeAsString(this->PointParameterType) << "\"";
   of << indent << " TubeRadius=\"" << this->TubeRadius << "\"";
   of << indent << " TubeNumberOfSides=\"" << this->TubeNumberOfSides << "\"";
@@ -170,15 +170,16 @@ void vtkMRMLMarkupsToModelNode::ReadXMLAttributes( const char** atts )
       nameString >> delaunayAlpha;
       this->SetDelaunayAlpha( delaunayAlpha );
     }
-    else if ( strcmp( attName, "InterpolationType" ) == 0 )
+    // CurveType is formerly InterpolationType (now deprecated)
+    else if ( strcmp( attName, "InterpolationType" ) == 0 || strcmp( attName, "CurveType" ) == 0 )
     {
-      int typeAsInt = this->GetInterpolationTypeFromString( attValue );
-      if ( typeAsInt < 0 || typeAsInt >= InterpolationType_Last )
+      int typeAsInt = this->GetCurveTypeFromString( attValue );
+      if ( typeAsInt < 0 || typeAsInt >= CurveType_Last )
       {
-        vtkWarningMacro( "Unrecognized interpolation type read from MRML node: " << attValue << ". Setting to Linear." );
+        vtkWarningMacro( "Unrecognized curve type read from MRML node: " << attValue << ". Setting to Linear." );
         typeAsInt = this->Linear;
       }
-      this->SetInterpolationType( typeAsInt );
+      this->SetCurveType( typeAsInt );
     }
     else if ( strcmp( attName, "PointParameterType" ) == 0 )
     {
@@ -416,7 +417,7 @@ const char* vtkMRMLMarkupsToModelNode::GetModelTypeAsString( int id )
 }
 
 //------------------------------------------------------------------------------
-const char* vtkMRMLMarkupsToModelNode::GetInterpolationTypeAsString( int id )
+const char* vtkMRMLMarkupsToModelNode::GetCurveTypeAsString( int id )
 {
   switch ( id )
   {
@@ -492,16 +493,16 @@ int vtkMRMLMarkupsToModelNode::GetModelTypeFromString( const char* name )
 }
 
 //------------------------------------------------------------------------------
-int vtkMRMLMarkupsToModelNode::GetInterpolationTypeFromString( const char* name )
+int vtkMRMLMarkupsToModelNode::GetCurveTypeFromString( const char* name )
 {
   if ( name == NULL )
   {
     // invalid name
     return -1;
   }
-  for ( int i = 0; i < InterpolationType_Last; i++ )
+  for ( int i = 0; i < CurveType_Last; i++ )
   {
-    if ( strcmp( name, GetInterpolationTypeAsString( i ) ) == 0 )
+    if ( strcmp( name, GetCurveTypeAsString( i ) ) == 0 )
     {
       // found a matching name
       return i;
@@ -598,4 +599,36 @@ void vtkMRMLMarkupsToModelNode::SetAndObserveModelNodeID( const char* id )
 {
   vtkWarningMacro( "vtkMRMLMarkupsToModelNode::SetAndObserveModelNodeID() is deprecated. Use vtkMRMLMarkupsToModelNode::SetAndObserveOutputModelNodeID() instead." );
   this->SetAndObserveOutputModelNodeID( id );
+}
+
+//------------------------------------------------------------------------------
+// DEPRECATED June 6, 2018
+int vtkMRMLMarkupsToModelNode::GetInterpolationType()
+{
+  vtkGenericWarningMacro( "vtkMRMLMarkupsToModelNode::GetInterpolationType() is deprecated. Use vtkMRMLMarkupsToModelNode::GetCurveType() instead." );
+  return this->GetCurveType();
+}
+
+//------------------------------------------------------------------------------
+// DEPRECATED June 6, 2018
+void vtkMRMLMarkupsToModelNode::SetInterpolationType( int newValue )
+{
+  vtkGenericWarningMacro( "vtkMRMLMarkupsToModelNode::SetInterpolationType() is deprecated. Use vtkMRMLMarkupsToModelNode::SetCurveType() instead." );
+  this->SetCurveType( newValue );
+}
+
+//------------------------------------------------------------------------------
+// DEPRECATED June 6, 2018
+const char* vtkMRMLMarkupsToModelNode::GetInterpolationTypeAsString( int id )
+{
+  vtkGenericWarningMacro( "vtkMRMLMarkupsToModelNode::GetInterpolationTypeAsString() is deprecated. Use vtkMRMLMarkupsToModelNode::GetCurveTypeAsString() instead." );
+  return vtkMRMLMarkupsToModelNode::GetCurveTypeAsString( id );
+}
+
+//------------------------------------------------------------------------------
+// DEPRECATED June 6, 2018
+int vtkMRMLMarkupsToModelNode::GetInterpolationTypeFromString( const char* name )
+{
+  vtkGenericWarningMacro( "vtkMRMLMarkupsToModelNode::GetInterpolationTypeFromString() is deprecated. Use vtkMRMLMarkupsToModelNode::GetCurveTypeFromString() instead." );
+  return vtkMRMLMarkupsToModelNode::GetCurveTypeFromString( name );
 }

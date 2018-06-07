@@ -46,12 +46,12 @@ The **Display Panel** allows convenient access to change basic rendering propert
 ![ClosedSurfaceExample](https://raw.githubusercontent.com/SlicerIGT/SlicerMarkupsToModel/master/Screenshots/ClosedSurfaceExample.png)
 > Left: Example of a closed surface. Right: Example of how a closed surface might look in slice view.
 
-Closed surfaces are [convex models](https://en.wikipedia.org/wiki/Convex_hull) that enclose the input points. Every time a new input point is added, the closed surface expands to contain the new input point. There are a variety of parameters that can be tweaked through the **Advanced Panel**.
+Closed surfaces are [convex models](https://en.wikipedia.org/wiki/Convex_hull) that enclose the input points. Every time a new input point is added, the closed surface expands to contain the new input point. There are a variety of parameters that can be tweaked through the **Closed Surface Model Settings** panel.
 
 ![AdvancedPanelClosedSurface](https://raw.githubusercontent.com/SlicerIGT/SlicerMarkupsToModel/master/Screenshots/AdvancedPanelClosedSurface.png)
-> Advanced panel when working with a closed surface.
+> Panel when working with a closed surface.
 
-- **Clean Duplicated Markups**: Remove duplicates from the input points
+- **Clean Duplicated Input Points**: Remove duplicates from the input points
 
 - **Smoothing**: Make the closed surface smoother by using the "Butterfly Subdivision". Note that sometimes concavities and self-intersections will occur after applying this smoothing. See "Force Convex Output" below.
 
@@ -64,20 +64,12 @@ Closed surfaces are [convex models](https://en.wikipedia.org/wiki/Convex_hull) t
 ![CurveExample](https://raw.githubusercontent.com/SlicerIGT/SlicerMarkupsToModel/master/Screenshots/CurveExample.png)
 > Left: Example of a curve. Right: Example of how a curve might look in slice view.
 
-Curves are models shaped like a tube that either [interpolate](https://en.wikipedia.org/wiki/Spline_interpolation) the input points, or [approximate](https://en.wikipedia.org/wiki/Polynomial_regression) them in a best fit. There are in fact four types of curve in this module: Piecewise Linear, Cardinal Spline, Kochanek Spline, and Polynomial. All curves share the following parameters that can be seen on the **Advanced Panel**.
+Curves are models shaped like a tube that either [interpolate](https://en.wikipedia.org/wiki/Spline_interpolation) the input points, or [approximate](https://en.wikipedia.org/wiki/Polynomial_regression) them in a best fit. There are in fact four types of curve in this module: Piecewise Linear, Cardinal Spline, Kochanek Spline, and Polynomial. All curves share the following parameters that can be seen on the **Curve Model Settings** panel.
 
 ![AdvancedPanelCurve](https://raw.githubusercontent.com/SlicerIGT/SlicerMarkupsToModel/master/Screenshots/AdvancedPanelCurve.png)
-> Advanced panel when working with a curve.
+> Panel when working with a curve.
 
-- **Radius**: Changes the radius of the tube model (larger = wider tube)
-
-- **Number of Sides**: Changes the outer smoothness of a tube model (larger = smoother appearance)
-
-- **Segments Per Point**: Changes the number of points used to interpolate/approximate a curve. (larger = smoother appearance)
-
-- **Clean Duplicated Markups**: Remove duplicates from the input points
-
-- **Curve is a Loop**: Indicate if the Curve should loop from the last point back to the first point.
+- **Clean Duplicated Markups**: Remove duplicates from the input points.
 
 **Piecewise linear** curves are the simplest type of curve that can be created. A tube model is created that passes from one input point to the next in the original order specified from the fiducial list.
 
@@ -85,22 +77,37 @@ Curves are models shaped like a tube that either [interpolate](https://en.wikipe
 
 **Kochanek spline** curves appear smooth. A tube model is created that passes through each input point in the order specified from the fiducial list. Between each pair of points, there will be some curvature in the model. See [Wikipedia](https://en.wikipedia.org/wiki/Kochanek%E2%80%93Bartels_spline) to learn more about Kochanek splines.
 
-There are a few paramters specific to Kochanek Splines, as seen in the **Advanced Panel**.
+- **Curve is a Loop**: Indicate if the Curve should loop from the last point back to the first point (Valid for splines only).
+
+There are a few paramters specific to Kochanek Splines, as seen in the **Advanced Fitting** panel.
 
 ![AdvancedPanelCurveKochanek](https://raw.githubusercontent.com/SlicerIGT/SlicerMarkupsToModel/master/Screenshots/AdvancedPanelCurveKochanek.png)
-> Additional parameters shown on the Advanced Panel for Kochanek splines.
+> Additional parameters shown on the Advanced Fitting panel for Kochanek splines.
 
 - **Ends copy nearest derivative**: The first and last points should use the tangent from their nearest neighboring points.
 
 - **Kochanek Bias**, **Kochanek Tension**, and **Kochanek Continuity**: As indicated on [Wikipedia](https://en.wikipedia.org/wiki/Kochanek%E2%80%93Bartels_spline).
 
-**Polynomial** curves appear smooth. Unlike the other types of curve, polynomials approximate the input points instead of interpolating them. The curve is represented using a tube-shaped model.
+**Global Least Squares Polynomial** curves appear smooth. Unlike the other types of curve, polynomials approximate the input points instead of interpolating them. This particular option creates a global approximation to the data. The curve is represented using a tube-shaped model.
 
-There are a few parameters specific to Polynomial curves, as seen in the **Advanced Panel**.
+**Moving Least Squares Polynomial** curves appear smooth. Unlike the other types of curve, polynomials approximate the input points instead of interpolating them. This particular option creates a curve based on local approximations to the data. It's slower than the global least squares polynomial, but it tends to follow the data better. The curve is represented using a tube-shaped model.
+
+There are a few parameters specific to Polynomial curves, as seen in the **Advanced Fitting** panel.
 
 ![AdvancedPanelCurvePolynomial](https://raw.githubusercontent.com/SlicerIGT/SlicerMarkupsToModel/master/Screenshots/AdvancedPanelCurvePolynomial.png)
-> Additional parameters shown on the Advanced Panel for polynomials.
+> Additional parameters shown on the Advanced Fitting panel for polynomials.
+
+- **Point Sorting**: This tells the module how to determine the order of the input points. If the input points are already in order, use "*Indices*". If the point order is unknown *and* the polynomial should connect the farthest two points, use "*Minimum Spanning Tree*".
 
 - **Polynomial Order**: How closely the polynomial should follow the input points. (Larger = closer fit, but also increased risk of [overfitting](https://en.wikipedia.org/wiki/Overfitting))
 
-- **Point Parameters**: This tells the module how to determine the order of the input points. If the input points are already in order, use "*Indices*". If the point order is unknown *but* the polynomial should connect the farthest two points, use "*Minimum Spanning Tree*".
+- **Sampling Width**: (Moving Least Squares Polynomial only) How much of the data should be used to create local polynomial fits. This is represented in normalized parameter space, meaning that 0.5 (for example) will capture half of the length of underlying data. (Larger = looser fit but more numerically stable, smaller is closer fit but higher risk of numerical instability and risk of [overfitting](https://en.wikipedia.org/wiki/Overfitting))
+
+- **Weight Function**: (Moving Least Squares Polynomial only) This tells the module how local polynomials should treat data that is farther away. *Rectangular* indicates that all data within the sampling width should be treated with equal importance in each fit (fast, but susceptible to noise and sudden turns in underlying data). The other options, *Triangular*, *Cosine*, and *Gaussian*, indicate that data should be treated less importantly if it is far away. Note that the *Gaussian* option uses a curve with three standard deviations (capturing 99.7% of the Gaussian curve area).
+
+- **Radius**: (Under Tube Properties) Changes the radius of the tube model (larger = wider tube).
+
+- **Number of Sides**: (Under Tube Properties) Changes the outer smoothness of a tube model (larger = smoother appearance).
+
+- **Segments Per Point**: (Under Tube Properties) Changes the number of points used to interpolate/approximate a curve. (larger = smoother appearance).
+

@@ -76,7 +76,7 @@ public:
   // Lower-level access to functionality for making a curve model.
   // If tubeRadius<=0.0 then a line will be created instead of a tube.
   static bool UpdateOutputCurveModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
-      int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
+      int curveType = vtkMRMLMarkupsToModelNode::Linear,
       bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
       bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices,
       vtkCurveGenerator* curveGenerator = NULL,
@@ -84,7 +84,7 @@ public:
       int polynomialWeightType = vtkMRMLMarkupsToModelNode::Rectangular );
   
   static bool UpdateOutputCurveModel( vtkPoints* controlPoints, vtkPolyData* polyData,
-      int interpolationType = vtkMRMLMarkupsToModelNode::Linear,
+      int curveType = vtkMRMLMarkupsToModelNode::Linear,
       bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
       bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices,
       bool kochanekEndsCopyNearestDerivative = false, double kochanekBias = 0.0,
