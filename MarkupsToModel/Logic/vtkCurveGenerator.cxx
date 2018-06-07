@@ -29,7 +29,7 @@ vtkCurveGenerator::vtkCurveGenerator()
   this->PolynomialOrder = 1; // linear
   this->PolynomialPointSortingMethod = vtkCurveGenerator::SORTING_METHOD_INDEX;
   this->PolynomialFitMethod = vtkCurveGenerator::POLYNOMIAL_FIT_METHOD_GLOBAL_LEAST_SQUARES;
-  this->PolynomialWeightFunction = vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_RECTANGULAR;
+  this->PolynomialWeightFunction = vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_GAUSSIAN;
   this->PolynomialSampleWidth = 0.5;
   this->OutputPoints = NULL;
 

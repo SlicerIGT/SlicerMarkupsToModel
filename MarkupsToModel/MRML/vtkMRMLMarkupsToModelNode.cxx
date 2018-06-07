@@ -72,7 +72,7 @@ vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
   this->PolynomialOrder = 3;
   this->PolynomialFitType = vtkMRMLMarkupsToModelNode::GlobalLeastSquares;
   this->PolynomialSampleWidth = 0.5;
-  this->PolynomialWeightType = vtkMRMLMarkupsToModelNode::Rectangular;
+  this->PolynomialWeightType = vtkMRMLMarkupsToModelNode::Gaussian;
 }
 
 //-----------------------------------------------------------------

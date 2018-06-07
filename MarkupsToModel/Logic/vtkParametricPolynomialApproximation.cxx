@@ -42,7 +42,7 @@ vtkParametricPolynomialApproximation::vtkParametricPolynomialApproximation()
 
   this->Weights = NULL;
   this->SortedParameters = NULL;
-  this->WeightFunction = vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_RECTANGULAR;
+  this->WeightFunction = vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_GAUSSIAN;
   this->SampleWidth = 0.5;
   this->SafeSampleWidth = 0.0; // recomputed as needed by this class
   this->SafeHalfSampleWidthComputedTime.Modified();

@@ -177,10 +177,10 @@
       <bool>false</bool>
      </property>
      <property name="checked">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="collapsed">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="AdvancedLayout">
       <item row="15" column="0">
@@ -690,7 +690,7 @@
             <string>Rectangular</string>
            </property>
            <property name="checked">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -705,6 +705,9 @@
           <widget class="QRadioButton" name="PolynomialWeightFunctionGaussianRadioButton">
            <property name="text">
             <string>Gaussian</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
