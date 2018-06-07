@@ -21,7 +21,6 @@
 
 #include <vector>
 #include <set>
-#include <functional>
 
 vtkStandardNewMacro( vtkParametricPolynomialApproximation );
 
@@ -260,7 +259,7 @@ void vtkParametricPolynomialApproximation::ComputeWeightsMovingLeastSquares()
         case vtkParametricPolynomialApproximation::WEIGHT_FUNCTION_COSINE:
         {
           // map between -PI and PI
-          double distanceNormalizedRadians = ( parameterDistanceFromSamplePosition / halfSampleWidth ) * M_PI;
+          double distanceNormalizedRadians = ( parameterDistanceFromSamplePosition / halfSampleWidth ) * vtkMath::Pi();
           double cosine = std::cos( distanceNormalizedRadians );
           // remap from -1..1 to 0..1
           weight = cosine / 2.0 + 0.5;
