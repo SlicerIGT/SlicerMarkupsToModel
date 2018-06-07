@@ -79,10 +79,10 @@ Curves are models shaped like a tube that either [interpolate](https://en.wikipe
 
 - **Curve is a Loop**: Indicate if the Curve should loop from the last point back to the first point (Valid for splines only).
 
-There are a few paramters specific to Kochanek Splines, as seen in the **Advanced Fitting** panel.
+There are a few paramters specific to Kochanek Splines, as seen in the **Fitting** panel.
 
 ![AdvancedPanelCurveKochanek](https://raw.githubusercontent.com/SlicerIGT/SlicerMarkupsToModel/master/Screenshots/AdvancedPanelCurveKochanek.png)
-> Additional parameters shown on the Advanced Fitting panel for Kochanek splines.
+> Additional parameters shown on the Fitting panel for Kochanek splines.
 
 - **Ends copy nearest derivative**: The first and last points should use the tangent from their nearest neighboring points.
 
@@ -92,10 +92,10 @@ There are a few paramters specific to Kochanek Splines, as seen in the **Advance
 
 **Moving Least Squares Polynomial** curves appear smooth. Unlike the other types of curve, polynomials approximate the input points instead of interpolating them. This particular option creates a curve based on local approximations to the data. It's slower than the global least squares polynomial, but it tends to follow the data better. The curve is represented using a tube-shaped model.
 
-There are a few parameters specific to Polynomial curves, as seen in the **Advanced Fitting** panel.
+There are a few parameters specific to Polynomial curves, as seen in the **Fitting** panel.
 
 ![AdvancedPanelCurvePolynomial](https://raw.githubusercontent.com/SlicerIGT/SlicerMarkupsToModel/master/Screenshots/AdvancedPanelCurvePolynomial.png)
-> Additional parameters shown on the Advanced Fitting panel for polynomials.
+> Additional parameters shown on the Fitting panel for polynomials.
 
 - **Point Sorting**: This tells the module how to determine the order of the input points. If the input points are already in order, use "*Indices*". If the point order is unknown *and* the polynomial should connect the farthest two points, use "*Minimum Spanning Tree*".
 
