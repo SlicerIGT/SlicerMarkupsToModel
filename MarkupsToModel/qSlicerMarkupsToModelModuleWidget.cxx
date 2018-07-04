@@ -98,7 +98,7 @@ void qSlicerMarkupsToModelModuleWidget::setup()
 
   this->setMRMLScene( d->logic()->GetMRMLScene() );
 
-  connect( d->ParameterNodeSelector, SIGNAL( currentNodeChanged( vtkMRMLNode* ) ), this, SLOT( onMarkupsToModelNodeSelectionChanged() ) );
+  connect( d->ParameterNodeSelector, SIGNAL( currentNodeChanged( vtkMRMLNode* ) ), this, SLOT( onParameterNodeSelectionChanged() ) );
   connect( d->ModelNodeSelector, SIGNAL( currentNodeChanged( vtkMRMLNode* ) ), this, SLOT( onOutputModelComboBoxSelectionChanged( vtkMRMLNode*) ) );
   connect( d->ModelNodeSelector, SIGNAL( nodeAddedByUser( vtkMRMLNode* ) ), this, SLOT( onOutputModelComboBoxNodeAdded( vtkMRMLNode* ) ) );
   connect( d->InputNodeSelector, SIGNAL( currentNodeChanged( vtkMRMLNode* ) ), this, SLOT( onInputNodeComboBoxSelectionChanged( vtkMRMLNode* ) ) );
@@ -174,11 +174,12 @@ void qSlicerMarkupsToModelModuleWidget::enter()
     d->ParameterNodeSelector->setCurrentNode(node);
   }
 
-  this->updateGUIFromMRML();
+  // Need to update the GUI so that it observes whichever parameter node is selected
+  this->onParameterNodeSelectionChanged();
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerMarkupsToModelModuleWidget::onMarkupsToModelNodeSelectionChanged()
+void qSlicerMarkupsToModelModuleWidget::onParameterNodeSelectionChanged()
 {
   Q_D(qSlicerMarkupsToModelModuleWidget);
   vtkMRMLMarkupsToModelNode* selectedMarkupsToModelNode = vtkMRMLMarkupsToModelNode::SafeDownCast(d->ParameterNodeSelector->currentNode());

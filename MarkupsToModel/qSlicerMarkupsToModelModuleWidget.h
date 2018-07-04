@@ -51,7 +51,7 @@ public slots:
 protected slots:
   void onUpdateButtonClicked();
   void onUpdateButtonCheckboxToggled(bool);
-  void onMarkupsToModelNodeSelectionChanged();
+  void onParameterNodeSelectionChanged();
   void onOutputModelComboBoxSelectionChanged(vtkMRMLNode*);
   void onOutputModelComboBoxNodeAdded(vtkMRMLNode*);
   void onInputNodeComboBoxSelectionChanged(vtkMRMLNode*);
@@ -84,7 +84,6 @@ protected:
   double GetOutputOpacity();
   void GetOutputColor( double outputColor[ 3 ] );
   double GetMarkupsTextScale();
-
 
 private:
   Q_DECLARE_PRIVATE(qSlicerMarkupsToModelModuleWidget);
