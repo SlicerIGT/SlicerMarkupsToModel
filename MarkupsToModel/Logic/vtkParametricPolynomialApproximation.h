@@ -34,26 +34,26 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkParametricPolynomialAppro
 {
 public:
   vtkTypeMacro(vtkParametricPolynomialApproximation,vtkParametricFunction);
-  void PrintSelf(ostream& os, vtkIndent indent) override;
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   static vtkParametricPolynomialApproximation *New();
 
   /**
    * Return the parametric dimension of the class.
    */
-  int GetDimension() override { return 1; }
+  int GetDimension() VTK_OVERRIDE { return 1; }
 
   /**
    * Evaluate the parametric function at parametric coordinate u[0] returning
    * the point coordinate Pt[3].
    */
-  void Evaluate( double u[ 3 ], double Pt[ 3 ], double Du[ 9 ] ) override;
+  void Evaluate( double u[ 3 ], double Pt[ 3 ], double Du[ 9 ] ) VTK_OVERRIDE;
 
   /**
    * Evaluate a scalar value at parametric coordinate u[0] and Pt[3].
    * Simply returns the parameter u[0].
    */
-  double EvaluateScalar( double u[ 3 ], double Pt[ 3 ], double Du[ 9 ] ) override;
+  double EvaluateScalar( double u[ 3 ], double Pt[ 3 ], double Du[ 9 ] ) VTK_OVERRIDE;
 
   //@{
   /**
@@ -139,7 +139,7 @@ public:
 
 protected:
   vtkParametricPolynomialApproximation();
-  ~vtkParametricPolynomialApproximation() override;
+  ~vtkParametricPolynomialApproximation() VTK_OVERRIDE;
 
 private:
   // What kind of fit (global/local)
