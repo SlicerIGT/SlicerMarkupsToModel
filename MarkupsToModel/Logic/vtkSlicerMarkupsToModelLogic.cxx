@@ -269,6 +269,11 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
     }
     case vtkMRMLMarkupsToModelNode::Curve:
     {
+      if ( this->CurveGenerator == NULL )
+      {
+        vtkErrorMacro( "Curve generator is null. No operation performed." );
+        return;
+      }
       int tubeSegmentsBetweenControlPoints = markupsToModelModuleNode->GetTubeSegmentsBetweenControlPoints();
       bool tubeLoop = markupsToModelModuleNode->GetTubeLoop();
       double tubeRadius = markupsToModelModuleNode->GetTubeRadius();
@@ -284,10 +289,14 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
       double polynomialSampleWidth = markupsToModelModuleNode->GetPolynomialSampleWidth();
       int polynomialWeightType = markupsToModelModuleNode->GetPolynomialWeightType();
       success = vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, curveType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, kochanekEndsCopyNearestDerivatives, kochanekBias, kochanekContinuity, kochanekTension, this->CurveGenerator, polynomialFitType, polynomialSampleWidth, polynomialWeightType );
-      if ( success && this->CurveGenerator )
+      if ( success && controlPoints->GetNumberOfPoints() > 1 )
       {
         double outputCurveLength = this->CurveGenerator->GetOutputCurveLength();
         markupsToModelModuleNode->SetOutputCurveLength( outputCurveLength );
+      }
+      else
+      {
+        markupsToModelModuleNode->SetOutputCurveLength( 0.0 );
       }
       break;
     }
