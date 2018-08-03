@@ -155,6 +155,9 @@ public:
   vtkGetMacro( KochanekEndsCopyNearestDerivatives, bool );
   vtkSetMacro( KochanekEndsCopyNearestDerivatives, bool );
   
+  vtkGetMacro( OutputCurveLength, double );
+  vtkSetMacro( OutputCurveLength, double );
+  
   vtkGetMacro( AutoUpdateOutput, bool );
   vtkSetMacro( AutoUpdateOutput, bool );
   vtkGetMacro( CleanMarkups, bool );
@@ -234,6 +237,7 @@ private:
   int    PolynomialFitType;
   double PolynomialSampleWidth;
   int    PolynomialWeightType;
+  double OutputCurveLength;
 };
 
 #endif

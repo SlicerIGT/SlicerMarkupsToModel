@@ -255,14 +255,16 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
   // Create the model from the points
   vtkSmartPointer< vtkPolyData > outputPolyData = vtkSmartPointer< vtkPolyData >::New();
   bool cleanMarkups = markupsToModelModuleNode->GetCleanMarkups();
-  switch ( markupsToModelModuleNode->GetModelType() )
+  bool success = false;
+  int modelType = markupsToModelModuleNode->GetModelType();
+  switch ( modelType )
   {
     case vtkMRMLMarkupsToModelNode::ClosedSurface:
     {
       double delaunayAlpha = markupsToModelModuleNode->GetDelaunayAlpha();
       bool smoothing = markupsToModelModuleNode->GetButterflySubdivision();
       bool forceConvex = markupsToModelModuleNode->GetConvexHull();
-      vtkSlicerMarkupsToModelLogic::UpdateClosedSurfaceModel( controlPoints, outputPolyData, smoothing, forceConvex, delaunayAlpha, cleanMarkups );
+      success = vtkSlicerMarkupsToModelLogic::UpdateClosedSurfaceModel( controlPoints, outputPolyData, smoothing, forceConvex, delaunayAlpha, cleanMarkups );
       break;
     }
     case vtkMRMLMarkupsToModelNode::Curve:
@@ -281,9 +283,17 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
       int polynomialFitType = markupsToModelModuleNode->GetPolynomialFitType();
       double polynomialSampleWidth = markupsToModelModuleNode->GetPolynomialSampleWidth();
       int polynomialWeightType = markupsToModelModuleNode->GetPolynomialWeightType();
-      vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, curveType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, kochanekEndsCopyNearestDerivatives, kochanekBias, kochanekContinuity, kochanekTension, this->CurveGenerator, polynomialFitType, polynomialSampleWidth, polynomialWeightType );
+      success = vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, curveType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, kochanekEndsCopyNearestDerivatives, kochanekBias, kochanekContinuity, kochanekTension, this->CurveGenerator, polynomialFitType, polynomialSampleWidth, polynomialWeightType );
       break;
     }
+  }
+
+  if ( success &&
+       this->CurveGenerator != NULL &&
+       modelType == vtkMRMLMarkupsToModelNode::Curve )
+  {
+    double outputCurveLength = this->CurveGenerator->GetOutputCurveLength();
+    markupsToModelModuleNode->SetOutputCurveLength( outputCurveLength );
   }
 
   vtkSlicerMarkupsToModelLogic::AssignPolyDataToOutput( markupsToModelModuleNode, outputPolyData );

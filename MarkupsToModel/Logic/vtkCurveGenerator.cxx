@@ -32,6 +32,7 @@ vtkCurveGenerator::vtkCurveGenerator()
   this->PolynomialWeightFunction = vtkCurveGenerator::POLYNOMIAL_WEIGHT_FUNCTION_GAUSSIAN;
   this->PolynomialSampleWidth = 0.5;
   this->OutputPoints = NULL;
+  this->OutputCurveLength = 0.0;
 
   // timestamps for input and output are the same, initially
   this->Modified();
@@ -185,6 +186,17 @@ vtkPoints* vtkCurveGenerator::GetOutputPoints()
   }
 
   return this->OutputPoints;
+}
+
+//------------------------------------------------------------------------------
+double vtkCurveGenerator::GetOutputCurveLength()
+{
+  if ( this->UpdateNeeded() )
+  {
+    this->Update();
+  }
+
+  return this->OutputCurveLength;
 }
 
 //------------------------------------------------------------------------------
@@ -464,6 +476,7 @@ void vtkCurveGenerator::GeneratePoints()
   {
     this->OutputPoints->Reset();
   }
+  this->OutputCurveLength = 0.0;
 
   int numberOfInputPoints = this->InputPoints->GetNumberOfPoints();
   int numberOfSegments = 0; // temporary value
@@ -477,12 +490,21 @@ void vtkCurveGenerator::GeneratePoints()
   }
 
   int totalNumberOfPoints = this->NumberOfPointsPerInterpolatingSegment * numberOfSegments + 1;
+  double previousPoint[ 3 ];
   for ( int pointIndex = 0; pointIndex < totalNumberOfPoints; pointIndex++ )
   {
     double sampleParameter = pointIndex / (double) ( totalNumberOfPoints - 1 );
     double curvePoint[ 3 ];
     this->ParametricFunction->Evaluate( &sampleParameter, curvePoint, NULL );
     this->OutputPoints->InsertNextPoint( curvePoint );
+    if ( pointIndex > 0 )
+    {
+      double segmentLength = sqrt( vtkMath::Distance2BetweenPoints( previousPoint, curvePoint ) );
+      this->OutputCurveLength += segmentLength;
+    }
+    previousPoint[ 0 ] = curvePoint[ 0 ];
+    previousPoint[ 1 ] = curvePoint[ 1 ];
+    previousPoint[ 2 ] = curvePoint[ 2 ];
   }
 }
 

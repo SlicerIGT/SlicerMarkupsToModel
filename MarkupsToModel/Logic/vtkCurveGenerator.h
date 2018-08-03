@@ -135,6 +135,8 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
     vtkPoints* GetOutputPoints();
     void SetOutputPoints( vtkPoints* );
 
+    double GetOutputCurveLength();
+
     // logic
     void Update();
 
@@ -166,6 +168,7 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkCurveGenerator : public v
 
     // output
     vtkSmartPointer< vtkPoints > OutputPoints;
+    double OutputCurveLength;
 
     // logic
     void SetParametricFunctionToSpline( vtkSpline* xSpline, vtkSpline* ySpline, vtkSpline* zSpline );
