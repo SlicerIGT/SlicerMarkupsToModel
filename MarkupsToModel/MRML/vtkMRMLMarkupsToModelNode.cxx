@@ -396,17 +396,31 @@ void vtkMRMLMarkupsToModelNode::SetAndObserveOutputModelNodeID( const char* outp
 //-----------------------------------------------------------------
 double vtkMRMLMarkupsToModelNode::GetOutputCurveLength()
 {
-  const char* curveLengthAsConstChar = this->GetAttribute( OUTPUT_CURVE_LENGTH_ATTRIBUTE_NAME );
+  vtkMRMLModelNode* outputModelNode = vtkMRMLModelNode::SafeDownCast( this->GetOutputModelNode() );
+  if ( outputModelNode == NULL )
+  {
+    vtkWarningMacro( "No output model node. Returning 0." );
+    return 0;
+  }
+
+  const char* curveLengthAsConstChar = outputModelNode->GetAttribute( OUTPUT_CURVE_LENGTH_ATTRIBUTE_NAME );
   return std::atof( curveLengthAsConstChar );
 }
 
 //-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::SetOutputCurveLength( double curveLength )
 {
+  vtkMRMLModelNode* outputModelNode = vtkMRMLModelNode::SafeDownCast( this->GetOutputModelNode() );
+  if ( outputModelNode == NULL )
+  {
+    vtkErrorMacro( "No output model node." );
+    return;
+  }
+
   std::stringstream curvestream;
   curvestream << curveLength;
   const char* curveLengthAsConstChar = curvestream.str().c_str();
-  this->SetAttribute( OUTPUT_CURVE_LENGTH_ATTRIBUTE_NAME, curveLengthAsConstChar );
+  outputModelNode->SetAttribute( OUTPUT_CURVE_LENGTH_ATTRIBUTE_NAME, curveLengthAsConstChar );
 }
 
 //-----------------------------------------------------------------
