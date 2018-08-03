@@ -284,16 +284,13 @@ void vtkSlicerMarkupsToModelLogic::UpdateOutputModel(vtkMRMLMarkupsToModelNode* 
       double polynomialSampleWidth = markupsToModelModuleNode->GetPolynomialSampleWidth();
       int polynomialWeightType = markupsToModelModuleNode->GetPolynomialWeightType();
       success = vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( controlPoints, outputPolyData, curveType, tubeLoop, tubeRadius, tubeNumberOfSides, tubeSegmentsBetweenControlPoints, cleanMarkups, polynomialOrder, pointParameterType, kochanekEndsCopyNearestDerivatives, kochanekBias, kochanekContinuity, kochanekTension, this->CurveGenerator, polynomialFitType, polynomialSampleWidth, polynomialWeightType );
+      if ( success && this->CurveGenerator )
+      {
+        double outputCurveLength = this->CurveGenerator->GetOutputCurveLength();
+        markupsToModelModuleNode->SetOutputCurveLength( outputCurveLength );
+      }
       break;
     }
-  }
-
-  if ( success &&
-       this->CurveGenerator != NULL &&
-       modelType == vtkMRMLMarkupsToModelNode::Curve )
-  {
-    double outputCurveLength = this->CurveGenerator->GetOutputCurveLength();
-    markupsToModelModuleNode->SetOutputCurveLength( outputCurveLength );
   }
 
   vtkSlicerMarkupsToModelLogic::AssignPolyDataToOutput( markupsToModelModuleNode, outputPolyData );

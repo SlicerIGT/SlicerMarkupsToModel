@@ -20,6 +20,8 @@
 static const char* INPUT_ROLE = "InputMarkups";
 static const char* OUTPUT_MODEL_ROLE = "OutputModel";
 
+static const char* OUTPUT_CURVE_LENGTH_ATTRIBUTE_NAME = "MarkupsToModel_OutputCurveLength";
+
 //-----------------------------------------------------------------
 vtkMRMLMarkupsToModelNode* vtkMRMLMarkupsToModelNode::New()
 {
@@ -73,8 +75,6 @@ vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
   this->PolynomialFitType = vtkMRMLMarkupsToModelNode::GlobalLeastSquares;
   this->PolynomialSampleWidth = 0.5;
   this->PolynomialWeightType = vtkMRMLMarkupsToModelNode::Gaussian;
-
-  this->OutputCurveLength = 0;
 }
 
 //-----------------------------------------------------------------
@@ -394,6 +394,22 @@ void vtkMRMLMarkupsToModelNode::SetAndObserveOutputModelNodeID( const char* outp
 }
 
 //-----------------------------------------------------------------
+double vtkMRMLMarkupsToModelNode::GetOutputCurveLength()
+{
+  const char* curveLengthAsConstChar = this->GetAttribute( OUTPUT_CURVE_LENGTH_ATTRIBUTE_NAME );
+  return std::atof( curveLengthAsConstChar );
+}
+
+//-----------------------------------------------------------------
+void vtkMRMLMarkupsToModelNode::SetOutputCurveLength( double curveLength )
+{
+  std::stringstream curvestream;
+  curvestream << curveLength;
+  const char* curveLengthAsConstChar = curvestream.str().c_str();
+  this->SetAttribute( OUTPUT_CURVE_LENGTH_ATTRIBUTE_NAME, curveLengthAsConstChar );
+}
+
+//-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::ProcessMRMLEvents( vtkObject *caller, unsigned long /*event*/, void* /*callData*/ )
 {
   vtkMRMLNode* callerNode = vtkMRMLNode::SafeDownCast( caller );
@@ -403,6 +419,12 @@ void vtkMRMLMarkupsToModelNode::ProcessMRMLEvents( vtkObject *caller, unsigned l
   {
     this->InvokeCustomModifiedEvent(MarkupsPositionModifiedEvent);
   }
+}
+
+//-----------------------------------------------------------------
+const char* vtkMRMLMarkupsToModelNode::GetOutputCurveLengthAttributeName()
+{
+  return OUTPUT_CURVE_LENGTH_ATTRIBUTE_NAME;
 }
 
 //-----------------------------------------------------------------

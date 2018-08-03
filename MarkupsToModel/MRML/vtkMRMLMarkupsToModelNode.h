@@ -155,9 +155,6 @@ public:
   vtkGetMacro( KochanekEndsCopyNearestDerivatives, bool );
   vtkSetMacro( KochanekEndsCopyNearestDerivatives, bool );
   
-  vtkGetMacro( OutputCurveLength, double );
-  vtkSetMacro( OutputCurveLength, double );
-  
   vtkGetMacro( AutoUpdateOutput, bool );
   vtkSetMacro( AutoUpdateOutput, bool );
   vtkGetMacro( CleanMarkups, bool );
@@ -168,6 +165,9 @@ public:
   vtkSetMacro( DelaunayAlpha, double );
   vtkGetMacro( ConvexHull, bool );
   vtkSetMacro( ConvexHull, bool );
+  
+  double GetOutputCurveLength();
+  void SetOutputCurveLength( double );
 
 protected:
 
@@ -185,6 +185,8 @@ public:
 
   vtkMRMLNode * GetInputNode( );
   vtkMRMLModelNode* GetOutputModelNode( );
+
+  static const char* GetOutputCurveLengthAttributeName();
 
   // Convert between model and interpolation types IDs and names.
   static const char* GetModelTypeAsString( int id );
