@@ -419,8 +419,7 @@ void vtkMRMLMarkupsToModelNode::SetOutputCurveLength( double curveLength )
 
   std::stringstream curvestream;
   curvestream << curveLength;
-  const char* curveLengthAsConstChar = curvestream.str().c_str();
-  outputModelNode->SetAttribute( OUTPUT_CURVE_LENGTH_ATTRIBUTE_NAME, curveLengthAsConstChar );
+  outputModelNode->SetAttribute( OUTPUT_CURVE_LENGTH_ATTRIBUTE_NAME, curvestream.str().c_str());
 }
 
 //-----------------------------------------------------------------
