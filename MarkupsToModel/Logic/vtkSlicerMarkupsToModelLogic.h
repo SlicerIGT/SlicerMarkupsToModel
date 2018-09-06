@@ -56,9 +56,9 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkSlicerMarkupsToModelLogic
 public:
   static vtkSlicerMarkupsToModelLogic *New();
   vtkTypeMacro(vtkSlicerMarkupsToModelLogic, vtkSlicerModuleLogic);
-  void PrintSelf(ostream& os, vtkIndent indent);
-  vtkSlicerMarkupsLogic* MarkupsLogic;  
-  void ProcessMRMLNodesEvents( vtkObject* caller, unsigned long event, void* callData );
+  void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
+  vtkSlicerMarkupsLogic* MarkupsLogic;
+  void ProcessMRMLNodesEvents( vtkObject* caller, unsigned long event, void* callData ) VTK_OVERRIDE;
 
   // Updates the mouse selection type to create markups or to navigate the scene.
   void UpdateSelectionNode( vtkMRMLMarkupsToModelNode* markupsToModelModuleNode );
@@ -109,15 +109,15 @@ protected:
   vtkSlicerMarkupsToModelLogic();
   virtual ~vtkSlicerMarkupsToModelLogic();
 
-  virtual void SetMRMLSceneInternal(vtkMRMLScene* newScene);
+  virtual void SetMRMLSceneInternal(vtkMRMLScene* newScene) VTK_OVERRIDE;
   /// Register MRML Node classes to Scene. Gets called automatically when the MRMLScene is attached to this logic class.
-  virtual void RegisterNodes();
-  virtual void UpdateFromMRMLScene();
+  virtual void RegisterNodes() VTK_OVERRIDE;
+  virtual void UpdateFromMRMLScene() VTK_OVERRIDE;
   ///When a scene has been imported it will set the markups list and model.
-  virtual void OnMRMLSceneEndImport();
-  virtual void OnMRMLSceneStartImport();
-  virtual void OnMRMLSceneNodeAdded(vtkMRMLNode* node);
-  virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
+  virtual void OnMRMLSceneEndImport() VTK_OVERRIDE;
+  virtual void OnMRMLSceneStartImport() VTK_OVERRIDE;
+  virtual void OnMRMLSceneNodeAdded(vtkMRMLNode* node) VTK_OVERRIDE;
+  virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node) VTK_OVERRIDE;
 
 private:
   vtkSmartPointer< vtkCurveGenerator > CurveGenerator;

@@ -115,12 +115,12 @@ public:
   // Standard MRML node methods  
   static vtkMRMLMarkupsToModelNode *New();  
 
-  virtual vtkMRMLNode* CreateNodeInstance();
-  virtual const char* GetNodeTagName() { return "MarkupsToModel"; };
-  void PrintSelf( ostream& os, vtkIndent indent );
-  virtual void ReadXMLAttributes( const char** atts );
-  virtual void WriteXML( ostream& of, int indent );
-  virtual void Copy( vtkMRMLNode *node );
+  virtual vtkMRMLNode* CreateNodeInstance() VTK_OVERRIDE;
+  virtual const char* GetNodeTagName() VTK_OVERRIDE { return "MarkupsToModel"; };
+  void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
+  virtual void ReadXMLAttributes( const char** atts ) VTK_OVERRIDE;
+  virtual void WriteXML( ostream& of, int indent ) VTK_OVERRIDE;
+  virtual void Copy( vtkMRMLNode *node ) VTK_OVERRIDE;
 
   vtkGetMacro( KochanekTension, double );
   vtkSetMacro( KochanekTension, double );
