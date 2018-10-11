@@ -123,27 +123,27 @@ public:
   virtual void Copy( vtkMRMLNode *node ) VTK_OVERRIDE;
 
   vtkGetMacro( KochanekTension, double );
-  vtkSetMacro( KochanekTension, double );
+  vtkSetClampMacro( KochanekTension, double, -1.0, 1.0 );
   vtkGetMacro( KochanekBias, double );
-  vtkSetMacro( KochanekBias, double );
+  vtkSetClampMacro(KochanekBias, double, -1.0, 1.0);
   vtkGetMacro( KochanekContinuity, double );
-  vtkSetMacro( KochanekContinuity, double );
+  vtkSetClampMacro(KochanekContinuity, double, -1.0, 1.0);
 
   vtkGetMacro( PolynomialOrder, int );
-  vtkSetMacro( PolynomialOrder, int );
+  vtkSetClampMacro( PolynomialOrder, int, 1, VTK_INT_MAX );
   vtkGetMacro( PolynomialFitType, int );
-  vtkSetMacro( PolynomialFitType, int );
+  vtkSetClampMacro(PolynomialFitType, int, 0, PolynomialFitType_Last-1);
   vtkGetMacro( PolynomialSampleWidth, double );
-  vtkSetMacro( PolynomialSampleWidth, double );
+  vtkSetClampMacro(PolynomialSampleWidth, double, 0.0, 1.0);
   vtkGetMacro( PolynomialWeightType, int );
-  vtkSetMacro( PolynomialWeightType, int );
+  vtkSetClampMacro(PolynomialWeightType, int, 0, PolynomialWeightType_Last-1);
 
   vtkGetMacro( ModelType, int );
-  vtkSetMacro( ModelType, int );
+  vtkSetClampMacro(ModelType, int, 0, ModelType_Last-1);
   vtkGetMacro( CurveType, int );
-  vtkSetMacro( CurveType, int );
+  vtkSetClampMacro(CurveType, int, 0, CurveType_Last-1);
   vtkGetMacro( PointParameterType, int );
-  vtkSetMacro( PointParameterType, int );
+  vtkSetClampMacro(PointParameterType, int, 0, PointParameterType_Last-1);
   vtkGetMacro( TubeRadius, double );
   vtkSetMacro( TubeRadius, double );
   vtkGetMacro( TubeSegmentsBetweenControlPoints, int );
