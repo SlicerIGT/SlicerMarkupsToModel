@@ -99,256 +99,117 @@ vtkMRMLNode* vtkMRMLMarkupsToModelNode::CreateNodeInstance()
 void vtkMRMLMarkupsToModelNode::WriteXML( ostream& of, int nIndent )
 {
   Superclass::WriteXML(of, nIndent); // This will take care of referenced nodes
-  vtkIndent indent(nIndent);
-
-  of << indent << " ModelType =\"" << this->GetModelTypeAsString(this->ModelType) << "\"";
-  of << indent << " AutoUpdateOutput =\"" << (this->AutoUpdateOutput ? "true" : "false") << "\"";
-  of << indent << " CleanMarkups =\"" << (this->CleanMarkups ? "true" : "false") << "\"";
-  of << indent << " ConvexHull =\"" << (this->ConvexHull ? "true" : "false") << "\"";
-  of << indent << " ButterflySubdivision =\"" << (this->ButterflySubdivision ? "true" : "false") << "\"";
-  of << indent << " DelaunayAlpha =\"" << this->DelaunayAlpha << "\"";
-  of << indent << " CurveType=\"" << this->GetCurveTypeAsString(this->CurveType) << "\"";
-  of << indent << " PointParameterType=\"" << this->GetPointParameterTypeAsString(this->PointParameterType) << "\"";
-  of << indent << " TubeRadius=\"" << this->TubeRadius << "\"";
-  of << indent << " TubeNumberOfSides=\"" << this->TubeNumberOfSides << "\"";
-  of << indent << " TubeSegmentsBetweenControlPoints=\"" << this->TubeSegmentsBetweenControlPoints << "\"";
-  of << indent << " TubeLoop=\"" << ( this->TubeLoop ? "true" : "false" ) << "\"";
-  of << indent << " KochanekEndsCopyNearestDerivatives=\"" << ( this->KochanekEndsCopyNearestDerivatives ? "true" : "false" ) << "\"";
-  of << indent << " KochanekBias=\"" << this->KochanekBias << "\"";
-  of << indent << " KochanekContinuity=\"" << this->KochanekContinuity << "\"";
-  of << indent << " KochanekTension=\"" << this->KochanekTension << "\"";
-  of << indent << " PolynomialOrder=\"" << this->PolynomialOrder << "\"";
-  of << indent << " PolynomialFitType=\"" << this->GetPolynomialFitTypeAsString( this->PolynomialFitType ) << "\"";
-  of << indent << " PolynomialSampleWidth=\"" << this->PolynomialSampleWidth << "\"";
-  of << indent << " PolynomialWeightType=\"" << this->GetPolynomialWeightTypeAsString( this->PolynomialWeightType ) << "\"";
+  vtkMRMLWriteXMLBeginMacro(of);
+  vtkMRMLWriteXMLEnumMacro(ModelType, ModelType);
+  vtkMRMLWriteXMLBooleanMacro(AutoUpdateOutput, AutoUpdateOutput);
+  vtkMRMLWriteXMLBooleanMacro(CleanMarkups, CleanMarkups);
+  vtkMRMLWriteXMLBooleanMacro(ConvexHull, ConvexHull);
+  vtkMRMLWriteXMLBooleanMacro(ButterflySubdivision, ButterflySubdivision);
+  vtkMRMLWriteXMLFloatMacro(DelaunayAlpha, DelaunayAlpha);
+  vtkMRMLWriteXMLEnumMacro(CurveType, CurveType);
+  vtkMRMLWriteXMLEnumMacro(PointParameterType, PointParameterType);
+  vtkMRMLWriteXMLFloatMacro(TubeRadius, TubeRadius);
+  vtkMRMLWriteXMLIntMacro(TubeNumberOfSides, TubeNumberOfSides);
+  vtkMRMLWriteXMLIntMacro(TubeSegmentsBetweenControlPoints, TubeSegmentsBetweenControlPoints);
+  vtkMRMLWriteXMLBooleanMacro(TubeLoop, TubeLoop);
+  vtkMRMLWriteXMLBooleanMacro(KochanekEndsCopyNearestDerivatives, KochanekEndsCopyNearestDerivatives);
+  vtkMRMLWriteXMLFloatMacro(KochanekBias, KochanekBias);
+  vtkMRMLWriteXMLFloatMacro(KochanekContinuity, KochanekContinuity);
+  vtkMRMLWriteXMLFloatMacro(KochanekTension, KochanekTension);
+  vtkMRMLWriteXMLIntMacro(PolynomialOrder, PolynomialOrder);
+  vtkMRMLWriteXMLEnumMacro(PolynomialFitType, PolynomialFitType);
+  vtkMRMLWriteXMLFloatMacro(PolynomialSampleWidth, PolynomialSampleWidth);
+  vtkMRMLWriteXMLEnumMacro(PolynomialWeightType, PolynomialWeightType);
+  vtkMRMLWriteXMLEndMacro();
 }
 
 //-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::ReadXMLAttributes( const char** atts )
 {
   int disabledModify = this->StartModify();
-
   Superclass::ReadXMLAttributes(atts); // This will take care of referenced nodes
-
-  // Read all MRML node attributes from two arrays of names and values
-  const char* attName;
-  const char* attValue;
-
-  while (*atts != NULL)
-  {
-    attName  = *(atts++);
-    attValue = *(atts++);
-    if ( strcmp( attName, "ModelType" ) == 0 )
-    {
-      int typeAsInt = this->GetModelTypeFromString( attValue );
-      if ( typeAsInt < 0 || typeAsInt >= ModelType_Last)
-      {
-        vtkWarningMacro( "Unrecognized model type read from MRML node: " << attValue << ". Setting to ClosedSurface." );
-        typeAsInt = this->ClosedSurface;
-      }
-      this->SetModelType( typeAsInt );
-    }
-    else if ( strcmp( attName, "AutoUpdateOutput" ) == 0 )
-    {
-      this->SetAutoUpdateOutput(!strcmp(attValue,"true"));
-    }
-    else if ( strcmp( attName, "CleanMarkups" ) == 0 )
-    {
-      this->SetCleanMarkups(!strcmp(attValue,"true"));
-    }
-    else if ( strcmp( attName, "ConvexHull" ) == 0 )
-    {
-      this->SetConvexHull(!strcmp(attValue,"true"));
-    }
-    else if ( strcmp( attName, "ButterflySubdivision" ) == 0 )
-    {
-      this->SetButterflySubdivision(!strcmp(attValue,"true"));
-    }
-    else if ( strcmp( attName, "DelaunayAlpha" ) == 0 )
-    {
-      double delaunayAlpha = 0.0;
-      std::stringstream nameString;
-      nameString << attValue;
-      nameString >> delaunayAlpha;
-      this->SetDelaunayAlpha( delaunayAlpha );
-    }
-    // CurveType is formerly InterpolationType (now deprecated)
-    else if ( strcmp( attName, "InterpolationType" ) == 0 || strcmp( attName, "CurveType" ) == 0 )
-    {
-      int typeAsInt = this->GetCurveTypeFromString( attValue );
-      if ( typeAsInt < 0 || typeAsInt >= CurveType_Last )
-      {
-        vtkWarningMacro( "Unrecognized curve type read from MRML node: " << attValue << ". Setting to Linear." );
-        typeAsInt = this->Linear;
-      }
-      this->SetCurveType( typeAsInt );
-    }
-    else if ( strcmp( attName, "PointParameterType" ) == 0 )
-    {
-      int typeAsInt = this->GetPointParameterTypeFromString( attValue );
-      if ( typeAsInt < 0 || typeAsInt >= PointParameterType_Last )
-      {
-        vtkWarningMacro( "Unrecognized point parameter type read from MRML node: " << attValue << ". Setting to RawIndices." );
-        typeAsInt = this->RawIndices;
-      }
-      this->SetPointParameterType( typeAsInt );
-    }
-    else if ( strcmp( attName, "TubeRadius" ) == 0 )
-    {
-      double tubeRadius = 0.0;
-      std::stringstream nameString;
-      nameString << attValue;
-      nameString >> tubeRadius;
-      this->SetTubeRadius( tubeRadius );
-    }
-    else if ( strcmp( attName, "TubeNumberOfSides" ) == 0 )
-    {
-      double tubeNumberOfSides = 0.0;
-      std::stringstream nameString;
-      nameString << attValue;
-      nameString >> tubeNumberOfSides;
-      this->SetTubeNumberOfSides( tubeNumberOfSides );
-    }
-    else if ( strcmp( attName, "TubeSegmentsBetweenControlPoints" ) == 0 )
-    {
-      double tubeSegmentsBetweenControlPoints = 0.0;
-      std::stringstream nameString;
-      nameString << attValue;
-      nameString >> tubeSegmentsBetweenControlPoints;
-      this->SetTubeSegmentsBetweenControlPoints( tubeSegmentsBetweenControlPoints );
-    }
-    else if ( strcmp( attName, "TubeLoop" ) == 0 )
-    {
-      bool isTrue = !strcmp( attValue, "true" );
-      this->SetTubeLoop( isTrue );
-    }
-    else if ( strcmp( attName, "KochanekEndsCopyNearestDerivatives" ) == 0 )
-    {
-      bool isTrue = !strcmp( attValue, "true" );
-      this->SetKochanekEndsCopyNearestDerivatives( isTrue );
-    }
-    else if ( strcmp( attName, "KochanekBias" ) == 0 )
-    {
-      double kochanekBias = 0.0;
-      std::stringstream nameString;
-      nameString << attValue;
-      nameString >> kochanekBias;
-      if ( kochanekBias < -1.0 )
-      {
-        vtkWarningMacro( "Kochanek Bias " << kochanekBias << " is too small. Setting to -1.0.)" );
-        kochanekBias = -1.0;
-      }
-      else if ( kochanekBias > 1.0 )
-      {
-        vtkWarningMacro( "Kochanek Bias " << kochanekBias << " is too large. Setting to 1.0.)" );
-        kochanekBias = 1.0;
-      }
-      this->SetKochanekBias( kochanekBias );
-    }
-    else if ( strcmp( attName, "KochanekContinuity" ) == 0 )
-    {
-      double kochanekContinuity = 0.0;
-      std::stringstream nameString;
-      nameString << attValue;
-      nameString >> kochanekContinuity;
-      if ( kochanekContinuity < -1.0 )
-      {
-        vtkWarningMacro( "Kochanek Continuity " << kochanekContinuity << " is too small. Setting to -1.0.)" );
-        kochanekContinuity = -1.0;
-      }
-      else if ( kochanekContinuity > 1.0 )
-      {
-        vtkWarningMacro( "Kochanek Continuity " << kochanekContinuity << " is too large. Setting to 1.0.)" );
-        kochanekContinuity = 1.0;
-      }
-      this->SetKochanekContinuity( kochanekContinuity );
-    }
-    else if ( strcmp( attName, "KochanekTension" ) == 0 )
-    {
-      double kochanekTension = 0.0;
-      std::stringstream nameString;
-      nameString << attValue;
-      nameString >> kochanekTension;
-      if ( kochanekTension < -1.0 )
-      {
-        vtkWarningMacro( "Kochanek Tension " << kochanekTension << " is too small. Setting to -1.0.)" );
-        kochanekTension = -1.0;
-      }
-      else if ( kochanekTension > 1.0 )
-      {
-        vtkWarningMacro( "Kochanek Tension " << kochanekTension << " is too large. Setting to 1.0.)" );
-        kochanekTension = 1.0;
-      }
-      this->SetKochanekTension( kochanekTension );
-    }
-    else if ( strcmp( attName, "PolynomialOrder" ) == 0 )
-    {
-      int polynomialOrder = 1;
-      std::stringstream nameString;
-      nameString << attValue;
-      nameString >> polynomialOrder;
-      if ( polynomialOrder < 1 )
-      {
-        vtkWarningMacro( "Polynomial Order " << polynomialOrder << " is too small. Setting to 1.)" );
-        polynomialOrder = 1;
-      }
-      this->SetPolynomialOrder( polynomialOrder );
-    }
-    else if ( strcmp( attName, "PolynomialFitType" ) == 0 )
-    {
-      int typeAsInt = this->GetPolynomialFitTypeFromString( attValue );
-      if ( typeAsInt < 0 || typeAsInt >= PolynomialFitType_Last )
-      {
-        vtkWarningMacro( "Unrecognized polynomial fit type read from MRML node: " << attValue << ". Setting to GlobalLeastSquares." );
-        typeAsInt = this->GlobalLeastSquares;
-      }
-      this->SetPolynomialFitType( typeAsInt );
-    }
-    else if ( strcmp( attName, "PolynomialSampleWidth" ) == 0 )
-    {
-      double polynomialSampleWidth = 0.0;
-      std::stringstream nameString;
-      nameString << attValue;
-      nameString >> polynomialSampleWidth;
-      if ( polynomialSampleWidth < 0.0 )
-      {
-        vtkWarningMacro( "Polynomial sample width " << polynomialSampleWidth << " is too small. Setting to 0.0.)" );
-        polynomialSampleWidth = 0.0;
-      }
-      else if ( polynomialSampleWidth > 1.0 )
-      {
-        vtkWarningMacro( "Polynomial sample width " << polynomialSampleWidth << " is too large. Setting to 1.0.)" );
-        polynomialSampleWidth = 1.0;
-      }
-      this->SetPolynomialSampleWidth( polynomialSampleWidth );
-    }
-    else if ( strcmp( attName, "PolynomialWeightType" ) == 0 )
-    {
-      int typeAsInt = this->GetPolynomialWeightTypeFromString( attValue );
-      if ( typeAsInt < 0 || typeAsInt >= PolynomialWeightType_Last )
-      {
-        vtkWarningMacro("Unrecognized polynomial weight type read from MRML node: " << attValue << ". Setting to Rectangular.");
-        typeAsInt = vtkMRMLMarkupsToModelNode::Rectangular;
-      }
-      this->SetPolynomialWeightType( typeAsInt );
-    }
-  }
-
+  vtkMRMLReadXMLBeginMacro(atts);
+  vtkMRMLReadXMLEnumMacro(ModelType, ModelType);
+  vtkMRMLReadXMLBooleanMacro(AutoUpdateOutput, AutoUpdateOutput);
+  vtkMRMLReadXMLBooleanMacro(CleanMarkups, CleanMarkups);
+  vtkMRMLReadXMLBooleanMacro(ConvexHull, ConvexHull);
+  vtkMRMLReadXMLBooleanMacro(ButterflySubdivision, ButterflySubdivision);
+  vtkMRMLReadXMLFloatMacro(DelaunayAlpha, DelaunayAlpha);
+  vtkMRMLReadXMLEnumMacro(InterpolationType, CurveType);
+  vtkMRMLReadXMLEnumMacro(CurveType, CurveType);
+  vtkMRMLReadXMLEnumMacro(PointParameterType, PointParameterType);
+  vtkMRMLReadXMLFloatMacro(TubeRadius, TubeRadius);
+  vtkMRMLReadXMLIntMacro(TubeNumberOfSides, TubeNumberOfSides);
+  vtkMRMLReadXMLIntMacro(TubeSegmentsBetweenControlPoints, TubeSegmentsBetweenControlPoints);
+  vtkMRMLReadXMLBooleanMacro(TubeLoop, TubeLoop);
+  vtkMRMLReadXMLBooleanMacro(KochanekEndsCopyNearestDerivatives, KochanekEndsCopyNearestDerivatives);
+  vtkMRMLReadXMLFloatMacro(KochanekBias, KochanekBias);
+  vtkMRMLReadXMLFloatMacro(KochanekContinuity, KochanekContinuity);
+  vtkMRMLReadXMLFloatMacro(KochanekTension, KochanekTension);
+  vtkMRMLReadXMLIntMacro(PolynomialOrder, PolynomialOrder);
+  vtkMRMLReadXMLEnumMacro(PolynomialFitType, PolynomialFitType);
+  vtkMRMLReadXMLFloatMacro(PolynomialSampleWidth, PolynomialSampleWidth);
+  vtkMRMLReadXMLEnumMacro(PolynomialWeightType, PolynomialWeightType);
+  vtkMRMLReadXMLEndMacro();
   this->EndModify( disabledModify );
 }
 
 //-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::Copy( vtkMRMLNode *anode )
-{  
+{
+  int disabledModify = this->StartModify();
   Superclass::Copy( anode ); // This will take care of referenced nodes
-  this->Modified();
+  vtkMRMLCopyBeginMacro(anode);
+  vtkMRMLCopyEnumMacro(ModelType);
+  vtkMRMLCopyBooleanMacro(AutoUpdateOutput);
+  vtkMRMLCopyBooleanMacro(CleanMarkups);
+  vtkMRMLCopyBooleanMacro(ConvexHull);
+  vtkMRMLCopyBooleanMacro(ButterflySubdivision);
+  vtkMRMLCopyFloatMacro(DelaunayAlpha);
+  vtkMRMLCopyEnumMacro(CurveType);
+  vtkMRMLCopyEnumMacro(PointParameterType);
+  vtkMRMLCopyFloatMacro(TubeRadius);
+  vtkMRMLCopyIntMacro(TubeNumberOfSides);
+  vtkMRMLCopyIntMacro(TubeSegmentsBetweenControlPoints);
+  vtkMRMLCopyBooleanMacro(TubeLoop);
+  vtkMRMLCopyBooleanMacro(KochanekEndsCopyNearestDerivatives);
+  vtkMRMLCopyFloatMacro(KochanekBias);
+  vtkMRMLCopyFloatMacro(KochanekContinuity);
+  vtkMRMLCopyFloatMacro(KochanekTension);
+  vtkMRMLCopyIntMacro(PolynomialOrder);
+  vtkMRMLCopyEnumMacro(PolynomialFitType);
+  vtkMRMLCopyFloatMacro(PolynomialSampleWidth);
+  vtkMRMLCopyEnumMacro(PolynomialWeightType);
+  vtkMRMLCopyEndMacro();
+  this->EndModify(disabledModify);
 }
 
 //-----------------------------------------------------------------
 void vtkMRMLMarkupsToModelNode::PrintSelf( ostream& os, vtkIndent indent )
 {
-  vtkMRMLNode::PrintSelf(os,indent); // This will take care of referenced nodes
-  os << indent << "ModelID: ";
+  Superclass::PrintSelf(os,indent); // This will take care of referenced nodes
+  vtkMRMLPrintBeginMacro(os, indent);
+  vtkMRMLPrintEnumMacro(ModelType);
+  vtkMRMLPrintBooleanMacro(AutoUpdateOutput);
+  vtkMRMLPrintBooleanMacro(CleanMarkups);
+  vtkMRMLPrintBooleanMacro(ConvexHull);
+  vtkMRMLPrintBooleanMacro(ButterflySubdivision);
+  vtkMRMLPrintFloatMacro(DelaunayAlpha);
+  vtkMRMLPrintEnumMacro(CurveType);
+  vtkMRMLPrintEnumMacro(PointParameterType);
+  vtkMRMLPrintFloatMacro(TubeRadius);
+  vtkMRMLPrintIntMacro(TubeNumberOfSides);
+  vtkMRMLPrintIntMacro(TubeSegmentsBetweenControlPoints);
+  vtkMRMLPrintBooleanMacro(TubeLoop);
+  vtkMRMLPrintBooleanMacro(KochanekEndsCopyNearestDerivatives);
+  vtkMRMLPrintFloatMacro(KochanekBias);
+  vtkMRMLPrintFloatMacro(KochanekContinuity);
+  vtkMRMLPrintFloatMacro(KochanekTension);
+  vtkMRMLPrintIntMacro(PolynomialOrder);
+  vtkMRMLPrintEnumMacro(PolynomialFitType);
+  vtkMRMLPrintFloatMacro(PolynomialSampleWidth);
+  vtkMRMLPrintEnumMacro(PolynomialWeightType);
+  vtkMRMLPrintEndMacro();
 }
 
 //-----------------------------------------------------------------
