@@ -22,18 +22,7 @@ static const char* OUTPUT_MODEL_ROLE = "OutputModel";
 
 static const char* OUTPUT_CURVE_LENGTH_ATTRIBUTE_NAME = "MarkupsToModel_OutputCurveLength";
 
-//-----------------------------------------------------------------
-vtkMRMLMarkupsToModelNode* vtkMRMLMarkupsToModelNode::New()
-{
-  // First try to create the object from the vtkObjectFactory
-  vtkObject* ret = vtkObjectFactory::CreateInstance( "vtkMRMLMarkupsToModelNode" );
-  if( ret )
-  {
-    return ( vtkMRMLMarkupsToModelNode* )ret;
-  }
-  // If the factory was unable to create the object, then create it here.
-  return new vtkMRMLMarkupsToModelNode;
-}
+vtkMRMLNodeNewMacro(vtkMRMLMarkupsToModelNode);
 
 //-----------------------------------------------------------------
 vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
@@ -80,19 +69,6 @@ vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
 //-----------------------------------------------------------------
 vtkMRMLMarkupsToModelNode::~vtkMRMLMarkupsToModelNode()
 {
-}
-
-//-----------------------------------------------------------------
-vtkMRMLNode* vtkMRMLMarkupsToModelNode::CreateNodeInstance()
-{
-  // First try to create the object from the vtkObjectFactory
-  vtkObject* ret = vtkObjectFactory::CreateInstance( "vtkMRMLMarkupsToModelNode" );
-  if( ret )
-    {
-      return ( vtkMRMLMarkupsToModelNode* )ret;
-    }
-  // If the factory was unable to create the object, then create it here.
-  return new vtkMRMLMarkupsToModelNode;
 }
 
 //-----------------------------------------------------------------
