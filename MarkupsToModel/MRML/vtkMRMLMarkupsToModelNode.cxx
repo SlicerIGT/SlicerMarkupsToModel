@@ -32,7 +32,9 @@ vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
 
   vtkNew<vtkIntArray> events;
   events->InsertNextValue( vtkCommand::ModifiedEvent );
-  events->InsertNextValue( vtkMRMLMarkupsNode::PointModifiedEvent );//PointEndInteractionEvent
+  events->InsertNextValue(vtkMRMLMarkupsNode::PointAddedEvent);
+  events->InsertNextValue(vtkMRMLMarkupsNode::PointRemovedEvent);
+  events->InsertNextValue( vtkMRMLMarkupsNode::PointModifiedEvent );
   events->InsertNextValue( vtkMRMLModelNode::MeshModifiedEvent );
 
   this->AddNodeReferenceRole( INPUT_ROLE, NULL, events.GetPointer() );
