@@ -15,7 +15,7 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkSlicerMarkupsToModelClose
   public:
     // standard vtk object methods
     vtkTypeMacro( vtkSlicerMarkupsToModelClosedSurfaceGeneration, vtkObject );
-    void PrintSelf( ostream& os, vtkIndent indent ) VTK_OVERRIDE;
+    void PrintSelf( ostream& os, vtkIndent indent ) override;
     static vtkSlicerMarkupsToModelClosedSurfaceGeneration *New();
 
     enum PointArrangement
@@ -54,8 +54,8 @@ class VTK_SLICER_MARKUPSTOMODEL_MODULE_LOGIC_EXPORT vtkSlicerMarkupsToModelClose
     static void GetNthColumnInMatrix( vtkMatrix4x4* matrix, int n, double outputAxis[ 3 ] );
 
     // not used
-    vtkSlicerMarkupsToModelClosedSurfaceGeneration ( const vtkSlicerMarkupsToModelClosedSurfaceGeneration& ) VTK_DELETE_FUNCTION;
-    void operator= ( const vtkSlicerMarkupsToModelClosedSurfaceGeneration& ) VTK_DELETE_FUNCTION;
+    vtkSlicerMarkupsToModelClosedSurfaceGeneration ( const vtkSlicerMarkupsToModelClosedSurfaceGeneration& ) =delete;
+    void operator= ( const vtkSlicerMarkupsToModelClosedSurfaceGeneration& ) =delete;
 };
 
 #endif
