@@ -446,7 +446,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
   // special case
   if ( controlPoints->GetNumberOfPoints() == 2 )
   {
-    curveGenerator->SetCurveIsLoop( false ); // can't loop 2 points
+    curveGenerator->SetCurveIsClosed( false ); // can't loop 2 points
     curveGenerator->SetCurveTypeToLinearSpline();
     curveGenerator->Update();
     curvePoints = curveGenerator->GetOutputPoints();
@@ -454,7 +454,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
     return true;
   }
 
-  curveGenerator->SetCurveIsLoop( tubeLoop );
+  curveGenerator->SetCurveIsClosed( tubeLoop );
   switch ( curveType )
   {
     // Generates a polynomial curve model.
