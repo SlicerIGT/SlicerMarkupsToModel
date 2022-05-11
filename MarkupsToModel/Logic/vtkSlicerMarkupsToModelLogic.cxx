@@ -677,12 +677,12 @@ void vtkSlicerMarkupsToModelLogic::MarkupsToPoints( vtkMRMLMarkupsFiducialNode* 
     return;
   }
 
-  int numberOfInputMarkups = inputMarkupsNode->GetNumberOfFiducials();
-  outputPoints->SetNumberOfPoints( numberOfInputMarkups );
+  int numberOfInputControlPoints = inputMarkupsNode->GetNumberOfControlPoints();
+  outputPoints->SetNumberOfPoints( numberOfInputControlPoints );
   double inputMarkupPoint[ 3 ] = { 0.0, 0.0, 0.0 }; // values temporary
-  for ( int i = 0; i < numberOfInputMarkups; i++ )
+  for ( int i = 0; i < numberOfInputControlPoints; i++ )
   {
-    inputMarkupsNode->GetNthFiducialPosition( i, inputMarkupPoint );
+    inputMarkupsNode->GetNthControlPointPosition( i, inputMarkupPoint );
     outputPoints->SetPoint( i, inputMarkupPoint );
   }
 }
