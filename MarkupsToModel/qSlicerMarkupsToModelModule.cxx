@@ -70,7 +70,7 @@ QString qSlicerMarkupsToModelModule::title() const
 //-----------------------------------------------------------------------------
 QString qSlicerMarkupsToModelModule::helpText() const
 {
-  return "Create a model (closed surface, tube) based on points in a Markups fiducial list.";
+  return "Create a model (closed surface, tube) based on control points in a Markups Point List.";
 }
 
 //-----------------------------------------------------------------------------

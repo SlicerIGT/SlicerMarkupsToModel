@@ -1,6 +1,6 @@
 # Overview
 
-**Slicer Markups to Model** is an extension of [3D Slicer](https://www.slicer.org/) for creating 3D surface models. The user first specifies a series of input points (as fiducial markups), then the module creates a model from those points. Currently there are two types of surface models that can be created: closed surfaces and curves.
+**Slicer Markups to Model** is an extension of [3D Slicer](https://www.slicer.org/) for creating 3D surface models. The user first specifies a series of input control points, then the module creates a model from those points. Currently there are two types of surface models that can be created: closed surfaces and curves.
 
 ![Overview](https://raw.githubusercontent.com/SlicerIGT/SlicerMarkupsToModel/master/Screenshots/Overview.png?raw=true)
 > Example models created using SlicerMarkupsToModel. Left: Closed Surface. Right: Curves.
@@ -20,7 +20,7 @@ The **parameter node** is used to store all options settings for the module. The
 
 The two radio buttons along the top indicate whether the model should be a **closed surface** or a **curve**.
 
-The **Input Node** is used to store input points for the model. There is an option to create a new Markup Fiducials from the drop-down selector. Fiducial markups can be added or deleted using buttons beside the selector. (*Note that advanced users can also take as input a "Model" and work with points from polygonal data).
+The **Input Node** is used to store input points for the model. There is an option to create a new Markups Point List from the drop-down selector. A Markups Point List can be added or deleted using buttons beside the selector. (*Note that advanced users can also take as input a "Model" and work with points from polygonal data).
 
 The **Output Model Node** stores the model created by this module.
 
@@ -39,7 +39,7 @@ The **Display Panel** allows convenient access to change basic rendering propert
 
 - **Model Slice Intersections**: Toggle visibility in the red, yellow, and green slice views. Model Visibility (above) must also be enabled.
 
-- **Markups Text Scale**: Change the size of text beside each input markup fiducial.
+- **Markups Text Scale**: Change the size of text beside each input markup control point.
 
 # Closed Surfaces
 
@@ -71,11 +71,11 @@ Curves are models shaped like a tube that either [interpolate](https://en.wikipe
 
 - **Clean Duplicated Markups**: Remove duplicates from the input points.
 
-**Piecewise linear** curves are the simplest type of curve that can be created. A tube model is created that passes from one input point to the next in the original order specified from the fiducial list.
+**Piecewise linear** curves are the simplest type of curve that can be created. A tube model is created that passes from one input point to the next in the original order specified from the point list.
 
-**Cardinal spline** curves appear smooth. A tube model is created that passes through each input point in the order specified from the fiducial list. Between each pair of points, there will be some curvature in the model. See [Wikipedia](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Cardinal_spline) to learn more about cardinal splines.
+**Cardinal spline** curves appear smooth. A tube model is created that passes through each input point in the order specified from the point list. Between each pair of points, there will be some curvature in the model. See [Wikipedia](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Cardinal_spline) to learn more about cardinal splines.
 
-**Kochanek spline** curves appear smooth. A tube model is created that passes through each input point in the order specified from the fiducial list. Between each pair of points, there will be some curvature in the model. See [Wikipedia](https://en.wikipedia.org/wiki/Kochanek%E2%80%93Bartels_spline) to learn more about Kochanek splines.
+**Kochanek spline** curves appear smooth. A tube model is created that passes through each input point in the order specified from the point list. Between each pair of points, there will be some curvature in the model. See [Wikipedia](https://en.wikipedia.org/wiki/Kochanek%E2%80%93Bartels_spline) to learn more about Kochanek splines.
 
 - **Curve is a Loop**: Indicate if the Curve should loop from the last point back to the first point (Valid for splines only).
 
