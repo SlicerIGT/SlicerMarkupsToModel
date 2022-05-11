@@ -368,13 +368,13 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkMRMLMarkupsFiducia
     vtkGenericWarningMacro( "No markups. Aborting." );
     return false;
   }
-  
+
   if ( outputModelNode == NULL )
   {
     vtkGenericWarningMacro( "No model. Aborting." );
     return false;
   }
-  
+
   // extract control points
   vtkSmartPointer< vtkPoints > controlPoints = vtkSmartPointer< vtkPoints >::New();
   vtkSlicerMarkupsToModelLogic::MarkupsToPoints( markupsNode, controlPoints );
@@ -388,7 +388,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkMRMLMarkupsFiducia
   {
     return false;
   }
-  
+
   outputModelNode->SetAndObservePolyData( outputPolyData );
 
   return true;
@@ -407,7 +407,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
     vtkGenericWarningMacro( "No control points. Aborting." );
     return false;
   }
-  
+
   if ( outputPolyData == NULL )
   {
     vtkGenericWarningMacro( "No poly data. Aborting." );
@@ -442,7 +442,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateOutputCurveModel( vtkPoints* controlPoi
   curveGenerator->SetInputPoints( controlPoints );
   curveGenerator->SetNumberOfPointsPerInterpolatingSegment( tubeSegmentsBetweenControlPoints );
   vtkPoints* curvePoints = NULL; // temporary value
-  
+
   // special case
   if ( controlPoints->GetNumberOfPoints() == 2 )
   {
@@ -587,7 +587,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateClosedSurfaceModel(
     vtkGenericWarningMacro( "No markups. Aborting." );
     return false;
   }
-  
+
   if ( outputModelNode == NULL )
   {
     vtkGenericWarningMacro( "No model. Aborting." );
@@ -617,7 +617,7 @@ bool vtkSlicerMarkupsToModelLogic::UpdateClosedSurfaceModel(
     vtkGenericWarningMacro( "No control points. Aborting." );
     return false;
   }
-  
+
   if ( outputPolyData == NULL )
   {
     vtkGenericWarningMacro( "No poly data. Aborting." );
@@ -773,7 +773,7 @@ void vtkSlicerMarkupsToModelLogic::GenerateTubeModel( vtkPoints* pointsToConnect
 
 //------------------------------------------------------------------------------
 void vtkSlicerMarkupsToModelLogic::AssignPolyDataToOutput( vtkMRMLMarkupsToModelNode* markupsToModelModuleNode, vtkPolyData* outputPolyData )
-{  
+{
   vtkMRMLModelNode* outputModelNode = markupsToModelModuleNode->GetOutputModelNode();
   if ( outputModelNode == NULL )
   {
@@ -796,7 +796,7 @@ void vtkSlicerMarkupsToModelLogic::AssignPolyDataToOutput( vtkMRMLMarkupsToModel
 //------------------------------------------------------------------------------
 void vtkSlicerMarkupsToModelLogic::MakeLoopContinuous( vtkPoints* curvePoints )
 {
-  // Move the starting point a tiny bit and add an *extra* point to join the curve 
+  // Move the starting point a tiny bit and add an *extra* point to join the curve
   // to the new starting position.
   double point0[ 3 ];
   curvePoints->GetPoint( 0, point0 );
