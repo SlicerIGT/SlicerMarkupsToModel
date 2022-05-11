@@ -280,7 +280,7 @@ void qSlicerMarkupsToModelModuleWidget::onInputNodeComboBoxSelectionChanged( vtk
   if ( inputMarkupsNode != NULL )
   {
     markupsToModelModuleNode->SetAndObserveInputNodeID( inputMarkupsNode->GetID() );
-  
+
     // Observe display node so that we can make sure the module GUI always shows up-to-date information
     // (applies specifically to markups)
     inputMarkupsNode->CreateDefaultDisplayNodes();
@@ -393,7 +393,7 @@ void qSlicerMarkupsToModelModuleWidget::updateMRMLFromGUI()
     markupsToModelModuleNode->SetPointParameterType(vtkMRMLMarkupsToModelNode::MinimumSpanningTree);
   }
   markupsToModelModuleNode->SetPolynomialOrder(d->PolynomialOrderSpinBox->value());
-  
+
   markupsToModelModuleNode->SetPolynomialSampleWidth( d->PolynomialSampleWidthDoubleSpinBox->value() );
   if ( d->WeightFunctionRectangularRadioButton->isChecked() )
   {
@@ -441,7 +441,7 @@ void qSlicerMarkupsToModelModuleWidget::updateMRMLFromGUI()
 void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
 {
   Q_D(qSlicerMarkupsToModelModuleWidget);
-  
+
   vtkMRMLMarkupsToModelNode* markupsToModelModuleNode = vtkMRMLMarkupsToModelNode::SafeDownCast( d->ParameterNodeSelector->currentNode() );
   if (markupsToModelModuleNode == NULL)
   {
@@ -585,7 +585,7 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
   }
 
   // Model display options
-  vtkMRMLModelDisplayNode* modelDisplayNode = vtkMRMLModelDisplayNode::SafeDownCast( 
+  vtkMRMLModelDisplayNode* modelDisplayNode = vtkMRMLModelDisplayNode::SafeDownCast(
     this->GetOutputModelNode() ? this->GetOutputModelNode()->GetDisplayNode() : NULL );
   if ( modelDisplayNode != NULL )
   {
@@ -634,7 +634,7 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
 
   // Determine visibility of widgets
   bool isInputMarkups = ( vtkMRMLMarkupsFiducialNode::SafeDownCast( inputNode ) != NULL );
-  
+
   d->InputMarkupsPlaceWidget->setVisible( isInputMarkups );
   d->MarkupsTextScaleSlider->setVisible( isInputMarkups );
 
@@ -643,7 +643,7 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
   d->ClosedSurfaceModelGroupBox->setVisible( isClosedSurface );
 
   bool isCurve = d->ModeCurveRadioButton->isChecked();
-  
+
   d->CurveModelGroupBox->setVisible( isCurve );
 
   bool isLinearSpline = d->LinearInterpolationRadioButton->isChecked();
@@ -752,7 +752,7 @@ void qSlicerMarkupsToModelModuleWidget::UpdateOutputModel()
     qCritical("Model node changed with no module node selection");
     return;
   }
-  
+
   // set up the output model node if needed
   vtkMRMLModelNode* outputModelNode = markupsToModelModuleNode->GetOutputModelNode();
   if (outputModelNode == NULL)

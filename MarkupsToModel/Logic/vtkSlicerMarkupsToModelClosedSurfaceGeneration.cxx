@@ -40,13 +40,13 @@ vtkSlicerMarkupsToModelClosedSurfaceGeneration::~vtkSlicerMarkupsToModelClosedSu
 //------------------------------------------------------------------------------
 bool vtkSlicerMarkupsToModelClosedSurfaceGeneration::GenerateClosedSurfaceModel(vtkPoints* inputPoints, vtkPolyData* outputPolyData,
   double delaunayAlpha, bool smoothing, bool forceConvex)
-{  
+{
   if (inputPoints == NULL)
   {
     vtkGenericWarningMacro("Input points are null. No model generated.");
     return false;
   }
-  
+
   if (outputPolyData == NULL)
   {
     vtkGenericWarningMacro("Output poly data is null. No model generated.");
@@ -222,7 +222,7 @@ bool vtkSlicerMarkupsToModelClosedSurfaceGeneration::GenerateClosedSurfaceModel(
 // 2. The axes returned are based on variation of coordinates, not the range
 //    (so the return result is not necessarily intuitive, variation != length).
 // Neither of these limitations will prevent the overall logic from functioning
-// correctly, but it is worth keeping in mind, and worth changing should a need 
+// correctly, but it is worth keeping in mind, and worth changing should a need
 // arise
 void vtkSlicerMarkupsToModelClosedSurfaceGeneration::ComputeTransformMatrixFromBoundingAxes(vtkPoints* points, vtkMatrix4x4* boundingAxesToRasTransformMatrix)
 {

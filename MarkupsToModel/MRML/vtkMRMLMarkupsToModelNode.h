@@ -77,7 +77,7 @@ public:
     Curve,
     ModelType_Last // insert valid types above this line
   };
-  
+
   enum CurveType
   {
     Linear = 0,
@@ -111,9 +111,9 @@ public:
   };
 
   vtkTypeMacro( vtkMRMLMarkupsToModelNode, vtkMRMLNode );
-  
-  // Standard MRML node methods  
-  static vtkMRMLMarkupsToModelNode *New();  
+
+  // Standard MRML node methods
+  static vtkMRMLMarkupsToModelNode *New();
 
   virtual vtkMRMLNode* CreateNodeInstance() override;
   virtual const char* GetNodeTagName() override { return "MarkupsToModel"; };
@@ -154,7 +154,7 @@ public:
   vtkSetMacro( TubeLoop, bool );
   vtkGetMacro( KochanekEndsCopyNearestDerivatives, bool );
   vtkSetMacro( KochanekEndsCopyNearestDerivatives, bool );
-  
+
   vtkGetMacro( AutoUpdateOutput, bool );
   vtkSetMacro( AutoUpdateOutput, bool );
   vtkGetMacro( CleanMarkups, bool );
@@ -165,7 +165,7 @@ public:
   vtkSetMacro( DelaunayAlpha, double );
   vtkGetMacro( ConvexHull, bool );
   vtkSetMacro( ConvexHull, bool );
-  
+
   double GetOutputCurveLength();
   void SetOutputCurveLength( double );
 
@@ -176,7 +176,7 @@ protected:
   virtual ~vtkMRMLMarkupsToModelNode();
   vtkMRMLMarkupsToModelNode ( const vtkMRMLMarkupsToModelNode& );
   void operator=( const vtkMRMLMarkupsToModelNode& );
-  
+
 public:
 
   void SetAndObserveInputNodeID( const char* inputNodeId );
@@ -233,7 +233,7 @@ private:
   bool   TubeLoop;
   bool   KochanekEndsCopyNearestDerivatives;
   double KochanekTension;
-  double KochanekBias; 
+  double KochanekBias;
   double KochanekContinuity;
   int    PolynomialOrder;
   int    PolynomialFitType;

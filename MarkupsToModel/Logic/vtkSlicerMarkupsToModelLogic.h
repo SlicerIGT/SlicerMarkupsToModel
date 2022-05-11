@@ -65,7 +65,7 @@ public:
 
   // Updates closed surface or curve output model from markups
   void UpdateOutputModel( vtkMRMLMarkupsToModelNode* moduleNode );
-  
+
   // lower-level access to functionality for making a closed surface model
   static bool UpdateClosedSurfaceModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
       bool smoothing = true, bool forceConvex = false, double delaunayAlpha = 0.0, bool cleanMarkups = true );
@@ -82,7 +82,7 @@ public:
       vtkCurveGenerator* curveGenerator = NULL,
       int polynomialFitType = vtkMRMLMarkupsToModelNode::GlobalLeastSquares, double polynomialSampleWidth = 0.5,
       int polynomialWeightType = vtkMRMLMarkupsToModelNode::Rectangular );
-  
+
   static bool UpdateOutputCurveModel( vtkPoints* controlPoints, vtkPolyData* polyData,
       int curveType = vtkMRMLMarkupsToModelNode::Linear,
       bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
@@ -95,7 +95,7 @@ public:
 
   // Get the points store in a vtkMRMLMarkupsFiducialNode
   static void MarkupsToPoints( vtkMRMLMarkupsFiducialNode* markupsNode, vtkPoints* outputPoints );
-  
+
   // Get the points store in a vtkMRMLModelNode
   static void ModelToPoints( vtkMRMLModelNode* modelNode, vtkPoints* outputPoints );
 
