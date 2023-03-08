@@ -423,7 +423,7 @@ void qSlicerMarkupsToModelModuleWidget::updateMRMLFromGUI()
     int modelDisplayNodeWasModified = modelDisplayNode->StartModify();
     modelDisplayNode->SetVisibility(d->ModelVisiblityButton->isChecked());
     modelDisplayNode->SetOpacity(d->ModelOpacitySlider->value());
-    modelDisplayNode->SetSliceIntersectionVisibility(d->ModelSliceIntersectionCheckbox->isChecked());
+    modelDisplayNode->SetVisibility2D(d->ModelSliceIntersectionCheckbox->isChecked());
     modelDisplayNode->SetColor(d->ModelColorSelector->color().redF(), d->ModelColorSelector->color().greenF(), d->ModelColorSelector->color().blueF());
     modelDisplayNode->EndModify(modelDisplayNodeWasModified);
   }
