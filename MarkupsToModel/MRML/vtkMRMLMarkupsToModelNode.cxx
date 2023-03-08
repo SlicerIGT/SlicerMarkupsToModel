@@ -52,6 +52,7 @@ vtkMRMLMarkupsToModelNode::vtkMRMLMarkupsToModelNode()
   this->TubeSegmentsBetweenControlPoints = 5;
   this->TubeNumberOfSides = 8;
   this->TubeLoop = false;
+  this->TubeCapping = true;
   this->ModelType = vtkMRMLMarkupsToModelNode::ClosedSurface;
   this->CurveType = vtkMRMLMarkupsToModelNode::Linear;
   this->PointParameterType = vtkMRMLMarkupsToModelNode::RawIndices;
@@ -90,6 +91,7 @@ void vtkMRMLMarkupsToModelNode::WriteXML( ostream& of, int nIndent )
   vtkMRMLWriteXMLIntMacro(TubeNumberOfSides, TubeNumberOfSides);
   vtkMRMLWriteXMLIntMacro(TubeSegmentsBetweenControlPoints, TubeSegmentsBetweenControlPoints);
   vtkMRMLWriteXMLBooleanMacro(TubeLoop, TubeLoop);
+  vtkMRMLWriteXMLBooleanMacro(TubeCapping, TubeCapping);
   vtkMRMLWriteXMLBooleanMacro(KochanekEndsCopyNearestDerivatives, KochanekEndsCopyNearestDerivatives);
   vtkMRMLWriteXMLFloatMacro(KochanekBias, KochanekBias);
   vtkMRMLWriteXMLFloatMacro(KochanekContinuity, KochanekContinuity);
@@ -120,6 +122,7 @@ void vtkMRMLMarkupsToModelNode::ReadXMLAttributes( const char** atts )
   vtkMRMLReadXMLIntMacro(TubeNumberOfSides, TubeNumberOfSides);
   vtkMRMLReadXMLIntMacro(TubeSegmentsBetweenControlPoints, TubeSegmentsBetweenControlPoints);
   vtkMRMLReadXMLBooleanMacro(TubeLoop, TubeLoop);
+  vtkMRMLReadXMLBooleanMacro(TubeCapping, TubeCapping);
   vtkMRMLReadXMLBooleanMacro(KochanekEndsCopyNearestDerivatives, KochanekEndsCopyNearestDerivatives);
   vtkMRMLReadXMLFloatMacro(KochanekBias, KochanekBias);
   vtkMRMLReadXMLFloatMacro(KochanekContinuity, KochanekContinuity);
@@ -150,6 +153,7 @@ void vtkMRMLMarkupsToModelNode::Copy( vtkMRMLNode *anode )
   vtkMRMLCopyIntMacro(TubeNumberOfSides);
   vtkMRMLCopyIntMacro(TubeSegmentsBetweenControlPoints);
   vtkMRMLCopyBooleanMacro(TubeLoop);
+  vtkMRMLCopyBooleanMacro(TubeCapping);
   vtkMRMLCopyBooleanMacro(KochanekEndsCopyNearestDerivatives);
   vtkMRMLCopyFloatMacro(KochanekBias);
   vtkMRMLCopyFloatMacro(KochanekContinuity);
@@ -179,6 +183,7 @@ void vtkMRMLMarkupsToModelNode::PrintSelf( ostream& os, vtkIndent indent )
   vtkMRMLPrintIntMacro(TubeNumberOfSides);
   vtkMRMLPrintIntMacro(TubeSegmentsBetweenControlPoints);
   vtkMRMLPrintBooleanMacro(TubeLoop);
+  vtkMRMLPrintBooleanMacro(TubeCapping);
   vtkMRMLPrintBooleanMacro(KochanekEndsCopyNearestDerivatives);
   vtkMRMLPrintFloatMacro(KochanekBias);
   vtkMRMLPrintFloatMacro(KochanekContinuity);

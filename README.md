@@ -113,3 +113,5 @@ Under **Tube Properties** you can change certain aspects of the curve model's ge
 
 - **Segments Per Point**: (Under Tube Properties) Changes the number of points used to interpolate/approximate a curve. (larger = smoother appearance).
 
+- **Capping**: (Under Tube Properties) Changes if the ends of the output tube should be capped.
+

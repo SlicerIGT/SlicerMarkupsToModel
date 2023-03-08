@@ -32,7 +32,7 @@
 #include "vtkMRMLMarkupsDisplayNode.h"
 #include "vtkMRMLDisplayNode.h"
 #include "vtkMRMLModelNode.h"
-#include "vtkMRMLMarkupsFiducialNode.h"
+#include "vtkMRMLMarkupsNode.h"
 #include "vtkMRMLInteractionNode.h"
 
 // module includes
@@ -118,6 +118,7 @@ void qSlicerMarkupsToModelModuleWidget::setup()
   connect(d->TubeSegmentsSpinBox, SIGNAL(valueChanged(double)), this, SLOT(updateMRMLFromGUI()));
   connect(d->TubeSidesSpinBox, SIGNAL(valueChanged(double)), this, SLOT(updateMRMLFromGUI()));
   connect(d->TubeLoopCheckBox, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
+  connect(d->TubeCappingCheckBox, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
 
   connect(d->KochanekEndsCopyNearestDerivativesCheckBox, SIGNAL(clicked()), this, SLOT(updateMRMLFromGUI()));
   connect(d->KochanekBiasDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(updateMRMLFromGUI()));
@@ -275,7 +276,7 @@ void qSlicerMarkupsToModelModuleWidget::onInputNodeComboBoxSelectionChanged( vtk
     markupsToModelModuleNode->SetAndObserveInputNodeID( NULL );
   }
 
-  vtkMRMLMarkupsFiducialNode* inputMarkupsNode = vtkMRMLMarkupsFiducialNode::SafeDownCast( newNode );
+  vtkMRMLMarkupsNode* inputMarkupsNode = vtkMRMLMarkupsNode::SafeDownCast( newNode );
   vtkMRMLModelNode* inputModelNode = vtkMRMLModelNode::SafeDownCast( newNode );
   if ( inputMarkupsNode != NULL )
   {
@@ -357,6 +358,7 @@ void qSlicerMarkupsToModelModuleWidget::updateMRMLFromGUI()
   markupsToModelModuleNode->SetTubeSegmentsBetweenControlPoints(d->TubeSegmentsSpinBox->value());
   markupsToModelModuleNode->SetTubeNumberOfSides(d->TubeSidesSpinBox->value());
   markupsToModelModuleNode->SetTubeLoop(d->TubeLoopCheckBox->isChecked());
+  markupsToModelModuleNode->SetTubeCapping(d->TubeCappingCheckBox->isChecked());
   if (d->LinearInterpolationRadioButton->isChecked())
   {
     markupsToModelModuleNode->SetCurveType(vtkMRMLMarkupsToModelNode::Linear);
@@ -426,7 +428,7 @@ void qSlicerMarkupsToModelModuleWidget::updateMRMLFromGUI()
     modelDisplayNode->EndModify(modelDisplayNodeWasModified);
   }
 
-  vtkMRMLMarkupsFiducialNode* inputMarkupsNode = vtkMRMLMarkupsFiducialNode::SafeDownCast( this->GetInputNode() );
+  vtkMRMLMarkupsNode* inputMarkupsNode = vtkMRMLMarkupsNode::SafeDownCast( this->GetInputNode() );
   if ( inputMarkupsNode != NULL )
   {
     vtkMRMLMarkupsDisplayNode* inputMarkupsDisplayNode = vtkMRMLMarkupsDisplayNode::SafeDownCast( inputMarkupsNode->GetDisplayNode() );
@@ -455,7 +457,7 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
   vtkMRMLNode* inputNode = markupsToModelModuleNode->GetInputNode();
   d->InputNodeSelector->setCurrentNode( inputNode );
 
-  vtkMRMLMarkupsFiducialNode* inputMarkupsFiducialNode = vtkMRMLMarkupsFiducialNode::SafeDownCast( inputNode );
+  vtkMRMLMarkupsNode* inputMarkupsFiducialNode = vtkMRMLMarkupsNode::SafeDownCast( inputNode );
   if ( inputMarkupsFiducialNode != NULL )
   {
     d->InputMarkupsPlaceWidget->setCurrentNode( inputMarkupsFiducialNode );
@@ -507,6 +509,7 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
   d->TubeSidesSpinBox->setValue(markupsToModelModuleNode->GetTubeNumberOfSides());
   d->TubeSegmentsSpinBox->setValue(markupsToModelModuleNode->GetTubeSegmentsBetweenControlPoints());
   d->TubeLoopCheckBox->setChecked(markupsToModelModuleNode->GetTubeLoop());
+  d->TubeCappingCheckBox->setChecked(markupsToModelModuleNode->GetTubeCapping());
   int curveType = markupsToModelModuleNode->GetCurveType();
   if ( curveType == vtkMRMLMarkupsToModelNode::Linear )
   {
@@ -612,7 +615,7 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
   d->ModelSliceIntersectionCheckbox->setEnabled( modelDisplayNode != NULL );
 
   // Markups display options
-  vtkMRMLMarkupsFiducialNode* inputMarkupsNode = vtkMRMLMarkupsFiducialNode::SafeDownCast( this->GetInputNode() );
+  vtkMRMLMarkupsNode* inputMarkupsNode = vtkMRMLMarkupsNode::SafeDownCast( this->GetInputNode() );
   if ( inputMarkupsNode != NULL )
   {
     vtkMRMLMarkupsDisplayNode* inputMarkupsDisplayNode = vtkMRMLMarkupsDisplayNode::SafeDownCast( inputMarkupsNode->GetDisplayNode() );
@@ -633,7 +636,7 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
   }
 
   // Determine visibility of widgets
-  bool isInputMarkups = ( vtkMRMLMarkupsFiducialNode::SafeDownCast( inputNode ) != NULL );
+  bool isInputMarkups = ( vtkMRMLMarkupsNode::SafeDownCast( inputNode ) != NULL );
 
   d->InputMarkupsPlaceWidget->setVisible( isInputMarkups );
   d->MarkupsTextScaleSlider->setVisible( isInputMarkups );

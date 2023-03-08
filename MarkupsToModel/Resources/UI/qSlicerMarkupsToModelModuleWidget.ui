@@ -133,7 +133,7 @@
         <widget class="qMRMLNodeComboBox" name="InputNodeSelector">
          <property name="nodeTypes">
           <stringlist>
-           <string>vtkMRMLMarkupsFiducialNode</string>
+           <string>vtkMRMLMarkupsNode</string>
            <string>vtkMRMLModelNode</string>
           </stringlist>
          </property>
@@ -288,6 +288,9 @@
      </property>
      <property name="checked">
       <bool>false</bool>
+     </property>
+     <property name="collapsed">
+      <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="CurveModelLayout">
       <property name="leftMargin">
@@ -704,6 +707,9 @@
         <property name="checked">
          <bool>false</bool>
         </property>
+        <property name="collapsed">
+         <bool>true</bool>
+        </property>
         <layout class="QGridLayout" name="TubePropertiesLayout">
          <property name="leftMargin">
           <number>0</number>
@@ -720,20 +726,6 @@
          <property name="spacing">
           <number>4</number>
          </property>
-         <item row="2" column="0">
-          <widget class="QLabel" name="TubeSegmentsLabel">
-           <property name="text">
-            <string>Segments Per Point</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="TubeSidesLabel">
-           <property name="text">
-            <string>Number of Sides</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="1">
           <widget class="qMRMLSpinBox" name="TubeRadiusDoubleSpinBox">
            <property name="toolTip">
@@ -750,19 +742,6 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
-          <widget class="qMRMLSpinBox" name="TubeSegmentsSpinBox">
-           <property name="toolTip">
-            <string extracomment="Set the curve model's resolution (number of segments between individual markups)">Set the curve model's resolution (number of segments between individual markups)</string>
-           </property>
-           <property name="decimals">
-            <number>0</number>
-           </property>
-           <property name="minimum">
-            <double>1.000000000000000</double>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="1">
           <widget class="qMRMLSpinBox" name="TubeSidesSpinBox">
            <property name="toolTip">
@@ -776,12 +755,49 @@
            </property>
           </widget>
          </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="TubeSegmentsLabel">
+           <property name="text">
+            <string>Segments Per Point</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="TubeRadiusLabel">
            <property name="text">
             <string>Radius</string>
            </property>
           </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="TubeSidesLabel">
+           <property name="text">
+            <string>Number of Sides</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="qMRMLSpinBox" name="TubeSegmentsSpinBox">
+           <property name="toolTip">
+            <string extracomment="Set the curve model's resolution (number of segments between individual markups)">Set the curve model's resolution (number of segments between individual markups)</string>
+           </property>
+           <property name="decimals">
+            <number>0</number>
+           </property>
+           <property name="minimum">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Capping</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="ctkCheckBox" name="TubeCappingCheckBox"/>
          </item>
         </layout>
        </widget>
@@ -937,31 +953,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>qMRMLNodeComboBox</class>
-   <extends>QWidget</extends>
-   <header>qMRMLNodeComboBox.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>qMRMLSpinBox</class>
-   <extends>ctkDoubleSpinBox</extends>
-   <header>qMRMLSpinBox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>qSlicerWidget</class>
-   <extends>QWidget</extends>
-   <header>qSlicerWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>qSlicerMarkupsPlaceWidget</class>
-   <extends>qSlicerWidget</extends>
-   <header>qSlicerMarkupsPlaceWidget.h</header>
-  </customwidget>
-  <customwidget>
    <class>ctkCheckablePushButton</class>
    <extends>ctkPushButton</extends>
    <header>ctkCheckablePushButton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ctkCheckBox</class>
+   <extends>QCheckBox</extends>
+   <header>ctkCheckBox.h</header>
   </customwidget>
   <customwidget>
    <class>ctkCollapsibleButton</class>
@@ -994,6 +993,28 @@
    <class>ctkSliderWidget</class>
    <extends>QWidget</extends>
    <header>ctkSliderWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLNodeComboBox</class>
+   <extends>QWidget</extends>
+   <header>qMRMLNodeComboBox.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLSpinBox</class>
+   <extends>ctkDoubleSpinBox</extends>
+   <header>qMRMLSpinBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>qSlicerWidget</class>
+   <extends>QWidget</extends>
+   <header>qSlicerWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qSlicerMarkupsPlaceWidget</class>
+   <extends>qSlicerWidget</extends>
+   <header>qSlicerMarkupsPlaceWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

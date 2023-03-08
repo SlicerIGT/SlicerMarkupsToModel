@@ -43,7 +43,7 @@ limitations under the License.
 
 #include "vtkSlicerMarkupsToModelModuleLogicExport.h"
 
-class vtkMRMLMarkupsFiducialNode;
+class vtkMRMLMarkupsNode;
 class vtkMRMLMarkupsToModelNode;
 class vtkMRMLModelNode;
 class vtkPolyData;
@@ -67,7 +67,7 @@ public:
   void UpdateOutputModel( vtkMRMLMarkupsToModelNode* moduleNode );
 
   // lower-level access to functionality for making a closed surface model
-  static bool UpdateClosedSurfaceModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
+  static bool UpdateClosedSurfaceModel( vtkMRMLMarkupsNode* markupsNode, vtkMRMLModelNode* modelNode,
       bool smoothing = true, bool forceConvex = false, double delaunayAlpha = 0.0, bool cleanMarkups = true );
 
   static bool UpdateClosedSurfaceModel( vtkPoints* controlPoints, vtkPolyData* polyData,
@@ -75,13 +75,14 @@ public:
 
   // Lower-level access to functionality for making a curve model.
   // If tubeRadius<=0.0 then a line will be created instead of a tube.
-  static bool UpdateOutputCurveModel( vtkMRMLMarkupsFiducialNode* markupsNode, vtkMRMLModelNode* modelNode,
+  static bool UpdateOutputCurveModel( vtkMRMLMarkupsNode* markupsNode, vtkMRMLModelNode* modelNode,
       int curveType = vtkMRMLMarkupsToModelNode::Linear,
       bool tubeLoop = false, double tubeRadius = 1.0, int tubeNumberOfSides = 8, int tubeSegmentsBetweenControlPoints = 5,
       bool cleanMarkups = true, int polynomialOrder = 3, int pointParameterType = vtkMRMLMarkupsToModelNode::RawIndices,
       vtkCurveGenerator* curveGenerator = NULL,
       int polynomialFitType = vtkMRMLMarkupsToModelNode::GlobalLeastSquares, double polynomialSampleWidth = 0.5,
-      int polynomialWeightType = vtkMRMLMarkupsToModelNode::Rectangular );
+      int polynomialWeightType = vtkMRMLMarkupsToModelNode::Rectangular,
+      bool tubeCap = true);
 
   static bool UpdateOutputCurveModel( vtkPoints* controlPoints, vtkPolyData* polyData,
       int curveType = vtkMRMLMarkupsToModelNode::Linear,
@@ -91,10 +92,11 @@ public:
       double kochanekContinuity = 0.0, double kochanekTension = 0.0,
       vtkCurveGenerator* curveGenerator = NULL,
       int polynomialFitType = vtkMRMLMarkupsToModelNode::GlobalLeastSquares, double polynomialSampleWidth = 0.5,
-      int polynomialWeightType = vtkMRMLMarkupsToModelNode::Rectangular );
+      int polynomialWeightType = vtkMRMLMarkupsToModelNode::Rectangular,
+      bool tubeCap = true);
 
-  // Get the points store in a vtkMRMLMarkupsFiducialNode
-  static void MarkupsToPoints( vtkMRMLMarkupsFiducialNode* markupsNode, vtkPoints* outputPoints );
+  // Get the points store in a vtkMRMLMarkupsNode
+  static void MarkupsToPoints( vtkMRMLMarkupsNode* markupsNode, vtkPoints* outputPoints );
 
   // Get the points store in a vtkMRMLModelNode
   static void ModelToPoints( vtkMRMLModelNode* modelNode, vtkPoints* outputPoints );
@@ -103,7 +105,7 @@ public:
   static void RemoveDuplicatePoints( vtkPoints* points );
 
   // DEPRECATED - Sets the input node to be processed
-  void SetMarkupsNode( vtkMRMLMarkupsFiducialNode* newMarkups, vtkMRMLMarkupsToModelNode* moduleNode );
+  void SetMarkupsNode( vtkMRMLMarkupsNode* newMarkups, vtkMRMLMarkupsToModelNode* moduleNode );
 
 protected:
   vtkSlicerMarkupsToModelLogic();
@@ -134,7 +136,7 @@ private:
   //   outputTubePolyData - the tube mesh will be stored in this poly data.
   //   tubeRadius - the radius of the tube in outputTubePolyData.
   //   tubeNumberOfSides - The resolution for tube tesselation (higher = smoother).
-  static void GenerateTubeModel( vtkPoints* points, vtkPolyData* outputTubePolyData, double tubeRadius, int tubeNumberOfSides );
+  static void GenerateTubeModel( vtkPoints* points, vtkPolyData* outputTubePolyData, double tubeRadius, int tubeNumberOfSides, bool tubeCapping=true );
 
   // If looped, the first and last segment of the curve must be exactly parallel.
   // Otherwise the curve will have two caps that don't line up and the curve will

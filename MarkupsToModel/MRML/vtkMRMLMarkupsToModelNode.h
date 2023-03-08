@@ -152,8 +152,14 @@ public:
   vtkSetMacro( TubeNumberOfSides, int );
   vtkGetMacro( TubeLoop, bool );
   vtkSetMacro( TubeLoop, bool );
+  vtkBooleanMacro( TubeLoop, bool );
+  vtkGetMacro( TubeCapping, bool );
+  vtkSetMacro( TubeCapping, bool );
+  vtkBooleanMacro(TubeCapping, bool);
   vtkGetMacro( KochanekEndsCopyNearestDerivatives, bool );
   vtkSetMacro( KochanekEndsCopyNearestDerivatives, bool );
+  vtkBooleanMacro( KochanekEndsCopyNearestDerivatives, bool );
+  
 
   vtkGetMacro( AutoUpdateOutput, bool );
   vtkSetMacro( AutoUpdateOutput, bool );
@@ -231,6 +237,7 @@ private:
   int    TubeSegmentsBetweenControlPoints;
   int    TubeNumberOfSides;
   bool   TubeLoop;
+  bool   TubeCapping;
   bool   KochanekEndsCopyNearestDerivatives;
   double KochanekTension;
   double KochanekBias;
