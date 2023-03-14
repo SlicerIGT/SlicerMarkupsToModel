@@ -19,6 +19,7 @@ set(${KIT}_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleMRML
   vtkSlicerMarkupsModuleMRML
   vtkSlicerMarkupsModuleLogic
+  vtkAddon
   )
 
 #-----------------------------------------------------------------------------
