@@ -133,6 +133,8 @@
         <widget class="qMRMLNodeComboBox" name="InputNodeSelector">
          <property name="nodeTypes">
           <stringlist>
+           <string>vtkMRMLMarkupsFiducialNode</string>
+           <string>vtkMRMLMarkupsCurveNode</string>
            <string>vtkMRMLMarkupsNode</string>
            <string>vtkMRMLModelNode</string>
           </stringlist>
@@ -953,6 +955,28 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>qMRMLNodeComboBox</class>
+   <extends>QWidget</extends>
+   <header>qMRMLNodeComboBox.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLSpinBox</class>
+   <extends>ctkDoubleSpinBox</extends>
+   <header>qMRMLSpinBox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>qSlicerWidget</class>
+   <extends>QWidget</extends>
+   <header>qSlicerWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qSlicerMarkupsPlaceWidget</class>
+   <extends>qSlicerWidget</extends>
+   <header>qSlicerMarkupsPlaceWidget.h</header>
+  </customwidget>
+  <customwidget>
    <class>ctkCheckablePushButton</class>
    <extends>ctkPushButton</extends>
    <header>ctkCheckablePushButton.h</header>
@@ -993,28 +1017,6 @@
    <class>ctkSliderWidget</class>
    <extends>QWidget</extends>
    <header>ctkSliderWidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>qMRMLNodeComboBox</class>
-   <extends>QWidget</extends>
-   <header>qMRMLNodeComboBox.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>qMRMLSpinBox</class>
-   <extends>ctkDoubleSpinBox</extends>
-   <header>qMRMLSpinBox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>qSlicerWidget</class>
-   <extends>QWidget</extends>
-   <header>qSlicerWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>qSlicerMarkupsPlaceWidget</class>
-   <extends>qSlicerWidget</extends>
-   <header>qSlicerMarkupsPlaceWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
