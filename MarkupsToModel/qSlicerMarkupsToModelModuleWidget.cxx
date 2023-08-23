@@ -254,7 +254,7 @@ void qSlicerMarkupsToModelModuleWidget::onOutputModelComboBoxNodeAdded( vtkMRMLN
   if (displayNode)
   {
     displayNode->SetColor(1, 1, 0);
-    displayNode->SliceIntersectionVisibilityOn();
+    displayNode->Visibility2DOn();
     displayNode->SetSliceIntersectionThickness(2);
   }
 }
@@ -598,7 +598,7 @@ void qSlicerMarkupsToModelModuleWidget::updateGUIFromMRML()
     QColor nodeOutputColor;
     nodeOutputColor.setRgbF( outputColor[ 0 ], outputColor[ 1 ], outputColor[ 2 ] );
     d->ModelColorSelector->setColor( nodeOutputColor );
-    d->ModelSliceIntersectionCheckbox->setChecked( modelDisplayNode->GetSliceIntersectionVisibility() );
+    d->ModelSliceIntersectionCheckbox->setChecked( modelDisplayNode->GetVisibility2D() );
   }
   else
   {
